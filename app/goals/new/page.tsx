@@ -24,18 +24,19 @@ export default function NewGoalPage() {
     }
 
     const raw = localStorage.getItem(GOAL_KEY);
-const goals: Goal[] = raw ? JSON.parse(raw) : [];
+    const goals: Goal[] = raw ? JSON.parse(raw) : [];
 
-const newGoal: Goal = {
-  id: crypto.randomUUID(),
-  title,
-  targetAmount: Number(targetAmount),
-};
+    const newGoal: Goal = {
+      id: crypto.randomUUID(),
+      title,
+      targetAmount: Number(targetAmount),
+    };
 
-goals.push(newGoal);
+    goals.push(newGoal);
+    localStorage.setItem(GOAL_KEY, JSON.stringify(goals));
 
-localStorage.setItem(GOAL_KEY, JSON.stringify(goals));
-router.push("/goals");
+    router.push("/goals");
+  }
 
   return (
     <main
