@@ -81,27 +81,8 @@ export default function GoalsPage() {
           width: "390px",
           padding: "18px",
           borderRadius: "24px",
-          position: "relative",
         }}
       >
-        <button
-          onClick={() => {
-            window.location.href = "/";
-          }}
-          style={{
-            position: "absolute",
-            top: "18px",
-            right: "18px",
-            padding: "10px 14px",
-            borderRadius: "12px",
-            border: "1px solid #333",
-            background: "#111",
-            color: "white",
-            cursor: "pointer",
-          }}
-        >
-          Выйти
-        </button>
 
         <h1 style={{ fontSize: "28px", marginBottom: "20px" }}>Цели</h1>
 
