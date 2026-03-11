@@ -2,6 +2,18 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+} from "recharts";
 
 type Expense = {
   id: string;
@@ -12,6 +24,8 @@ type Expense = {
 };
 
 const EXPENSES_KEY = "finance-expenses";
+
+const COLORS = ["#f59e0b", "#6366f1", "#10b981", "#ef4444", "#06b6d4", "#a855f7"];
 
 export default function AnalyticsPage() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -37,8 +51,21 @@ export default function AnalyticsPage() {
     }
 
     return Object.entries(map)
-      .map(([category, amount]) => ({ category, amount }))
+      .map(([category, amount]) => ({
+        category,
+        amount,
+      }))
       .sort((a, b) => b.amount - a.amount);
+  }, [expenses]);
+
+  const latestByDate = useMemo(() => {
+    return [...expenses]
+      .sort((a, b) => a.date.localeCompare(b.date))
+      .slice(-7)
+      .map((item) => ({
+        date: item.date.slice(5),
+        amount: item.amount,
+      }));
   }, [expenses]);
 
   return (
@@ -76,6 +103,78 @@ export default function AnalyticsPage() {
             Общая сумма расходов
           </div>
           <b style={{ fontSize: "24px" }}>{totalExpense}€</b>
+        </div>
+
+        <div
+          style={{
+            background: "#1a1a1a",
+            padding: "16px",
+            borderRadius: "12px",
+            marginBottom: "20px",
+          }}
+        >
+          <h3 style={{ marginTop: 0, marginBottom: "14px" }}>
+            Круговая диаграмма
+          </h3>
+
+          {categoryTotals.length === 0 ? (
+            <p style={{ color: "#999", margin: 0 }}>Пока данных нет</p>
+          ) : (
+            <div style={{ width: "100%", height: 260 }}>
+              <ResponsiveContainer>
+                <PieChart>
+                  <Pie
+                    data={categoryTotals}
+                    dataKey="amount"
+                    nameKey="category"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={85}
+                    label={({ name, percent }) =>
+                      `${name} ${Math.round((percent ?? 0) * 100)}%`
+                    }
+                  >
+                    {categoryTotals.map((_, index) => (
+                      <Cell
+                        key={index}
+                        fill={COLORS[index % COLORS.length]}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+        </div>
+
+        <div
+          style={{
+            background: "#1a1a1a",
+            padding: "16px",
+            borderRadius: "12px",
+            marginBottom: "20px",
+          }}
+        >
+          <h3 style={{ marginTop: 0, marginBottom: "14px" }}>
+            Последние расходы по датам
+          </h3>
+
+          {latestByDate.length === 0 ? (
+            <p style={{ color: "#999", margin: 0 }}>Пока данных нет</p>
+          ) : (
+            <div style={{ width: "100%", height: 260 }}>
+              <ResponsiveContainer>
+                <BarChart data={latestByDate}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" />
+                  <XAxis dataKey="date" stroke="#aaa" />
+                  <YAxis stroke="#aaa" />
+                  <Tooltip />
+                  <Bar dataKey="amount" fill="#f59e0b" radius={[6, 6, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
         </div>
 
         <div
@@ -195,16 +294,16 @@ export default function AnalyticsPage() {
           </Link>
 
           <Link
-  href="/goals"
-  style={{
-    padding: "14px 10px",
-    textAlign: "center",
-    color: "white",
-    textDecoration: "none",
-  }}
->
-  Цель
-</Link>
+            href="/goals"
+            style={{
+              padding: "14px 10px",
+              textAlign: "center",
+              color: "white",
+              textDecoration: "none",
+            }}
+          >
+            Цель
+          </Link>
 
           <Link
             href="/income"
