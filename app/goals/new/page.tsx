@@ -4,11 +4,12 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 type Goal = {
+  id: string;
   title: string;
   targetAmount: number;
 };
 
-const GOAL_KEY = "finance-goal";
+const GOAL_KEY = "finance-goals";
 
 export default function NewGoalPage() {
   const router = useRouter();
@@ -22,14 +23,19 @@ export default function NewGoalPage() {
       return;
     }
 
-    const goal: Goal = {
-      title,
-      targetAmount: Number(targetAmount),
-    };
+    const raw = localStorage.getItem(GOAL_KEY);
+const goals: Goal[] = raw ? JSON.parse(raw) : [];
 
-    localStorage.setItem(GOAL_KEY, JSON.stringify(goal));
-    router.push("/goals");
-  }
+const newGoal: Goal = {
+  id: crypto.randomUUID(),
+  title,
+  targetAmount: Number(targetAmount),
+};
+
+goals.push(newGoal);
+
+localStorage.setItem(GOAL_KEY, JSON.stringify(goals));
+router.push("/goals");
 
   return (
     <main
