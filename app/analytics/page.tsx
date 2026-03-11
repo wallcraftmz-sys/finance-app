@@ -68,57 +68,136 @@ export default function AnalyticsPage() {
       }));
   }, [expenses]);
 
+  const topCategory = categoryTotals[0];
+
   return (
     <main
       style={{
         minHeight: "100vh",
-        background: "#0a0a0a",
+        background: "linear-gradient(180deg, #0b0b0f 0%, #111111 100%)",
         color: "white",
         display: "flex",
         justifyContent: "center",
-        fontFamily: "sans-serif",
-        padding: "20px 0 90px",
+        fontFamily: "Inter, sans-serif",
+        padding: "20px 0 96px",
       }}
     >
       <div
         style={{
-          width: "380px",
-          padding: "30px",
-          background: "#111",
-          borderRadius: "16px",
-          position: "relative",
+          width: "390px",
+          padding: "18px",
+          borderRadius: "24px",
         }}
       >
-        <h1 style={{ fontSize: "28px", marginBottom: "20px" }}>Аналитика</h1>
-
         <div
           style={{
-            background: "#1a1a1a",
-            padding: "16px",
-            borderRadius: "12px",
-            marginBottom: "20px",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "18px",
           }}
         >
-          <div style={{ fontSize: "14px", color: "#aaa", marginBottom: "6px" }}>
-            Общая сумма расходов
+          <div>
+            <div style={{ fontSize: "13px", color: "#8f8f95", marginBottom: "4px" }}>
+              FinTrack
+            </div>
+            <h1 style={{ fontSize: "28px", margin: 0, fontWeight: 700 }}>
+              Analytics
+            </h1>
           </div>
-          <b style={{ fontSize: "24px" }}>{totalExpense}€</b>
+
+          <div
+            style={{
+              width: "42px",
+              height: "42px",
+              borderRadius: "50%",
+              background: "linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)",
+              color: "#111",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontWeight: 700,
+            }}
+          >
+            A
+          </div>
         </div>
 
-        <div
+        <section
           style={{
-            background: "#1a1a1a",
-            padding: "16px",
-            borderRadius: "12px",
-            marginBottom: "20px",
+            background: "linear-gradient(135deg, #1c1c22 0%, #111114 100%)",
+            border: "1px solid #26262b",
+            borderRadius: "24px",
+            padding: "22px",
+            marginBottom: "16px",
+            boxShadow: "0 20px 40px rgba(0,0,0,0.35)",
           }}
         >
-          <h3 style={{ marginTop: 0, marginBottom: "14px" }}>
+          <div style={{ color: "#9898a3", fontSize: "13px", marginBottom: "8px" }}>
+            Общие расходы
+          </div>
+
+          <div
+            style={{
+              fontSize: "40px",
+              fontWeight: 800,
+              letterSpacing: "-1px",
+              marginBottom: "16px",
+            }}
+          >
+            {totalExpense}€
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+            <div
+              style={{
+                background: "#15151a",
+                border: "1px solid #24242a",
+                borderRadius: "18px",
+                padding: "12px",
+              }}
+            >
+              <div style={{ color: "#8f8f95", fontSize: "12px", marginBottom: "6px" }}>
+                Категорий
+              </div>
+              <div style={{ fontWeight: 700, fontSize: "18px" }}>
+                {categoryTotals.length}
+              </div>
+            </div>
+
+            <div
+              style={{
+                background: "#15151a",
+                border: "1px solid #24242a",
+                borderRadius: "18px",
+                padding: "12px",
+              }}
+            >
+              <div style={{ color: "#8f8f95", fontSize: "12px", marginBottom: "6px" }}>
+                Топ категория
+              </div>
+              <div style={{ fontWeight: 700, fontSize: "18px", color: "#fbbf24" }}>
+                {topCategory ? topCategory.category : "—"}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section
+          style={{
+            background: "#17171c",
+            border: "1px solid #26262b",
+            borderRadius: "22px",
+            padding: "18px",
+            marginBottom: "16px",
+          }}
+        >
+          <div style={{ fontSize: "16px", fontWeight: 700, marginBottom: "12px" }}>
             Круговая диаграмма
-          </h3>
+          </div>
 
           {categoryTotals.length === 0 ? (
-            <p style={{ color: "#999", margin: 0 }}>Пока данных нет</p>
+            <div style={{ color: "#8f8f95", fontSize: "14px" }}>Пока данных нет</div>
           ) : (
             <div style={{ width: "100%", height: 260 }}>
               <ResponsiveContainer>
@@ -135,10 +214,7 @@ export default function AnalyticsPage() {
                     }
                   >
                     {categoryTotals.map((_, index) => (
-                      <Cell
-                        key={index}
-                        fill={COLORS[index % COLORS.length]}
-                      />
+                      <Cell key={index} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
                   <Tooltip />
@@ -146,22 +222,23 @@ export default function AnalyticsPage() {
               </ResponsiveContainer>
             </div>
           )}
-        </div>
+        </section>
 
-        <div
+        <section
           style={{
-            background: "#1a1a1a",
-            padding: "16px",
-            borderRadius: "12px",
-            marginBottom: "20px",
+            background: "#17171c",
+            border: "1px solid #26262b",
+            borderRadius: "22px",
+            padding: "18px",
+            marginBottom: "16px",
           }}
         >
-          <h3 style={{ marginTop: 0, marginBottom: "14px" }}>
-            Последние расходы по датам
-          </h3>
+          <div style={{ fontSize: "16px", fontWeight: 700, marginBottom: "12px" }}>
+            Расходы по датам
+          </div>
 
           {latestByDate.length === 0 ? (
-            <p style={{ color: "#999", margin: 0 }}>Пока данных нет</p>
+            <div style={{ color: "#8f8f95", fontSize: "14px" }}>Пока данных нет</div>
           ) : (
             <div style={{ width: "100%", height: 260 }}>
               <ResponsiveContainer>
@@ -175,21 +252,23 @@ export default function AnalyticsPage() {
               </ResponsiveContainer>
             </div>
           )}
-        </div>
+        </section>
 
-        <div
+        <section
           style={{
-            background: "#1a1a1a",
-            padding: "16px",
-            borderRadius: "12px",
+            background: "#17171c",
+            border: "1px solid #26262b",
+            borderRadius: "22px",
+            padding: "18px",
+            marginBottom: "16px",
           }}
         >
-          <h3 style={{ marginTop: 0, marginBottom: "14px" }}>
-            Расходы по категориям
-          </h3>
+          <div style={{ fontSize: "16px", fontWeight: 700, marginBottom: "12px" }}>
+            Категории расходов
+          </div>
 
           {categoryTotals.length === 0 ? (
-            <p style={{ color: "#999", margin: 0 }}>Пока аналитики нет</p>
+            <div style={{ color: "#8f8f95", fontSize: "14px" }}>Пока аналитики нет</div>
           ) : (
             <div style={{ display: "grid", gap: "10px" }}>
               {categoryTotals.map((item) => {
@@ -202,47 +281,46 @@ export default function AnalyticsPage() {
                   <div
                     key={item.category}
                     style={{
-                      padding: "12px",
-                      background: "#111",
-                      borderRadius: "10px",
-                      border: "1px solid #2a2a2a",
+                      background: "#111114",
+                      border: "1px solid #24242a",
+                      borderRadius: "18px",
+                      padding: "14px",
                     }}
                   >
                     <div
                       style={{
                         display: "flex",
                         justifyContent: "space-between",
-                        marginBottom: "6px",
+                        alignItems: "center",
+                        gap: "10px",
+                        marginBottom: "8px",
                       }}
                     >
-                      <b>{item.category}</b>
-                      <b>{item.amount}€</b>
+                      <div style={{ fontWeight: 700 }}>{item.category}</div>
+                      <div style={{ fontWeight: 700, color: "#fbbf24" }}>
+                        {item.amount}€
+                      </div>
                     </div>
 
                     <div
                       style={{
                         height: "8px",
-                        background: "#2a2a2a",
+                        background: "#26262b",
                         borderRadius: "999px",
                         overflow: "hidden",
+                        marginBottom: "6px",
                       }}
                     >
                       <div
                         style={{
                           width: `${percent}%`,
                           height: "100%",
-                          background: "#f59e0b",
+                          background: "linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%)",
                         }}
                       />
                     </div>
 
-                    <div
-                      style={{
-                        marginTop: "6px",
-                        fontSize: "12px",
-                        color: "#aaa",
-                      }}
-                    >
+                    <div style={{ color: "#8f8f95", fontSize: "12px" }}>
                       {percent}% от всех расходов
                     </div>
                   </div>
@@ -250,7 +328,7 @@ export default function AnalyticsPage() {
               })}
             </div>
           )}
-        </div>
+        </section>
 
         <div
           style={{
@@ -258,17 +336,18 @@ export default function AnalyticsPage() {
             bottom: "16px",
             left: "50%",
             transform: "translateX(-50%)",
-            width: "380px",
-            background: "#161616",
-            border: "1px solid #2a2a2a",
-            borderRadius: "16px",
+            width: "390px",
+            background: "rgba(20,20,24,0.95)",
+            border: "1px solid #2a2a30",
+            borderRadius: "22px",
             display: "grid",
             gridTemplateColumns: "1fr 1fr 1fr 1fr 1fr",
             overflow: "hidden",
+            backdropFilter: "blur(12px)",
           }}
         >
           <Link
-            href="/"
+            href="/dashboard"
             style={{
               padding: "14px 10px",
               textAlign: "center",
@@ -284,10 +363,10 @@ export default function AnalyticsPage() {
             style={{
               padding: "14px 10px",
               textAlign: "center",
-              color: "#f59e0b",
+              color: "#fbbf24",
               textDecoration: "none",
-              fontWeight: "bold",
-              background: "#1d1d1d",
+              fontWeight: 700,
+              background: "#1a1a20",
             }}
           >
             Аналитика
@@ -318,7 +397,7 @@ export default function AnalyticsPage() {
           </Link>
 
           <Link
-            href="/expenses/new"
+            href="/expenses"
             style={{
               padding: "14px 10px",
               textAlign: "center",

@@ -41,7 +41,7 @@ export default function NewExpensePage() {
     current.push(newExpense);
     localStorage.setItem(LS_KEY, JSON.stringify(current));
 
-    router.push("/");
+    router.push("/expenses");
   }
 
   return (

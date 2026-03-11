@@ -3,35 +3,35 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
-type Income = {
+type Expense = {
   id: string;
   amount: number;
-  source: string;
+  category: string;
   date: string;
   note: string;
 };
 
-const INCOME_KEY = "finance-income";
+const EXPENSES_KEY = "finance-expenses";
 
-export default function IncomeListPage() {
-  const [income, setIncome] = useState<Income[]>([]);
+export default function ExpensesPage() {
+  const [expenses, setExpenses] = useState<Expense[]>([]);
 
   useEffect(() => {
-    const rawIncome = localStorage.getItem(INCOME_KEY);
-    const incomeData: Income[] = rawIncome ? JSON.parse(rawIncome) : [];
-    setIncome(incomeData);
+    const rawExpenses = localStorage.getItem(EXPENSES_KEY);
+    const expenseData: Expense[] = rawExpenses ? JSON.parse(rawExpenses) : [];
+    setExpenses(expenseData);
   }, []);
 
-  const totalIncome = useMemo(() => {
-    return income.reduce((sum, item) => sum + item.amount, 0);
-  }, [income]);
+  const totalExpense = useMemo(() => {
+    return expenses.reduce((sum, item) => sum + item.amount, 0);
+  }, [expenses]);
 
-  const latestIncome = [...income].reverse();
+  const sortedExpenses = [...expenses].reverse();
 
   function handleDelete(id: string) {
-    const updated = income.filter((item) => item.id !== id);
-    setIncome(updated);
-    localStorage.setItem(INCOME_KEY, JSON.stringify(updated));
+    const updated = expenses.filter((item) => item.id !== id);
+    setExpenses(updated);
+    localStorage.setItem(EXPENSES_KEY, JSON.stringify(updated));
   }
 
   return (
@@ -42,101 +42,97 @@ export default function IncomeListPage() {
         color: "white",
         display: "flex",
         justifyContent: "center",
-        fontFamily: "sans-serif",
+        fontFamily: "Inter, sans-serif",
         padding: "20px 0 90px",
       }}
     >
       <div
         style={{
-          width: "380px",
-          padding: "30px",
-          background: "#111",
-          borderRadius: "16px",
-          position: "relative",
+          width: "390px",
+          padding: "18px",
+          borderRadius: "24px",
         }}
       >
-        <h1 style={{ fontSize: "28px", marginBottom: "20px" }}>Доходы</h1>
+        <h1 style={{ fontSize: "28px", marginBottom: "20px" }}>Расходы</h1>
 
         <div
           style={{
-            background: "#1a1a1a",
-            padding: "16px",
-            borderRadius: "12px",
-            marginBottom: "20px",
+            background: "#17171c",
+            border: "1px solid #26262b",
+            borderRadius: "22px",
+            padding: "18px",
+            marginBottom: "16px",
           }}
         >
-          <div style={{ fontSize: "14px", color: "#aaa", marginBottom: "6px" }}>
-            Общая сумма доходов
+          <div style={{ fontSize: "14px", color: "#8f8f95", marginBottom: "8px" }}>
+            Общая сумма расходов
           </div>
-          <b style={{ fontSize: "24px" }}>{totalIncome}€</b>
+          <div style={{ fontSize: "32px", fontWeight: 800 }}>{totalExpense}€</div>
         </div>
 
-        <Link href="/income/new" style={{ textDecoration: "none" }}>
+        <Link href="/expenses/new" style={{ textDecoration: "none" }}>
           <button
             style={{
               width: "100%",
-              padding: "12px",
-              background: "#f59e0b",
+              padding: "14px",
+              background: "linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)",
               border: "none",
-              borderRadius: "10px",
-              fontWeight: "bold",
+              borderRadius: "18px",
+              fontWeight: 800,
+              color: "#111",
               cursor: "pointer",
-              marginBottom: "20px",
+              marginBottom: "16px",
             }}
           >
-            Добавить доход
+            + Добавить расход
           </button>
         </Link>
 
         <div
           style={{
-            background: "#1a1a1a",
-            padding: "16px",
-            borderRadius: "12px",
+            background: "#17171c",
+            border: "1px solid #26262b",
+            borderRadius: "22px",
+            padding: "18px",
           }}
         >
-          <h3 style={{ marginTop: 0, marginBottom: "14px" }}>
-            Список доходов
-          </h3>
+          <h3 style={{ marginTop: 0, marginBottom: "14px" }}>Список расходов</h3>
 
-          {latestIncome.length === 0 ? (
-            <p style={{ color: "#999", margin: 0 }}>Пока доходов нет</p>
+          {sortedExpenses.length === 0 ? (
+            <p style={{ color: "#8f8f95", margin: 0 }}>Пока расходов нет</p>
           ) : (
             <div style={{ display: "grid", gap: "10px" }}>
-              {latestIncome.map((item) => (
+              {sortedExpenses.map((item) => (
                 <div
                   key={item.id}
                   style={{
-                    padding: "12px",
-                    background: "#111",
-                    borderRadius: "10px",
-                    border: "1px solid #2a2a2a",
+                    background: "#111114",
+                    border: "1px solid #24242a",
+                    borderRadius: "18px",
+                    padding: "14px",
                   }}
                 >
                   <div
                     style={{
                       display: "flex",
                       justifyContent: "space-between",
-                      marginBottom: "6px",
+                      alignItems: "center",
                       gap: "10px",
+                      marginBottom: "6px",
                     }}
                   >
-                    <b>{item.source}</b>
-                    <b style={{ color: "#f59e0b" }}>{item.amount}€</b>
+                    <div style={{ fontWeight: 700 }}>{item.category}</div>
+                    <div style={{ fontWeight: 700, color: "#fbbf24" }}>
+                      {item.amount}€
+                    </div>
                   </div>
 
-                  <div style={{ fontSize: "13px", color: "#aaa" }}>
+                  <div style={{ color: "#8f8f95", fontSize: "12px", marginBottom: "6px" }}>
                     {item.date}
                   </div>
 
                   {item.note ? (
-                    <div
-                      style={{
-                        fontSize: "13px",
-                        color: "#ccc",
-                        marginTop: "6px",
-                      }}
-                    >
+                    <div style={{ color: "#c8c8ce", fontSize: "13px", marginBottom: "10px" }}>
                       {item.note}
                     </div>
                   ) : null}
@@ -144,12 +140,11 @@ export default function IncomeListPage() {
                   <button
                     onClick={() => handleDelete(item.id)}
                     style={{
-                      marginTop: "10px",
-                      padding: "8px 10px",
-                      background: "#2a2a2a",
+                      background: "#222228",
+                      border: "1px solid #2f2f36",
                       color: "white",
-                      border: "1px solid #3a3a3a",
-                      borderRadius: "8px",
+                      borderRadius: "12px",
+                      padding: "8px 12px",
                       cursor: "pointer",
                     }}
                   >
@@ -167,13 +162,14 @@ export default function IncomeListPage() {
             bottom: "16px",
             left: "50%",
             transform: "translateX(-50%)",
-            width: "380px",
-            background: "#161616",
-            border: "1px solid #2a2a2a",
-            borderRadius: "16px",
+            width: "390px",
+            background: "rgba(20,20,24,0.95)",
+            border: "1px solid #2a2a30",
+            borderRadius: "22px",
             display: "grid",
             gridTemplateColumns: "1fr 1fr 1fr 1fr 1fr",
             overflow: "hidden",
+            backdropFilter: "blur(12px)",
           }}
         >
           <Link
@@ -217,10 +213,8 @@ export default function IncomeListPage() {
             style={{
               padding: "14px 10px",
               textAlign: "center",
-              color: "#f59e0b",
+              color: "white",
               textDecoration: "none",
-              fontWeight: "bold",
-              background: "#1d1d1d",
             }}
           >
             Доход
@@ -231,8 +225,10 @@ export default function IncomeListPage() {
             style={{
               padding: "14px 10px",
               textAlign: "center",
-              color: "white",
+              color: "#fbbf24",
               textDecoration: "none",
+              fontWeight: 700,
+              background: "#1a1a20",
             }}
           >
             Расход

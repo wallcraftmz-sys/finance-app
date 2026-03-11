@@ -19,22 +19,32 @@ type Income = {
   note: string;
 };
 
+type Goal = {
+  title: string;
+  targetAmount: number;
+};
+
 const EXPENSES_KEY = "finance-expenses";
 const INCOME_KEY = "finance-income";
+const GOAL_KEY = "finance-goal";
 
 export default function GoalsPage() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [income, setIncome] = useState<Income[]>([]);
+  const [goal, setGoal] = useState<Goal | null>(null);
 
   useEffect(() => {
     const rawExpenses = localStorage.getItem(EXPENSES_KEY);
     const rawIncome = localStorage.getItem(INCOME_KEY);
+    const rawGoal = localStorage.getItem(GOAL_KEY);
 
     const expenseData: Expense[] = rawExpenses ? JSON.parse(rawExpenses) : [];
     const incomeData: Income[] = rawIncome ? JSON.parse(rawIncome) : [];
+    const goalData: Goal | null = rawGoal ? JSON.parse(rawGoal) : null;
 
     setExpenses(expenseData);
     setIncome(incomeData);
+    setGoal(goalData);
   }, []);
 
   const totalExpense = useMemo(() => {
@@ -47,12 +57,16 @@ export default function GoalsPage() {
 
   const moneyLeft = totalIncome - totalExpense;
 
-  const goalName = "Резервный фонд";
-  const goalTarget = 2000;
   const goalSaved = Math.max(moneyLeft, 0);
+  const goalTarget = goal?.targetAmount ?? 0;
   const goalPercent =
     goalTarget > 0 ? Math.min(Math.round((goalSaved / goalTarget) * 100), 100) : 0;
   const goalRemain = Math.max(goalTarget - goalSaved, 0);
+
+  function handleDeleteGoal() {
+    localStorage.removeItem(GOAL_KEY);
+    setGoal(null);
+  }
 
   return (
     <main
@@ -62,190 +76,166 @@ export default function GoalsPage() {
         color: "white",
         display: "flex",
         justifyContent: "center",
-        fontFamily: "sans-serif",
+        fontFamily: "Inter, sans-serif",
         padding: "20px 0 90px",
       }}
     >
       <div
         style={{
-          width: "380px",
-          padding: "30px",
-          background: "#111",
-          borderRadius: "16px",
-          position: "relative",
+          width: "390px",
+          padding: "18px",
+          borderRadius: "24px",
         }}
       >
         <h1 style={{ fontSize: "28px", marginBottom: "20px" }}>Цели</h1>
 
-        <div
-          style={{
-            background: "#1a1a1a",
-            padding: "16px",
-            borderRadius: "12px",
-            marginBottom: "20px",
-          }}
-        >
-          <div style={{ fontSize: "14px", color: "#aaa", marginBottom: "8px" }}>
-            Активная цель
-          </div>
-
-          <h2 style={{ margin: "0 0 10px 0", fontSize: "22px" }}>{goalName}</h2>
-
+        {!goal ? (
           <div
             style={{
-              display: "flex",
-              justifyContent: "space-between",
-              marginBottom: "10px",
-              gap: "10px",
+              background: "#17171c",
+              padding: "18px",
+              borderRadius: "22px",
+              border: "1px solid #26262b",
             }}
           >
-            <span>Накоплено</span>
-            <b>{goalSaved}€</b>
-          </div>
+            <p style={{ color: "#c8c8ce", marginTop: 0 }}>
+              У тебя пока нет цели. Создай свою первую финансовую цель.
+            </p>
 
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              marginBottom: "10px",
-              gap: "10px",
-            }}
-          >
-            <span>Цель</span>
-            <b>{goalTarget}€</b>
+            <Link href="/goals/new" style={{ textDecoration: "none" }}>
+              <button
+                style={{
+                  width: "100%",
+                  padding: "14px",
+                  background: "linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)",
+                  border: "none",
+                  borderRadius: "16px",
+                  fontWeight: 800,
+                  color: "#111",
+                  cursor: "pointer",
+                }}
+              >
+                + Создать цель
+              </button>
+            </Link>
           </div>
-
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              marginBottom: "14px",
-              gap: "10px",
-            }}
-          >
-            <span>Осталось накопить</span>
-            <b>{goalRemain}€</b>
-          </div>
-
-          <div
-            style={{
-              height: "10px",
-              background: "#2a2a2a",
-              borderRadius: "999px",
-              overflow: "hidden",
-            }}
-          >
+        ) : (
+          <>
             <div
               style={{
-                width: `${goalPercent}%`,
-                height: "100%",
-                background: "#f59e0b",
+                background: "#17171c",
+                padding: "18px",
+                borderRadius: "22px",
+                border: "1px solid #26262b",
+                marginBottom: "16px",
               }}
-            />
-          </div>
+            >
+              <div style={{ fontSize: "14px", color: "#aaa", marginBottom: "8px" }}>
+                Активная цель
+              </div>
 
-          <div
-            style={{
-              marginTop: "8px",
-              fontSize: "12px",
-              color: "#aaa",
-            }}
-          >
-            Прогресс: {goalPercent}%
-          </div>
-        </div>
+              <h2 style={{ margin: "0 0 10px 0", fontSize: "22px" }}>{goal.title}</h2>
 
-        <div
-          style={{
-            background: "#1a1a1a",
-            padding: "16px",
-            borderRadius: "12px",
-          }}
-        >
-          <h3 style={{ marginTop: 0, marginBottom: "12px" }}>Подсказка</h3>
-          <p style={{ margin: 0, color: "#ccc", lineHeight: 1.6 }}>
-            Сейчас цель считается от свободного остатка после расходов. Потом мы
-            сделаем отдельное создание целей и ручное пополнение накоплений.
-          </p>
-        </div>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  marginBottom: "10px",
+                  gap: "10px",
+                }}
+              >
+                <span>Накоплено</span>
+                <b>{goalSaved}€</b>
+              </div>
 
-        <div
-          style={{
-            position: "fixed",
-            bottom: "16px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            width: "380px",
-            background: "#161616",
-            border: "1px solid #2a2a2a",
-            borderRadius: "16px",
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr 1fr 1fr 1fr",
-            overflow: "hidden",
-          }}
-        >
-          <Link
-            href="/"
-            style={{
-              padding: "14px 10px",
-              textAlign: "center",
-              color: "white",
-              textDecoration: "none",
-            }}
-          >
-            Главная
-          </Link>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  marginBottom: "10px",
+                  gap: "10px",
+                }}
+              >
+                <span>Цель</span>
+                <b>{goalTarget}€</b>
+              </div>
 
-          <Link
-            href="/analytics"
-            style={{
-              padding: "14px 10px",
-              textAlign: "center",
-              color: "white",
-              textDecoration: "none",
-            }}
-          >
-            Аналитика
-          </Link>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  marginBottom: "14px",
+                  gap: "10px",
+                }}
+              >
+                <span>Осталось накопить</span>
+                <b>{goalRemain}€</b>
+              </div>
 
-          <Link
-            href="/goals"
-            style={{
-              padding: "14px 10px",
-              textAlign: "center",
-              color: "#f59e0b",
-              textDecoration: "none",
-              fontWeight: "bold",
-              background: "#1d1d1d",
-            }}
-          >
-            Цель
-          </Link>
+              <div
+                style={{
+                  height: "10px",
+                  background: "#2a2a2a",
+                  borderRadius: "999px",
+                  overflow: "hidden",
+                }}
+              >
+                <div
+                  style={{
+                    width: `${goalPercent}%`,
+                    height: "100%",
+                    background: "#f59e0b",
+                  }}
+                />
+              </div>
 
-          <Link
-            href="/income"
-            style={{
-              padding: "14px 10px",
-              textAlign: "center",
-              color: "white",
-              textDecoration: "none",
-            }}
-          >
-            Доход
-          </Link>
+              <div
+                style={{
+                  marginTop: "8px",
+                  fontSize: "12px",
+                  color: "#aaa",
+                }}
+              >
+                Прогресс: {goalPercent}%
+              </div>
+            </div>
 
-          <Link
-            href="/expenses/new"
-            style={{
-              padding: "14px 10px",
-              textAlign: "center",
-              color: "white",
-              textDecoration: "none",
-            }}
-          >
-            Расход
-          </Link>
-        </div>
+            <div style={{ display: "grid", gap: "10px" }}>
+              <Link href="/goals/new" style={{ textDecoration: "none" }}>
+                <button
+                  style={{
+                    width: "100%",
+                    padding: "14px",
+                    background: "#222228",
+                    border: "1px solid #2f2f36",
+                    borderRadius: "16px",
+                    fontWeight: 700,
+                    color: "white",
+                    cursor: "pointer",
+                  }}
+                >
+                  Изменить цель
+                </button>
+              </Link>
+
+              <button
+                onClick={handleDeleteGoal}
+                style={{
+                  width: "100%",
+                  padding: "14px",
+                  background: "#3a1f1f",
+                  border: "1px solid #5a2a2a",
+                  borderRadius: "16px",
+                  fontWeight: 700,
+                  color: "white",
+                  cursor: "pointer",
+                }}
+              >
+                Удалить цель
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </main>
   );
