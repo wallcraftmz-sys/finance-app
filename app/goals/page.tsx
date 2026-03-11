@@ -200,40 +200,57 @@ export default function GoalsPage() {
               </div>
             </div>
 
-            <div style={{ display: "grid", gap: "10px" }}>
-              <Link href="/goals/new" style={{ textDecoration: "none" }}>
-                <button
-                  style={{
-                    width: "100%",
-                    padding: "14px",
-                    background: "#222228",
-                    border: "1px solid #2f2f36",
-                    borderRadius: "16px",
-                    fontWeight: 700,
-                    color: "white",
-                    cursor: "pointer",
-                  }}
-                >
-                  Изменить цель
-                </button>
-              </Link>
+          <div style={{ display: "grid", gap: "10px" }}>
+  <Link href="/dashboard" style={{ textDecoration: "none" }}>
+    <button
+      style={{
+        width: "100%",
+        padding: "14px",
+        background: "#1f1f26",
+        border: "1px solid #2f2f36",
+        borderRadius: "16px",
+        fontWeight: 700,
+        color: "white",
+        cursor: "pointer",
+      }}
+    >
+      Назад
+    </button>
+  </Link>
 
-              <button
-                onClick={handleDeleteGoal}
-                style={{
-                  width: "100%",
-                  padding: "14px",
-                  background: "#3a1f1f",
-                  border: "1px solid #5a2a2a",
-                  borderRadius: "16px",
-                  fontWeight: 700,
-                  color: "white",
-                  cursor: "pointer",
-                }}
-              >
-                Удалить цель
-              </button>
-            </div>
+  <Link href="/goals/new" style={{ textDecoration: "none" }}>
+    <button
+      style={{
+        width: "100%",
+        padding: "14px",
+        background: "#222228",
+        border: "1px solid #2f2f36",
+        borderRadius: "16px",
+        fontWeight: 700,
+        color: "white",
+        cursor: "pointer",
+      }}
+    >
+      Изменить цель
+    </button>
+  </Link>
+
+  <button
+    onClick={handleDeleteGoal}
+    style={{
+      width: "100%",
+      padding: "14px",
+      background: "#3a1f1f",
+      border: "1px solid #5a2a2a",
+      borderRadius: "16px",
+      fontWeight: 700,
+      color: "white",
+      cursor: "pointer",
+    }}
+  >
+    Удалить цель
+  </button>
+</div>
           </>
         )}
       </div>
