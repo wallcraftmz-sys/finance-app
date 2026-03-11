@@ -102,17 +102,18 @@ export default function NewIncomePage() {
           </select>
 
           <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            style={{
-              padding: "12px",
-              borderRadius: "10px",
-              border: "1px solid #333",
-              background: "#1a1a1a",
-              color: "white",
-            }}
-          />
+  type="text"
+  placeholder="Дата, например 2026-03-11"
+  value={date}
+  onChange={(e) => setDate(e.target.value)}
+  style={{
+    padding: "12px",
+    borderRadius: "10px",
+    border: "1px solid #333",
+    background: "#1a1a1a",
+    color: "white",
+  }}
+/>
 
           <textarea
             placeholder="Комментарий"
