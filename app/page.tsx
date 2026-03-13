@@ -119,45 +119,43 @@ export default function WelcomePage() {
             </div>
           </div>
 
-          <Link href="/dashboard" style={{ textDecoration: "none" }}>
-            <div style={{display:"grid",gap:"10px"}}>
+          <div style={{ display: "grid", gap: "10px" }}>
+            <Link href="/register" style={{ textDecoration: "none" }}>
+              <button
+                style={{
+                  width: "100%",
+                  padding: "16px",
+                  background: "linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)",
+                  border: "none",
+                  borderRadius: "18px",
+                  color: "#111",
+                  fontWeight: 800,
+                  fontSize: "16px",
+                  cursor: "pointer",
+                }}
+              >
+                Регистрация
+              </button>
+            </Link>
 
-<a href="/register">
-<button
-style={{
-width:"100%",
-padding:"14px",
-background:"#f59e0b",
-border:"none",
-borderRadius:"16px",
-fontWeight:800,
-color:"#111",
-cursor:"pointer"
-}}
->
-Регистрация
-</button>
-</a>
-
-<a href="/login">
-<button
-style={{
-width:"100%",
-padding:"14px",
-background:"#1f1f26",
-border:"1px solid #2f2f36",
-borderRadius:"16px",
-fontWeight:700,
-color:"white",
-cursor:"pointer"
-}}
->
-Войти
-</button>
-</a>
-
-</div>
-          </Link>
+            <Link href="/login" style={{ textDecoration: "none" }}>
+              <button
+                style={{
+                  width: "100%",
+                  padding: "16px",
+                  background: "#1f1f26",
+                  border: "1px solid #2f2f36",
+                  borderRadius: "18px",
+                  color: "white",
+                  fontWeight: 700,
+                  fontSize: "16px",
+                  cursor: "pointer",
+                }}
+              >
+                Войти
+              </button>
+            </Link>
+          </div>
         </div>
       </div>
     </main>
