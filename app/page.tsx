@@ -119,43 +119,23 @@ export default function WelcomePage() {
             </div>
           </div>
 
-          <div style={{ display: "grid", gap: "10px" }}>
-            <Link href="/register" style={{ textDecoration: "none" }}>
-              <button
-                style={{
-                  width: "100%",
-                  padding: "16px",
-                  background: "linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)",
-                  border: "none",
-                  borderRadius: "18px",
-                  color: "#111",
-                  fontWeight: 800,
-                  fontSize: "16px",
-                  cursor: "pointer",
-                }}
-              >
-                Регистрация
-              </button>
-            </Link>
-
-            <Link href="/login" style={{ textDecoration: "none" }}>
-              <button
-                style={{
-                  width: "100%",
-                  padding: "16px",
-                  background: "#1f1f26",
-                  border: "1px solid #2f2f36",
-                  borderRadius: "18px",
-                  color: "white",
-                  fontWeight: 700,
-                  fontSize: "16px",
-                  cursor: "pointer",
-                }}
-              >
-                Войти
-              </button>
-            </Link>
-          </div>
+          <Link href="/login" style={{ textDecoration: "none" }}>
+            <button
+              style={{
+                width: "100%",
+                padding: "16px",
+                background: "linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)",
+                border: "none",
+                borderRadius: "18px",
+                color: "#111",
+                fontWeight: 800,
+                fontSize: "16px",
+                cursor: "pointer",
+              }}
+            >
+              Войти
+            </button>
+          </Link>
         </div>
       </div>
     </main>

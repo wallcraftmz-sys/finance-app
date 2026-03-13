@@ -141,21 +141,23 @@ export default function Dashboard() {
             </h1>
           </div>
 
-          <div
-            style={{
-              width: "42px",
-              height: "42px",
-              borderRadius: "50%",
-              background: "linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)",
-              color: "#111",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontWeight: 700,
-            }}
-          >
-            F
-          </div>
+         <button
+  onClick={() => {
+    localStorage.removeItem("finance-user");
+    window.location.href = "/login";
+  }}
+  style={{
+    padding: "10px 14px",
+    borderRadius: "12px",
+    border: "1px solid #333",
+    background: "#111",
+    color: "white",
+    cursor: "pointer",
+    fontWeight: 700,
+  }}
+>
+  Выйти
+</button>
         </div>
 
         <section
