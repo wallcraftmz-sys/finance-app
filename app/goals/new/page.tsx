@@ -3,39 +3,43 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-type Goal = {
-  id: string;
-  title: string;
-  targetAmount: number;
-};
-
-const GOAL_KEY = "finance-goals";
-
 export default function NewGoalPage() {
   const router = useRouter();
 
   const [title, setTitle] = useState("");
   const [targetAmount, setTargetAmount] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  function handleSave() {
-    if (!title || !targetAmount) {
-      alert("Заполни название цели и сумму");
-      return;
+  async function handleSave() {
+    try {
+      setLoading(true);
+      setError("");
+
+      const res = await fetch("/api/goals", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title,
+          targetAmount: Number(targetAmount),
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "Ошибка создания цели");
+        return;
+      }
+
+      router.push("/goals");
+    } catch (error) {
+      setError("Ошибка сети");
+    } finally {
+      setLoading(false);
     }
-
-    const raw = localStorage.getItem(GOAL_KEY);
-    const goals: Goal[] = raw ? JSON.parse(raw) : [];
-
-    const newGoal: Goal = {
-      id: crypto.randomUUID(),
-      title,
-      targetAmount: Number(targetAmount),
-    };
-
-    goals.push(newGoal);
-    localStorage.setItem(GOAL_KEY, JSON.stringify(goals));
-
-    router.push("/goals");
   }
 
   return (
@@ -67,7 +71,7 @@ export default function NewGoalPage() {
         <div style={{ display: "grid", gap: "12px" }}>
           <input
             type="text"
-            placeholder="Название цели, например Ноутбук"
+            placeholder="Название цели"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             style={{
@@ -81,7 +85,7 @@ export default function NewGoalPage() {
 
           <input
             type="number"
-            placeholder="Сумма, например 2000"
+            placeholder="Сумма"
             value={targetAmount}
             onChange={(e) => setTargetAmount(e.target.value)}
             style={{
@@ -93,8 +97,24 @@ export default function NewGoalPage() {
             }}
           />
 
+          {error ? (
+            <div
+              style={{
+                color: "#ff8a8a",
+                fontSize: "14px",
+                background: "#2a1414",
+                border: "1px solid #5a2a2a",
+                padding: "10px 12px",
+                borderRadius: "12px",
+              }}
+            >
+              {error}
+            </div>
+          ) : null}
+
           <button
             onClick={handleSave}
+            disabled={loading}
             style={{
               width: "100%",
               padding: "14px",
@@ -104,9 +124,10 @@ export default function NewGoalPage() {
               fontWeight: 800,
               color: "#111",
               cursor: "pointer",
+              opacity: loading ? 0.7 : 1,
             }}
           >
-            Сохранить цель
+            {loading ? "Сохранение..." : "Сохранить цель"}
           </button>
         </div>
       </div>
