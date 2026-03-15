@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 
 type Expense = {
   id: string;
@@ -20,67 +20,475 @@ type Income = {
 };
 
 type Goal = {
+  id: string;
   title: string;
   targetAmount: number;
 };
 
-const EXPENSES_KEY = "finance-expenses";
-const INCOME_KEY = "finance-income";
-const GOAL_KEY = "finance-goal";
+type Props = {
+  expenses: Expense[];
+  incomes: Income[];
+  goals: Goal[];
+};
 
-export default function DashboardClient() {
-  const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [income, setIncome] = useState<Income[]>([]);
-  const [goal, setGoal] = useState<Goal | null>(null);
-
-  useEffect(() => {
-    const rawExpenses = localStorage.getItem(EXPENSES_KEY);
-    const rawIncome = localStorage.getItem(INCOME_KEY);
-    const rawGoal = localStorage.getItem(GOAL_KEY);
-
-    const expenseData: Expense[] = rawExpenses ? JSON.parse(rawExpenses) : [];
-    const incomeData: Income[] = rawIncome ? JSON.parse(rawIncome) : [];
-    const goalData: Goal | null = rawGoal ? JSON.parse(rawGoal) : null;
-
-    setExpenses(expenseData);
-    setIncome(incomeData);
-    setGoal(goalData);
-  }, []);
-
+export default function DashboardClient({ expenses, incomes, goals }: Props) {
   const totalExpense = useMemo(() => {
     return expenses.reduce((sum, item) => sum + item.amount, 0);
   }, [expenses]);
 
   const totalIncome = useMemo(() => {
-    return income.reduce((sum, item) => sum + item.amount, 0);
-  }, [income]);
+    return incomes.reduce((sum, item) => sum + item.amount, 0);
+  }, [incomes]);
 
   const moneyLeft = totalIncome - totalExpense;
+  const latestExpenses = [...expenses].slice(0, 4);
+  const goal = goals[0] ?? null;
 
-  async function logout() {
-    await fetch("/api/logout", { method: "POST" });
+  const categoryTotals = useMemo(() => {
+    const map: Record<string, number> = {};
+
+    for (const item of expenses) {
+      if (!map[item.category]) {
+        map[item.category] = 0;
+      }
+      map[item.category] += item.amount;
+    }
+
+    return Object.entries(map)
+      .map(([category, amount]) => ({ category, amount }))
+      .sort((a, b) => b.amount - a.amount);
+  }, [expenses]);
+
+  const aiTip = useMemo(() => {
+    if (totalIncome === 0 && totalExpense === 0) {
+      return "Добавь первый доход и первый расход — тогда появится персональная подсказка.";
+    }
+
+    if (totalIncome > 0 && totalExpense === 0) {
+      return "Доход уже добавлен. Теперь внеси расходы, чтобы увидеть живую аналитику.";
+    }
+
+    if (moneyLeft < 0) {
+      return "Ты вышел в минус. Сократи самую большую категорию хотя бы на 10–15%.";
+    }
+
+    if (categoryTotals.length > 0) {
+      const topCategory = categoryTotals[0];
+      return `Самая большая категория — ${topCategory.category} (${topCategory.amount}€). Часть остатка можно отправить в накопления.`;
+    }
+
+    return "Финансовая картина собирается. Продолжай добавлять операции.";
+  }, [totalIncome, totalExpense, moneyLeft, categoryTotals]);
+
+  async function handleLogout() {
+    await fetch("/api/logout", {
+      method: "POST",
+    });
+
     localStorage.removeItem("finance-user");
     window.location.href = "/login";
   }
 
+  const goalSaved = Math.max(moneyLeft, 0);
+  const goalTarget = goal?.targetAmount ?? 0;
+  const goalPercent =
+    goalTarget > 0 ? Math.min(Math.round((goalSaved / goalTarget) * 100), 100) : 0;
+
   return (
-    <main style={{ padding: "40px", color: "white" }}>
-      <h1>Dashboard</h1>
+    <main
+      style={{
+        minHeight: "100vh",
+        background: "linear-gradient(180deg, #0b0b0f 0%, #111111 100%)",
+        color: "white",
+        display: "flex",
+        justifyContent: "center",
+        fontFamily: "Inter, sans-serif",
+        padding: "20px 0 96px",
+      }}
+    >
+      <div
+        style={{
+          width: "390px",
+          padding: "18px",
+          borderRadius: "24px",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "18px",
+          }}
+        >
+          <div>
+            <div style={{ fontSize: "13px", color: "#8f8f95", marginBottom: "4px" }}>
+              FinTrack
+            </div>
+            <h1 style={{ fontSize: "28px", margin: 0, fontWeight: 700 }}>
+              Dashboard
+            </h1>
+          </div>
 
-      <div style={{ marginBottom: "20px" }}>
-        <button onClick={logout}>Выйти</button>
-      </div>
+          <button
+            onClick={handleLogout}
+            style={{
+              padding: "10px 14px",
+              borderRadius: "12px",
+              border: "1px solid #333",
+              background: "#111",
+              color: "white",
+              cursor: "pointer",
+              fontWeight: 700,
+            }}
+          >
+            Выйти
+          </button>
+        </div>
 
-      <div>Доход: {totalIncome}€</div>
-      <div>Расход: {totalExpense}€</div>
-      <div>Баланс: {moneyLeft}€</div>
+        <section
+          style={{
+            background: "linear-gradient(135deg, #1c1c22 0%, #111114 100%)",
+            border: "1px solid #26262b",
+            borderRadius: "24px",
+            padding: "22px",
+            marginBottom: "16px",
+            boxShadow: "0 20px 40px rgba(0,0,0,0.35)",
+          }}
+        >
+          <div style={{ color: "#9898a3", fontSize: "13px", marginBottom: "8px" }}>
+            Текущий остаток
+          </div>
 
-      <div style={{ marginTop: "20px" }}>
-        <Link href="/income">Доход</Link>
-        <br />
-        <Link href="/expenses">Расходы</Link>
-        <br />
-        <Link href="/analytics">Аналитика</Link>
+          <div
+            style={{
+              fontSize: "40px",
+              fontWeight: 800,
+              letterSpacing: "-1px",
+              marginBottom: "16px",
+            }}
+          >
+            {moneyLeft}€
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px" }}>
+            <div
+              style={{
+                background: "#15151a",
+                border: "1px solid #24242a",
+                borderRadius: "18px",
+                padding: "12px",
+              }}
+            >
+              <div style={{ color: "#8f8f95", fontSize: "12px", marginBottom: "6px" }}>
+                Доход
+              </div>
+              <div style={{ fontWeight: 700, fontSize: "18px" }}>{totalIncome}€</div>
+            </div>
+
+            <div
+              style={{
+                background: "#15151a",
+                border: "1px solid #24242a",
+                borderRadius: "18px",
+                padding: "12px",
+              }}
+            >
+              <div style={{ color: "#8f8f95", fontSize: "12px", marginBottom: "6px" }}>
+                Расход
+              </div>
+              <div style={{ fontWeight: 700, fontSize: "18px" }}>{totalExpense}€</div>
+            </div>
+
+            <div
+              style={{
+                background: "#15151a",
+                border: "1px solid #24242a",
+                borderRadius: "18px",
+                padding: "12px",
+              }}
+            >
+              <div style={{ color: "#8f8f95", fontSize: "12px", marginBottom: "6px" }}>
+                Баланс
+              </div>
+              <div style={{ fontWeight: 700, fontSize: "18px", color: "#fbbf24" }}>
+                {moneyLeft}€
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: "12px",
+            marginBottom: "16px",
+          }}
+        >
+          <Link href="/income" style={{ textDecoration: "none" }}>
+            <div
+              style={{
+                background: "#17171c",
+                border: "1px solid #26262b",
+                borderRadius: "20px",
+                padding: "16px",
+                color: "white",
+              }}
+            >
+              <div style={{ fontSize: "13px", color: "#8f8f95", marginBottom: "6px" }}>
+                Быстрое действие
+              </div>
+              <div style={{ fontSize: "18px", fontWeight: 700 }}>Доходы</div>
+            </div>
+          </Link>
+
+          <Link href="/expenses/new" style={{ textDecoration: "none" }}>
+            <div
+              style={{
+                background: "linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)",
+                borderRadius: "20px",
+                padding: "16px",
+                color: "#111",
+              }}
+            >
+              <div style={{ fontSize: "13px", opacity: 0.8, marginBottom: "6px" }}>
+                Быстрое действие
+              </div>
+              <div style={{ fontSize: "18px", fontWeight: 800 }}>+ Расход</div>
+            </div>
+          </Link>
+        </section>
+
+        <section
+          style={{
+            background: "#17171c",
+            border: "1px solid #26262b",
+            borderRadius: "22px",
+            padding: "18px",
+            marginBottom: "16px",
+          }}
+        >
+          <div style={{ fontSize: "16px", fontWeight: 700, marginBottom: "10px" }}>
+            AI-подсказка
+          </div>
+          <div style={{ color: "#d0d0d6", lineHeight: 1.55, fontSize: "14px" }}>
+            {aiTip}
+          </div>
+        </section>
+
+        <section
+          style={{
+            background: "#17171c",
+            border: "1px solid #26262b",
+            borderRadius: "22px",
+            padding: "18px",
+            marginBottom: "16px",
+          }}
+        >
+          {!goal ? (
+            <>
+              <div style={{ fontSize: "16px", fontWeight: 700, marginBottom: "10px" }}>
+                Финансовая цель
+              </div>
+              <div style={{ color: "#8f8f95", fontSize: "14px", marginBottom: "12px" }}>
+                У тебя пока нет цели. Создай её, чтобы видеть прогресс прямо на главной.
+              </div>
+
+              <Link href="/goals/new" style={{ textDecoration: "none" }}>
+                <button
+                  style={{
+                    width: "100%",
+                    padding: "12px",
+                    background: "linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)",
+                    border: "none",
+                    borderRadius: "14px",
+                    fontWeight: 800,
+                    color: "#111",
+                    cursor: "pointer",
+                  }}
+                >
+                  + Создать цель
+                </button>
+              </Link>
+            </>
+          ) : (
+            <>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  gap: "10px",
+                  marginBottom: "10px",
+                  alignItems: "center",
+                }}
+              >
+                <div style={{ fontSize: "16px", fontWeight: 700 }}>{goal.title}</div>
+                <div style={{ fontSize: "13px", color: "#a0a0a8" }}>
+                  {goalSaved}€ / {goalTarget}€
+                </div>
+              </div>
+
+              <div
+                style={{
+                  height: "10px",
+                  background: "#26262b",
+                  borderRadius: "999px",
+                  overflow: "hidden",
+                  marginBottom: "8px",
+                }}
+              >
+                <div
+                  style={{
+                    width: `${goalPercent}%`,
+                    height: "100%",
+                    background: "linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%)",
+                  }}
+                />
+              </div>
+
+              <div style={{ color: "#8f8f95", fontSize: "12px" }}>
+                Прогресс: {goalPercent}%
+              </div>
+            </>
+          )}
+        </section>
+
+        <section
+          style={{
+            background: "#17171c",
+            border: "1px solid #26262b",
+            borderRadius: "22px",
+            padding: "18px",
+            marginBottom: "16px",
+          }}
+        >
+          <div style={{ fontSize: "16px", fontWeight: 700, marginBottom: "12px" }}>
+            Последние расходы
+          </div>
+
+          {latestExpenses.length === 0 ? (
+            <div style={{ color: "#8f8f95", fontSize: "14px" }}>Пока расходов нет</div>
+          ) : (
+            <div style={{ display: "grid", gap: "10px" }}>
+              {latestExpenses.map((item) => (
+                <div
+                  key={item.id}
+                  style={{
+                    background: "#111114",
+                    border: "1px solid #24242a",
+                    borderRadius: "18px",
+                    padding: "14px",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      gap: "10px",
+                      marginBottom: "6px",
+                    }}
+                  >
+                    <div style={{ fontWeight: 700 }}>{item.category}</div>
+                    <div style={{ fontWeight: 700, color: "#fbbf24" }}>
+                      {item.amount}€
+                    </div>
+                  </div>
+
+                  <div style={{ color: "#8f8f95", fontSize: "12px", marginBottom: "6px" }}>
+                    {item.date}
+                  </div>
+
+                  {item.note ? (
+                    <div style={{ color: "#c8c8ce", fontSize: "13px", marginBottom: "10px" }}>
+                      {item.note}
+                    </div>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        <div
+          style={{
+            position: "fixed",
+            bottom: "16px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: "390px",
+            background: "rgba(20,20,24,0.95)",
+            border: "1px solid #2a2a30",
+            borderRadius: "22px",
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr 1fr 1fr 1fr",
+            overflow: "hidden",
+            backdropFilter: "blur(12px)",
+          }}
+        >
+          <Link
+            href="/dashboard"
+            style={{
+              padding: "14px 10px",
+              textAlign: "center",
+              color: "#fbbf24",
+              textDecoration: "none",
+              fontWeight: 700,
+              background: "#1a1a20",
+            }}
+          >
+            Главная
+          </Link>
+
+          <Link
+            href="/analytics"
+            style={{
+              padding: "14px 10px",
+              textAlign: "center",
+              color: "white",
+              textDecoration: "none",
+            }}
+          >
+            Аналитика
+          </Link>
+
+          <Link
+            href="/goals"
+            style={{
+              padding: "14px 10px",
+              textAlign: "center",
+              color: "white",
+              textDecoration: "none",
+            }}
+          >
+            Цель
+          </Link>
+
+          <Link
+            href="/income"
+            style={{
+              padding: "14px 10px",
+              textAlign: "center",
+              color: "white",
+              textDecoration: "none",
+            }}
+          >
+            Доход
+          </Link>
+
+          <Link
+            href="/expenses"
+            style={{
+              padding: "14px 10px",
+              textAlign: "center",
+              color: "white",
+              textDecoration: "none",
+            }}
+          >
+            Расход
+          </Link>
+        </div>
       </div>
     </main>
   );

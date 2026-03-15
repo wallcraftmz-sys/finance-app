@@ -11,27 +11,41 @@ type Expense = {
   note: string;
 };
 
-const EXPENSES_KEY = "finance-expenses";
-
 export default function ExpensesPage() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  async function loadExpenses() {
+    try {
+      const res = await fetch("/api/expenses");
+      const data = await res.json();
+
+      if (res.ok) {
+        setExpenses(data.expenses || []);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    const rawExpenses = localStorage.getItem(EXPENSES_KEY);
-    const expenseData: Expense[] = rawExpenses ? JSON.parse(rawExpenses) : [];
-    setExpenses(expenseData);
+    loadExpenses();
   }, []);
 
   const totalExpense = useMemo(() => {
     return expenses.reduce((sum, item) => sum + item.amount, 0);
   }, [expenses]);
 
-  const sortedExpenses = [...expenses].reverse();
+  const sortedExpenses = [...expenses];
 
-  function handleDelete(id: string) {
-    const updated = expenses.filter((item) => item.id !== id);
-    setExpenses(updated);
-    localStorage.setItem(EXPENSES_KEY, JSON.stringify(updated));
+  async function handleDelete(id: string) {
+    const res = await fetch(`/api/expenses/${id}`, {
+      method: "DELETE",
+    });
+
+    if (res.ok) {
+      setExpenses((prev) => prev.filter((item) => item.id !== id));
+    }
   }
 
   return (
@@ -98,7 +112,9 @@ export default function ExpensesPage() {
         >
           <h3 style={{ marginTop: 0, marginBottom: "14px" }}>Список расходов</h3>
 
-          {sortedExpenses.length === 0 ? (
+          {loading ? (
+            <p style={{ color: "#8f8f95", margin: 0 }}>Загрузка...</p>
+          ) : sortedExpenses.length === 0 ? (
             <p style={{ color: "#8f8f95", margin: 0 }}>Пока расходов нет</p>
           ) : (
             <div style={{ display: "grid", gap: "10px" }}>

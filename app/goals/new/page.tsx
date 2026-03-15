@@ -34,7 +34,7 @@ export default function NewGoalPage() {
         return;
       }
 
-      router.push("/goals");
+      router.push("/dashboard");
     } catch (error) {
       setError("Ошибка сети");
     } finally {

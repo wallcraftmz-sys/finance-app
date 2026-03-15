@@ -11,27 +11,41 @@ type Income = {
   note: string;
 };
 
-const INCOME_KEY = "finance-income";
-
 export default function IncomeListPage() {
   const [income, setIncome] = useState<Income[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  async function loadIncome() {
+    try {
+      const res = await fetch("/api/income");
+      const data = await res.json();
+
+      if (res.ok) {
+        setIncome(data.incomes || []);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    const rawIncome = localStorage.getItem(INCOME_KEY);
-    const incomeData: Income[] = rawIncome ? JSON.parse(rawIncome) : [];
-    setIncome(incomeData);
+    loadIncome();
   }, []);
 
   const totalIncome = useMemo(() => {
     return income.reduce((sum, item) => sum + item.amount, 0);
   }, [income]);
 
-  const latestIncome = [...income].reverse();
+  const latestIncome = [...income];
 
-  function handleDelete(id: string) {
-    const updated = income.filter((item) => item.id !== id);
-    setIncome(updated);
-    localStorage.setItem(INCOME_KEY, JSON.stringify(updated));
+  async function handleDelete(id: string) {
+    const res = await fetch(`/api/income/${id}`, {
+      method: "DELETE",
+    });
+
+    if (res.ok) {
+      setIncome((prev) => prev.filter((item) => item.id !== id));
+    }
   }
 
   return (
@@ -95,11 +109,11 @@ export default function IncomeListPage() {
             borderRadius: "12px",
           }}
         >
-          <h3 style={{ marginTop: 0, marginBottom: "14px" }}>
-            Список доходов
-          </h3>
+          <h3 style={{ marginTop: 0, marginBottom: "14px" }}>Список доходов</h3>
 
-          {latestIncome.length === 0 ? (
+          {loading ? (
+            <p style={{ color: "#999", margin: 0 }}>Загрузка...</p>
+          ) : latestIncome.length === 0 ? (
             <p style={{ color: "#999", margin: 0 }}>Пока доходов нет</p>
           ) : (
             <div style={{ display: "grid", gap: "10px" }}>
@@ -125,9 +139,7 @@ export default function IncomeListPage() {
                     <b style={{ color: "#f59e0b" }}>{item.amount}€</b>
                   </div>
 
-                  <div style={{ fontSize: "13px", color: "#aaa" }}>
-                    {item.date}
-                  </div>
+                  <div style={{ fontSize: "13px", color: "#aaa" }}>{item.date}</div>
 
                   {item.note ? (
                     <div
