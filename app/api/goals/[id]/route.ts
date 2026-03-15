@@ -2,11 +2,10 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 
-type Params = {
-  params: Promise<{ id: string }>;
-};
-
-export async function DELETE(_: Request, { params }: Params) {
+export async function DELETE(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const user = await getCurrentUser();
 
@@ -27,16 +26,16 @@ export async function DELETE(_: Request, { params }: Params) {
       return NextResponse.json({ error: "Цель не найдена" }, { status: 404 });
     }
 
-   export async function DELETE(req: Request, { params }: { params: { id: string } }) {
-  const { id } = params;
-
-  await prisma.goal.delete({
-    where: { id },
-  });
+    await prisma.goal.delete({
+      where: { id },
+    });
 
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("GOAL_DELETE_ERROR", error);
-    return NextResponse.json({ error: "Ошибка удаления цели" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Ошибка удаления цели" },
+      { status: 500 }
+    );
   }
 }
