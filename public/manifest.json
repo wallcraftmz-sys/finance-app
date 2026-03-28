@@ -1,6 +1,6 @@
 {
-  "name": "FinTrack",
-  "short_name": "FinTrack",
+  "name": "Moniq",
+  "short_name": "Moniq",
   "description": "Учёт доходов, расходов, целей и аналитики",
   "start_url": "/",
   "display": "standalone",

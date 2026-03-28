@@ -59,8 +59,24 @@ export default function GoalsPage() {
           borderRadius: "24px",
         }}
       >
-        <h1 style={{ fontSize: "28px", marginBottom: "20px" }}>Цели</h1>
+       <h1 style={{ fontSize: "28px", marginBottom: "12px" }}>Цели</h1>
 
+<Link href="/dashboard" style={{ textDecoration: "none" }}>
+  <button
+    style={{
+      marginBottom: "16px",
+      padding: "10px 14px",
+      background: "#1f1f26",
+      border: "1px solid #2f2f36",
+      borderRadius: "12px",
+      color: "white",
+      fontWeight: 700,
+      cursor: "pointer",
+    }}
+  >
+    ← Назад
+  </button>
+</Link>
         {loading ? (
           <div>Загрузка...</div>
         ) : goals.length === 0 ? (

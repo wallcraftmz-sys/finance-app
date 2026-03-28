@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type Expense = {
   id: string;
@@ -32,6 +32,8 @@ type Props = {
 };
 
 export default function DashboardClient({ expenses, incomes, goals }: Props) {
+  const [aiAdvice, setAiAdvice] = useState("Анализирую твои финансы...");
+
   const totalExpense = useMemo(() => {
     return expenses.reduce((sum, item) => sum + item.amount, 0);
   }, [expenses]);
@@ -59,26 +61,36 @@ export default function DashboardClient({ expenses, incomes, goals }: Props) {
       .sort((a, b) => b.amount - a.amount);
   }, [expenses]);
 
-  const aiTip = useMemo(() => {
-    if (totalIncome === 0 && totalExpense === 0) {
-      return "Добавь первый доход и первый расход — тогда появится персональная подсказка.";
+  useEffect(() => {
+    async function loadAdvice() {
+      try {
+        const res = await fetch("/api/ai-advice", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            income: totalIncome,
+            expense: totalExpense,
+            categories: categoryTotals,
+          }),
+        });
+
+        const data = await res.json();
+
+        if (res.ok && data.advice) {
+          setAiAdvice(data.advice);
+          return;
+        }
+
+        setAiAdvice("Пока не удалось построить совет. Добавь ещё немного данных.");
+      } catch {
+        setAiAdvice("Пока не удалось подключить финансовый совет. Попробуй позже.");
+      }
     }
 
-    if (totalIncome > 0 && totalExpense === 0) {
-      return "Доход уже добавлен. Теперь внеси расходы, чтобы увидеть живую аналитику.";
-    }
-
-    if (moneyLeft < 0) {
-      return "Ты вышел в минус. Сократи самую большую категорию хотя бы на 10–15%.";
-    }
-
-    if (categoryTotals.length > 0) {
-      const topCategory = categoryTotals[0];
-      return `Самая большая категория — ${topCategory.category} (${topCategory.amount}€). Часть остатка можно отправить в накопления.`;
-    }
-
-    return "Финансовая картина собирается. Продолжай добавлять операции.";
-  }, [totalIncome, totalExpense, moneyLeft, categoryTotals]);
+    loadAdvice();
+  }, [totalIncome, totalExpense, categoryTotals]);
 
   async function handleLogout() {
     await fetch("/api/logout", {
@@ -270,10 +282,10 @@ export default function DashboardClient({ expenses, incomes, goals }: Props) {
           }}
         >
           <div style={{ fontSize: "16px", fontWeight: 700, marginBottom: "10px" }}>
-            AI-подсказка
+            Финансовый помощник
           </div>
-          <div style={{ color: "#d0d0d6", lineHeight: 1.55, fontSize: "14px" }}>
-            {aiTip}
+          <div style={{ color: "#d0d0d6", lineHeight: 1.6, fontSize: "14px" }}>
+            {aiAdvice}
           </div>
         </section>
 
