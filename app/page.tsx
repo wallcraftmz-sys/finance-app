@@ -44,7 +44,7 @@ export default function WelcomePage() {
               marginBottom: "22px",
             }}
           >
-            F
+            M
           </div>
 
           <h1
