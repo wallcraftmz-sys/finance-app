@@ -1,8 +1,8 @@
-
 import type { Metadata, Viewport } from "next";
-import UpdateNotice from "@/components/UpdateNotice";
 import "./globals.css";
 import AssistantButton from "@/components/AssistantButton";
+import UpdateNotice from "@/components/UpdateNotice";
+
 export const metadata: Metadata = {
   title: "Moniq",
   description: "AI финансовое приложение",
@@ -13,9 +13,11 @@ export const metadata: Metadata = {
     title: "Moniq",
   },
 };
+
 export const viewport: Viewport = {
   themeColor: "#0a0a0a",
 };
+
 export default function RootLayout({
   children,
 }: {
@@ -24,14 +26,10 @@ export default function RootLayout({
   return (
     <html lang="ru">
       <body>
+        <UpdateNotice />
         {children}
         <AssistantButton />
       </body>
     </html>
   );
 }
-<body>
-  <UpdateNotice />
-  {children}
-  <AssistantButton />
-</body>
