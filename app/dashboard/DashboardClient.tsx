@@ -281,9 +281,6 @@ export default function DashboardClient({ expenses, incomes, goals }: Props) {
             marginBottom: "16px",
           }}
         >
-          <div style={{ fontSize: "16px", fontWeight: 700, marginBottom: "10px" }}>
-            Финансовый помощник
-          </div>
           <div style={{ color: "#d0d0d6", lineHeight: 1.6, fontSize: "14px" }}>
             {aiAdvice}
           </div>

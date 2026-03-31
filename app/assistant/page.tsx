@@ -85,7 +85,7 @@ export default function AssistantPage() {
           }}
         >
           <div style={{ fontSize: "13px", color: "#8f8f95", marginBottom: "4px" }}>
-            FinTrack
+            moniq
           </div>
           <h1 style={{ fontSize: "28px", margin: 0, fontWeight: 700 }}>
             AI помощник

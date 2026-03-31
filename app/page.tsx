@@ -47,10 +47,6 @@ export default function WelcomePage() {
             F
           </div>
 
-          <div style={{ color: "#8f8f95", fontSize: "14px", marginBottom: "8px" }}>
-            Финансовый помощник
-          </div>
-
           <h1
             style={{
               fontSize: "34px",
