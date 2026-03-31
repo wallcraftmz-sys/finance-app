@@ -4,7 +4,7 @@ import "./globals.css";
 import AssistantButton from "@/components/AssistantButton";
 export const metadata: Metadata = {
   title: "moniq",
-  description: "Учёт доходов, расходов, целей и аналитики",
+  description: "AI финансовое приложение",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
