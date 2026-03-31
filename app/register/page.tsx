@@ -130,6 +130,18 @@ export default function RegisterPage() {
           >
             {loading ? "Создание..." : "Создать аккаунт"}
           </button>
+          <div style={{ marginTop: "16px", textAlign: "center" }}>
+  <a
+    href="/privacy"
+    style={{
+      color: "#a0a0a8",
+      textDecoration: "none",
+      fontSize: "13px",
+    }}
+  >
+    Политика конфиденциальности
+  </a>
+</div>
         </div>
       </div>
     </main>
