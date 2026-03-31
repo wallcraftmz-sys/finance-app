@@ -1,5 +1,6 @@
 
 import type { Metadata, Viewport } from "next";
+import UpdateNotice from "@/components/UpdateNotice";
 import "./globals.css";
 import AssistantButton from "@/components/AssistantButton";
 export const metadata: Metadata = {
@@ -29,3 +30,8 @@ export default function RootLayout({
     </html>
   );
 }
+<body>
+  <UpdateNotice />
+  {children}
+  <AssistantButton />
+</body>
