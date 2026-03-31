@@ -125,24 +125,6 @@ export async function POST(req: Request) {
           role: "system",
           content: systemPrompt,
         },
-        {
-          role: "system",
-          content: `
-Вот реальные данные пользователя:
-
-Доходы всего: ${totalIncome}€
-Расходы всего: ${totalExpense}€
-Баланс: ${balance}€
-
-Самая большая категория расходов: ${biggestCategory}
-
-Расходы по категориям:
-${categorySummary}
-
-Цели:
-${goalSummary}
-`,
-        },
         ...memoryMessages,
         {
           role: "user",
