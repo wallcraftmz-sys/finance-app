@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function PrivacyPage() {
   return (
     <main
@@ -12,6 +14,25 @@ export default function PrivacyPage() {
       }}
     >
       <div style={{ width: "100%", maxWidth: "760px" }}>
+
+        {/* КНОПКА НАЗАД */}
+        <Link href="/" style={{ textDecoration: "none" }}>
+          <button
+            style={{
+              marginBottom: "20px",
+              padding: "10px 14px",
+              background: "#1f1f26",
+              border: "1px solid #2f2f36",
+              borderRadius: "12px",
+              color: "white",
+              fontWeight: 700,
+              cursor: "pointer",
+            }}
+          >
+            ← Назад
+          </button>
+        </Link>
+
         <h1 style={{ fontSize: "32px", marginBottom: "20px" }}>
           Политика конфиденциальности
         </h1>

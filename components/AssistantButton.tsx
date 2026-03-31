@@ -1,9 +1,16 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 export default function AssistantButton() {
   const router = useRouter();
+  const pathname = usePathname();
+
+  const hiddenPaths = ["/", "/login", "/register", "/privacy", "/maintenance"];
+
+  const shouldHide = hiddenPaths.includes(pathname);
+
+  if (shouldHide) return null;
 
   return (
     <button
