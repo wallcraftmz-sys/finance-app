@@ -48,7 +48,7 @@ export default function WelcomePage() {
           </div>
 
           <div style={{ color: "#8f8f95", fontSize: "14px", marginBottom: "8px" }}>
-            Финансовый трекер
+            Финансовый помощник
           </div>
 
           <h1
@@ -60,7 +60,7 @@ export default function WelcomePage() {
               letterSpacing: "-1px",
             }}
           >
-            FinTrack
+            moniq
           </h1>
 
           <p

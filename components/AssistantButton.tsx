@@ -6,26 +6,27 @@ export default function AssistantButton() {
   const router = useRouter();
 
   return (
-    <div
+    <button
       onClick={() => router.push("/assistant")}
       style={{
         position: "fixed",
-        bottom: "90px",
         right: "20px",
-        width: "60px",
-        height: "60px",
-        borderRadius: "50%",
+        bottom: "90px",
+        width: "64px",
+        height: "64px",
+        borderRadius: "999px",
+        border: "none",
         background: "linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        fontSize: "24px",
+        color: "#111",
+        fontSize: "26px",
         cursor: "pointer",
-        boxShadow: "0 10px 25px rgba(0,0,0,0.4)",
+        boxShadow: "0 12px 30px rgba(0,0,0,0.35)",
         zIndex: 9999,
       }}
+      aria-label="Открыть AI помощника"
+      title="AI помощник"
     >
       🤖
-    </div>
+    </button>
   );
 }
