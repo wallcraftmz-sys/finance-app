@@ -13,7 +13,7 @@ export default function AssistantPage() {
   const [chat, setChat] = useState<ChatMessage[]>([
     {
       role: "ai",
-      text: "Привет. Я твой финансовый помощник. Можешь спросить меня, например: 'как мне накопить 500€?', 'на что у меня уходит больше всего денег?' или 'как распределить бюджет?'",
+      text: "Привет. Я твой финансовый помощник. Можешь спросить меня что тебе интересно по финансам"
     },
   ]);
   const [loading, setLoading] = useState(false);

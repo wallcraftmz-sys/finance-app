@@ -281,20 +281,6 @@ export default function DashboardClient({ expenses, incomes, goals }: Props) {
             marginBottom: "16px",
           }}
         >
-          <div style={{ color: "#d0d0d6", lineHeight: 1.6, fontSize: "14px" }}>
-            {aiAdvice}
-          </div>
-        </section>
-
-        <section
-          style={{
-            background: "#17171c",
-            border: "1px solid #26262b",
-            borderRadius: "22px",
-            padding: "18px",
-            marginBottom: "16px",
-          }}
-        >
           {!goal ? (
             <>
               <div style={{ fontSize: "16px", fontWeight: 700, marginBottom: "10px" }}>
