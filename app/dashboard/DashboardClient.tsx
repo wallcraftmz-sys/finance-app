@@ -138,7 +138,7 @@ export default function DashboardClient({ expenses, incomes, goals }: Props) {
               Moniq
             </div>
             <h1 style={{ fontSize: "28px", margin: 0, fontWeight: 700 }}>
-              Dashboard
+              Главная
             </h1>
           </div>
 
