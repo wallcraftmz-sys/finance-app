@@ -3,13 +3,13 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import AssistantButton from "@/components/AssistantButton";
 export const metadata: Metadata = {
-  title: "moniq",
+  title: "Moniq",
   description: "AI финансовое приложение",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "moniq",
+    title: "Moniq",
   },
 };
 export const viewport: Viewport = {
