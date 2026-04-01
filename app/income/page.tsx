@@ -2,78 +2,64 @@
 
 import Link from "next/link";
 
+type IncomeItem = {
+  id: string;
+  title: string;
+  amount: number;
+  date: string;
+};
+
 export default function IncomePage() {
   const totalIncome = 0;
-  const incomeItems: Array<{ id: string; title: string; amount: number; date: string }> = [];
+  const incomeItems: IncomeItem[] = [];
 
   return (
     <main
       style={{
         minHeight: "100vh",
-        background: "#000",
+        background: "#0a0a0a",
         color: "white",
         display: "flex",
         justifyContent: "center",
         fontFamily: "Inter, sans-serif",
-        padding: "40px 20px 120px",
+        padding: "20px 0 90px",
       }}
     >
-      <div style={{ width: "100%", maxWidth: "420px" }}>
-        <h1
-          style={{
-            fontSize: "56px",
-            lineHeight: 1,
-            margin: "0 0 28px 0",
-            fontWeight: 500,
-            letterSpacing: "-2px",
-          }}
-        >
-          Доходы
-        </h1>
+      <div
+        style={{
+          width: "390px",
+          padding: "18px",
+          borderRadius: "24px",
+        }}
+      >
+        <h1 style={{ fontSize: "28px", marginBottom: "20px" }}>Доходы</h1>
 
         <div
           style={{
-            background: "#111118",
-            border: "1px solid #24242c",
-            borderRadius: "28px",
-            padding: "22px",
-            marginBottom: "18px",
+            background: "#17171c",
+            border: "1px solid #26262b",
+            borderRadius: "22px",
+            padding: "18px",
+            marginBottom: "16px",
           }}
         >
-          <div
-            style={{
-              color: "#9ea0aa",
-              fontSize: "15px",
-              marginBottom: "14px",
-            }}
-          >
+          <div style={{ fontSize: "14px", color: "#8f8f95", marginBottom: "8px" }}>
             Общая сумма доходов
           </div>
-
-          <div
-            style={{
-              fontSize: "58px",
-              fontWeight: 800,
-              lineHeight: 1,
-              letterSpacing: "-2px",
-            }}
-          >
-            {totalIncome}€
-          </div>
+          <div style={{ fontSize: "32px", fontWeight: 800 }}>{totalIncome}€</div>
         </div>
 
         <button
           style={{
             width: "100%",
-            padding: "20px 22px",
-            background: "#f6b117",
+            padding: "14px",
+            background: "linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)",
             border: "none",
-            borderRadius: "24px",
-            color: "#111",
+            borderRadius: "18px",
             fontWeight: 800,
-            fontSize: "22px",
+            color: "#111",
             cursor: "pointer",
-            marginBottom: "18px",
+            marginBottom: "16px",
           }}
         >
           + Добавить доход
@@ -81,68 +67,45 @@ export default function IncomePage() {
 
         <div
           style={{
-            background: "#111118",
-            border: "1px solid #24242c",
-            borderRadius: "28px",
-            padding: "22px",
+            background: "#17171c",
+            border: "1px solid #26262b",
+            borderRadius: "22px",
+            padding: "18px",
           }}
         >
-          <div
-            style={{
-              fontSize: "18px",
-              fontWeight: 700,
-              marginBottom: "16px",
-            }}
-          >
-            Список доходов
-          </div>
+          <h3 style={{ marginTop: 0, marginBottom: "14px" }}>Список доходов</h3>
 
           {incomeItems.length === 0 ? (
-            <div
-              style={{
-                color: "#8f929c",
-                fontSize: "15px",
-                lineHeight: 1.6,
-              }}
-            >
-              Пока доходов нет
-            </div>
+            <p style={{ color: "#8f8f95", margin: 0 }}>Пока доходов нет</p>
           ) : (
-            <div style={{ display: "grid", gap: "12px" }}>
+            <div style={{ display: "grid", gap: "10px" }}>
               {incomeItems.map((item) => (
                 <div
                   key={item.id}
                   style={{
-                    background: "#181820",
-                    border: "1px solid #2a2a33",
+                    background: "#111114",
+                    border: "1px solid #24242a",
                     borderRadius: "18px",
-                    padding: "14px 16px",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
+                    padding: "14px",
                   }}
                 >
-                  <div>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      gap: "10px",
+                      marginBottom: "6px",
+                    }}
+                  >
                     <div style={{ fontWeight: 700 }}>{item.title}</div>
-                    <div
-                      style={{
-                        color: "#8f929c",
-                        fontSize: "14px",
-                        marginTop: "4px",
-                      }}
-                    >
-                      {item.date}
+                    <div style={{ fontWeight: 700, color: "#fbbf24" }}>
+                      +{item.amount}€
                     </div>
                   </div>
 
-                  <div
-                    style={{
-                      fontWeight: 800,
-                      fontSize: "22px",
-                      color: "#f6b117",
-                    }}
-                  >
-                    +{item.amount}€
+                  <div style={{ color: "#8f8f95", fontSize: "12px" }}>
+                    {item.date}
                   </div>
                 </div>
               ))}
@@ -153,40 +116,80 @@ export default function IncomePage() {
         <div
           style={{
             position: "fixed",
+            bottom: "16px",
             left: "50%",
-            bottom: "18px",
             transform: "translateX(-50%)",
-            width: "100%",
-            maxWidth: "420px",
-            padding: "0 20px",
-            boxSizing: "border-box",
+            width: "390px",
+            background: "rgba(20,20,24,0.95)",
+            border: "1px solid #2a2a30",
+            borderRadius: "22px",
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr 1fr 1fr 1fr",
+            overflow: "hidden",
+            backdropFilter: "blur(12px)",
           }}
         >
-          <div
+          <Link
+            href="/dashboard"
             style={{
-              background: "#111118",
-              border: "1px solid #2a2a31",
-              borderRadius: "22px",
-              padding: "16px 14px",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
+              padding: "14px 10px",
+              textAlign: "center",
+              color: "white",
+              textDecoration: "none",
             }}
           >
-            <Link href="/" style={{ color: "#e2e2e8", textDecoration: "none", fontWeight: 500 }}>
-              Главная
-            </Link>
-            <Link href="/analytics" style={{ color: "#e2e2e8", textDecoration: "none", fontWeight: 500 }}>
-              Аналитика
-            </Link>
-            <Link href="/goals" style={{ color: "#e2e2e8", textDecoration: "none", fontWeight: 500 }}>
-              Цель
-            </Link>
-            <span style={{ color: "#f6b117", fontWeight: 700 }}>Доход</span>
-            <Link href="/expenses" style={{ color: "#e2e2e8", textDecoration: "none", fontWeight: 500 }}>
-              Расход
-            </Link>
-          </div>
+            Главная
+          </Link>
+
+          <Link
+            href="/analytics"
+            style={{
+              padding: "14px 10px",
+              textAlign: "center",
+              color: "white",
+              textDecoration: "none",
+            }}
+          >
+            Аналитика
+          </Link>
+
+          <Link
+            href="/goals"
+            style={{
+              padding: "14px 10px",
+              textAlign: "center",
+              color: "white",
+              textDecoration: "none",
+            }}
+          >
+            Цель
+          </Link>
+
+          <Link
+            href="/income"
+            style={{
+              padding: "14px 10px",
+              textAlign: "center",
+              color: "#fbbf24",
+              textDecoration: "none",
+              fontWeight: 700,
+              background: "#1a1a20",
+            }}
+          >
+            Доход
+          </Link>
+
+          <Link
+            href="/expenses"
+            style={{
+              padding: "14px 10px",
+              textAlign: "center",
+              color: "white",
+              textDecoration: "none",
+            }}
+          >
+            Расход
+          </Link>
         </div>
       </div>
     </main>
