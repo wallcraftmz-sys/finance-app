@@ -47,7 +47,9 @@ export async function POST(req: Request) {
         expiresAt,
       },
     });
-
+    await prisma.session.deleteMany({
+    where: { userId: user.id },
+  });
     const res = NextResponse.json({
       ok: true,
       user: {

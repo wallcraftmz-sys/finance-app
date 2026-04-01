@@ -97,7 +97,6 @@ export default function DashboardClient({ expenses, incomes, goals }: Props) {
       method: "POST",
     });
 
-    localStorage.removeItem("finance-user");
     window.location.href = "/login";
   }
 
