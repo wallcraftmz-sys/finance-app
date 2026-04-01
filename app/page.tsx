@@ -63,120 +63,228 @@ function SplashScreen() {
           <div
             style={{
               position: "relative",
-              width: "220px",
-              height: "220px",
-              marginTop: "10px",
+              width: "250px",
+              height: "250px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 2,
+              marginTop: "8px",
             }}
           >
             <div
               style={{
                 position: "absolute",
-                inset: "50%",
-                width: "120px",
-                height: "120px",
-                marginLeft: "-60px",
-                marginTop: "-60px",
-                borderRadius: "999px",
+                width: "210px",
+                height: "210px",
+                borderRadius: "50%",
                 background:
-                  "radial-gradient(circle at 38% 34%, #8fd3ff 0%, #3a86ff 32%, #17335f 68%, #0a1220 100%)",
-                boxShadow:
-                  "0 0 30px rgba(58,134,255,0.28), 0 0 70px rgba(255,179,0,0.10), inset 0 0 20px rgba(255,255,255,0.08)",
-                animation: "corePulse 2.8s ease-in-out infinite",
+                  "radial-gradient(circle, rgba(51,120,255,0.10) 0%, rgba(51,120,255,0.05) 40%, rgba(255,166,0,0.04) 58%, transparent 74%)",
+                filter: "blur(10px)",
+                animation: "haloPulse 3.2s ease-in-out infinite",
               }}
             />
 
             <div
               style={{
                 position: "absolute",
-                inset: "50%",
-                width: "150px",
-                height: "150px",
-                marginLeft: "-75px",
-                marginTop: "-75px",
-                borderRadius: "999px",
-                border: "1px solid rgba(110,170,255,0.24)",
-                animation: "ringSpin 10s linear infinite",
+                width: "154px",
+                height: "154px",
+                borderRadius: "50%",
+                border: "1px solid rgba(115,170,255,0.18)",
+                animation: "ringSpin 15s linear infinite",
               }}
             />
             <div
               style={{
                 position: "absolute",
-                inset: "50%",
-                width: "176px",
-                height: "176px",
-                marginLeft: "-88px",
-                marginTop: "-88px",
-                borderRadius: "999px",
-                border: "1px solid rgba(255,183,43,0.22)",
-                animation: "ringSpinReverse 14s linear infinite",
+                width: "184px",
+                height: "184px",
+                borderRadius: "50%",
+                border: "1px solid rgba(255,176,43,0.16)",
+                animation: "ringSpinReverse 18s linear infinite",
               }}
             />
             <div
               style={{
                 position: "absolute",
-                inset: "50%",
-                width: "202px",
-                height: "202px",
-                marginLeft: "-101px",
-                marginTop: "-101px",
-                borderRadius: "999px",
-                border: "1px solid rgba(130,180,255,0.14)",
-                animation: "ringBreath 3.6s ease-in-out infinite",
+                width: "204px",
+                height: "204px",
+                borderRadius: "50%",
+                border: "1px solid rgba(130,180,255,0.10)",
+                animation: "ringBreath 4s ease-in-out infinite",
               }}
             />
 
-            <span
+            <svg
+              viewBox="0 0 240 240"
+              width="240"
+              height="240"
               style={{
                 position: "absolute",
-                top: "34px",
-                left: "104px",
-                width: "8px",
-                height: "8px",
-                borderRadius: "999px",
-                background: "#9ad6ff",
-                boxShadow: "0 0 12px rgba(154,214,255,0.8)",
-                animation: "twinkle 2s ease-in-out infinite",
+                overflow: "visible",
+                animation: "sphereFloat 4s ease-in-out infinite",
               }}
-            />
-            <span
-              style={{
-                position: "absolute",
-                top: "64px",
-                right: "28px",
-                width: "8px",
-                height: "8px",
-                borderRadius: "999px",
-                background: "#ffbf47",
-                boxShadow: "0 0 12px rgba(255,191,71,0.8)",
-                animation: "twinkle 2.2s ease-in-out infinite 0.4s",
-              }}
-            />
-            <span
-              style={{
-                position: "absolute",
-                bottom: "42px",
-                right: "42px",
-                width: "8px",
-                height: "8px",
-                borderRadius: "999px",
-                background: "#9ad6ff",
-                boxShadow: "0 0 12px rgba(154,214,255,0.8)",
-                animation: "twinkle 2.4s ease-in-out infinite 0.8s",
-              }}
-            />
-            <span
-              style={{
-                position: "absolute",
-                bottom: "28px",
-                left: "98px",
-                width: "8px",
-                height: "8px",
-                borderRadius: "999px",
-                background: "#ffbf47",
-                boxShadow: "0 0 12px rgba(255,191,71,0.8)",
-                animation: "twinkle 2.1s ease-in-out infinite 1.1s",
-              }}
-            />
+            >
+              <ellipse
+                cx="120"
+                cy="120"
+                rx="86"
+                ry="92"
+                fill="none"
+                stroke="rgba(88,160,255,0.24)"
+                strokeWidth="1.2"
+              />
+              <ellipse
+                cx="120"
+                cy="120"
+                rx="86"
+                ry="92"
+                fill="none"
+                stroke="rgba(255,176,43,0.18)"
+                strokeWidth="1"
+                transform="rotate(55 120 120)"
+              />
+              <ellipse
+                cx="120"
+                cy="120"
+                rx="86"
+                ry="92"
+                fill="none"
+                stroke="rgba(88,160,255,0.16)"
+                strokeWidth="1"
+                transform="rotate(-55 120 120)"
+              />
+              <ellipse
+                cx="120"
+                cy="120"
+                rx="92"
+                ry="52"
+                fill="none"
+                stroke="rgba(88,160,255,0.16)"
+                strokeWidth="1"
+              />
+              <ellipse
+                cx="120"
+                cy="120"
+                rx="92"
+                ry="30"
+                fill="none"
+                stroke="rgba(255,176,43,0.14)"
+                strokeWidth="1"
+              />
+
+              {[
+                [120, 28],
+                [168, 44],
+                [198, 78],
+                [206, 120],
+                [191, 165],
+                [162, 194],
+                [120, 210],
+                [78, 194],
+                [49, 165],
+                [34, 120],
+                [42, 78],
+                [72, 44],
+                [92, 86],
+                [148, 86],
+                [172, 118],
+                [154, 156],
+                [120, 170],
+                [86, 156],
+                [68, 118],
+              ].map(([cx, cy], i) => (
+                <circle
+                  key={`node-${i}`}
+                  cx={cx}
+                  cy={cy}
+                  r={i % 3 === 0 ? "4" : "3.2"}
+                  fill={i % 2 === 0 ? "#6fd0ff" : "#ffb33b"}
+                  style={{
+                    filter:
+                      i % 2 === 0
+                        ? "drop-shadow(0 0 8px rgba(111,208,255,0.95))"
+                        : "drop-shadow(0 0 8px rgba(255,179,59,0.95))",
+                    animation: `twinkle ${2 + (i % 3) * 0.4}s ease-in-out infinite`,
+                    transformOrigin: "center",
+                  }}
+                />
+              ))}
+
+              {[
+                [120, 28, 168, 44],
+                [168, 44, 198, 78],
+                [198, 78, 206, 120],
+                [206, 120, 191, 165],
+                [191, 165, 162, 194],
+                [162, 194, 120, 210],
+                [120, 210, 78, 194],
+                [78, 194, 49, 165],
+                [49, 165, 34, 120],
+                [34, 120, 42, 78],
+                [42, 78, 72, 44],
+                [72, 44, 120, 28],
+
+                [92, 86, 148, 86],
+                [148, 86, 172, 118],
+                [172, 118, 154, 156],
+                [154, 156, 120, 170],
+                [120, 170, 86, 156],
+                [86, 156, 68, 118],
+                [68, 118, 92, 86],
+
+                [72, 44, 92, 86],
+                [168, 44, 148, 86],
+                [198, 78, 172, 118],
+                [191, 165, 154, 156],
+                [162, 194, 120, 170],
+                [78, 194, 86, 156],
+                [49, 165, 68, 118],
+                [34, 120, 68, 118],
+
+                [120, 28, 92, 86],
+                [120, 28, 148, 86],
+                [120, 210, 86, 156],
+                [120, 210, 154, 156],
+              ].map(([x1, y1, x2, y2], i) => (
+                <line
+                  key={`line-${i}`}
+                  x1={x1}
+                  y1={y1}
+                  x2={x2}
+                  y2={y2}
+                  stroke={i % 2 === 0 ? "rgba(95,185,255,0.46)" : "rgba(255,179,59,0.38)"}
+                  strokeWidth="1.15"
+                />
+              ))}
+
+              {[
+                [96, 78],
+                [152, 70],
+                [175, 101],
+                [163, 149],
+                [120, 176],
+                [79, 145],
+                [66, 102],
+                [109, 54],
+                [135, 162],
+                [56, 86],
+                [184, 146],
+              ].map(([cx, cy], i) => (
+                <circle
+                  key={`spark-${i}`}
+                  cx={cx}
+                  cy={cy}
+                  r="1.8"
+                  fill={i % 2 === 0 ? "#ffffff" : "#8fd8ff"}
+                  style={{
+                    filter: "drop-shadow(0 0 6px rgba(255,255,255,0.8))",
+                    animation: `sparkBlink ${1.8 + (i % 4) * 0.5}s ease-in-out infinite`,
+                  }}
+                />
+              ))}
+            </svg>
           </div>
         </div>
       </main>
@@ -194,20 +302,12 @@ function SplashScreen() {
         }
 
         @keyframes logoFloat {
-          0%, 100% {
+          0%,
+          100% {
             transform: translateY(0px) scale(1);
           }
           50% {
             transform: translateY(-6px) scale(1.03);
-          }
-        }
-
-        @keyframes corePulse {
-          0%, 100% {
-            transform: scale(1);
-          }
-          50% {
-            transform: scale(1.06);
           }
         }
 
@@ -230,24 +330,71 @@ function SplashScreen() {
         }
 
         @keyframes ringBreath {
-          0%, 100% {
-            transform: scale(0.98);
-            opacity: 0.7;
+          0%,
+          100% {
+            transform: scale(0.985);
+            opacity: 0.65;
           }
           50% {
-            transform: scale(1.03);
+            transform: scale(1.02);
             opacity: 1;
           }
         }
 
+        @keyframes haloPulse {
+          0%,
+          100% {
+            opacity: 0.8;
+            transform: scale(0.98);
+          }
+          50% {
+            opacity: 1;
+            transform: scale(1.06);
+          }
+        }
+
+        @keyframes sphereFloat {
+          0%,
+          100% {
+            transform: translateY(0px);
+          }
+          50% {
+            transform: translateY(-6px);
+          }
+        }
+
         @keyframes twinkle {
-          0%, 100% {
+          0%,
+          100% {
             opacity: 0.4;
             transform: scale(0.9);
           }
           50% {
             opacity: 1;
             transform: scale(1.35);
+          }
+        }
+
+        @keyframes sparkBlink {
+          0%,
+          100% {
+            opacity: 0.2;
+            transform: scale(0.8);
+          }
+          50% {
+            opacity: 1;
+            transform: scale(1.35);
+          }
+        }
+
+        @keyframes welcomeFade {
+          from {
+            opacity: 0;
+            transform: translateY(8px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
           }
         }
       `}</style>
@@ -270,19 +417,6 @@ function WelcomeScreen() {
         animation: "welcomeFade 0.5s ease",
       }}
     >
-      <style jsx global>{`
-        @keyframes welcomeFade {
-          from {
-            opacity: 0;
-            transform: translateY(8px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
-
       <div
         style={{
           width: "390px",
