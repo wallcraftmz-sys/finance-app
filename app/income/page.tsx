@@ -1,17 +1,52 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 
-type IncomeItem = {
+type Income = {
   id: string;
-  title: string;
   amount: number;
+  source: string;
   date: string;
+  note: string;
 };
 
 export default function IncomePage() {
-  const totalIncome = 0;
-  const incomeItems: IncomeItem[] = [];
+  const [incomes, setIncomes] = useState<Income[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  async function loadIncomes() {
+    try {
+      const res = await fetch("/api/income");
+      const data = await res.json();
+
+      if (res.ok) {
+        setIncomes(data.incomes || []);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadIncomes();
+  }, []);
+
+  const totalIncome = useMemo(() => {
+    return incomes.reduce((sum, item) => sum + item.amount, 0);
+  }, [incomes]);
+
+  const sortedIncomes = [...incomes];
+
+  async function handleDelete(id: string) {
+    const res = await fetch(`/api/income/${id}`, {
+      method: "DELETE",
+    });
+
+    if (res.ok) {
+      setIncomes((prev) => prev.filter((item) => item.id !== id));
+    }
+  }
 
   return (
     <main
@@ -77,11 +112,13 @@ export default function IncomePage() {
         >
           <h3 style={{ marginTop: 0, marginBottom: "14px" }}>Список доходов</h3>
 
-          {incomeItems.length === 0 ? (
+          {loading ? (
+            <p style={{ color: "#8f8f95", margin: 0 }}>Загрузка...</p>
+          ) : sortedIncomes.length === 0 ? (
             <p style={{ color: "#8f8f95", margin: 0 }}>Пока доходов нет</p>
           ) : (
             <div style={{ display: "grid", gap: "10px" }}>
-              {incomeItems.map((item) => (
+              {sortedIncomes.map((item) => (
                 <div
                   key={item.id}
                   style={{
@@ -100,15 +137,35 @@ export default function IncomePage() {
                       marginBottom: "6px",
                     }}
                   >
-                    <div style={{ fontWeight: 700 }}>{item.title}</div>
+                    <div style={{ fontWeight: 700 }}>{item.source}</div>
                     <div style={{ fontWeight: 700, color: "#fbbf24" }}>
                       +{item.amount}€
                     </div>
                   </div>
 
-                  <div style={{ color: "#8f8f95", fontSize: "12px" }}>
+                  <div style={{ color: "#8f8f95", fontSize: "12px", marginBottom: "6px" }}>
                     {item.date}
                   </div>
+
+                  {item.note ? (
+                    <div style={{ color: "#c8c8ce", fontSize: "13px", marginBottom: "10px" }}>
+                      {item.note}
+                    </div>
+                  ) : null}
+
+                  <button
+                    onClick={() => handleDelete(item.id)}
+                    style={{
+                      background: "#222228",
+                      border: "1px solid #2f2f36",
+                      color: "white",
+                      borderRadius: "12px",
+                      padding: "8px 12px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Удалить
+                  </button>
                 </div>
               ))}
             </div>
