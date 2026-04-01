@@ -34,9 +34,9 @@ export default function LoginPage() {
         return;
       }
 
-      localStorage.setItem("finance-user", JSON.stringify(data.user));
       router.push("/dashboard");
-    } catch (err) {
+      router.refresh();
+    } catch {
       setError("Ошибка сети");
     } finally {
       setLoading(false);
@@ -130,38 +130,40 @@ export default function LoginPage() {
           >
             {loading ? "Вход..." : "Войти"}
           </button>
+
           <div
-  style={{
-    marginTop: "14px",
-    textAlign: "center",
-    color: "#a0a0a8",
-    fontSize: "14px",
-  }}
->
-  Если нет аккаунта, можете{" "}
-  <a
-    href="/register"
-    style={{
-      color: "#fbbf24",
-      textDecoration: "none",
-      fontWeight: 700,
-    }}
-  >
-    зарегистрироваться
-  </a>
-</div>
-<div style={{ marginTop: "16px", textAlign: "center" }}>
-  <a
-    href="/privacy"
-    style={{
-      color: "#a0a0a8",
-      textDecoration: "none",
-      fontSize: "13px",
-    }}
-  >
-    Политика конфиденциальности
-  </a>
-</div>
+            style={{
+              marginTop: "14px",
+              textAlign: "center",
+              color: "#a0a0a8",
+              fontSize: "14px",
+            }}
+          >
+            Если нет аккаунта, можете{" "}
+            <a
+              href="/register"
+              style={{
+                color: "#fbbf24",
+                textDecoration: "none",
+                fontWeight: 700,
+              }}
+            >
+              зарегистрироваться
+            </a>
+          </div>
+
+          <div style={{ marginTop: "16px", textAlign: "center" }}>
+            <a
+              href="/privacy"
+              style={{
+                color: "#a0a0a8",
+                textDecoration: "none",
+                fontSize: "13px",
+              }}
+            >
+              Политика конфиденциальности
+            </a>
+          </div>
         </div>
       </div>
     </main>

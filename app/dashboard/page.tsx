@@ -23,6 +23,10 @@ export default async function DashboardPage() {
   }
 
   if (session.expiresAt < new Date()) {
+    await prisma.session.deleteMany({
+      where: { token },
+    });
+
     redirect("/login");
   }
 

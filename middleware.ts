@@ -1,48 +1,38 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { verifySessionToken } from "@/lib/auth";
 
-const PROTECTED_PATHS = [
-  "/dashboard",
-  "/analytics",
-  "/goals",
-  "/income",
-  "/expenses",
-  "/assistant",
-];
+const protectedRoutes = ["/dashboard", "/expenses", "/income", "/analytics", "/goals"];
 
-export function middleware(req: NextRequest) {
-  const pathname = req.nextUrl.pathname;
-  const token = req.cookies.get("finance_session")?.value;
-  const maintenanceMode = process.env.MAINTENANCE_MODE === "true";
+export async function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
 
-  const isProtected = PROTECTED_PATHS.some(
-    (path) => pathname === path || pathname.startsWith(path + "/")
+  const isProtected = protectedRoutes.some(
+    (route) => pathname === route || pathname.startsWith(route + "/")
   );
 
-  const allowedDuringMaintenance =
-    pathname === "/maintenance" ||
-    pathname.startsWith("/_next") ||
-    pathname.startsWith("/api/health") ||
-    pathname === "/favicon.ico" ||
-    pathname === "/manifest.json" ||
-    pathname.startsWith("/icon-") ||
-    pathname === "/icon.png";
-
-  if (maintenanceMode && !allowedDuringMaintenance) {
-    return NextResponse.redirect(new URL("/maintenance", req.url));
+  if (!isProtected) {
+    return NextResponse.next();
   }
 
-  if (!maintenanceMode && pathname === "/maintenance") {
-    return NextResponse.redirect(new URL("/", req.url));
-  }
+  const token = req.cookies.get("session")?.value;
 
-  if (isProtected && !token) {
+  if (!token) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  return NextResponse.next();
+  try {
+    await verifySessionToken(token);
+    return NextResponse.next();
+  } catch {
+    const res = NextResponse.redirect(new URL("/login", req.url));
+    res.cookies.set("session", "", {
+      path: "/",
+      expires: new Date(0),
+    });
+    return res;
+  }
 }
 
 export const config = {
-  matcher: ["/((?!api).*)"],
+  matcher: ["/dashboard/:path*", "/expenses/:path*", "/income/:path*", "/analytics/:path*", "/goals/:path*"],
 };

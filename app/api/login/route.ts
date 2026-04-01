@@ -8,23 +8,37 @@ export async function POST(req: Request) {
     const email = String(body.email || "").trim().toLowerCase();
     const password = String(body.password || "");
 
+    if (!email || !password) {
+      return NextResponse.json(
+        { error: "Введите email и пароль" },
+        { status: 400 }
+      );
+    }
+
     const user = await prisma.user.findUnique({
       where: { email },
     });
 
     if (!user) {
-      return NextResponse.json({ error: "Пользователь не найден" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Пользователь не найден" },
+        { status: 404 }
+      );
     }
 
     const isValid = await bcrypt.compare(password, user.passwordHash);
 
     if (!isValid) {
-      return NextResponse.json({ error: "Неверный пароль" }, { status: 401 });
+      return NextResponse.json(
+        { error: "Неверный пароль" },
+        { status: 401 }
+      );
     }
 
     const token = crypto.randomUUID() + crypto.randomUUID();
 
-    const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7);
+    // 30 дней
+    const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30);
 
     await prisma.session.create({
       data: {
@@ -53,8 +67,9 @@ export async function POST(req: Request) {
     return res;
   } catch (error) {
     console.error("LOGIN_ERROR", error);
-    return NextResponse.json({ error: "Ошибка сервера при входе" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Ошибка сервера при входе" },
+      { status: 500 }
+    );
   }
 }
-
-  
