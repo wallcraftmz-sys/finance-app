@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-function SplashScreen() {
+function SplashScreen({ fadeOut = false }: { fadeOut?: boolean }) {
   return (
     <>
       <main
@@ -16,6 +16,9 @@ function SplashScreen() {
           justifyContent: "center",
           overflow: "hidden",
           fontFamily: "Inter, sans-serif",
+          opacity: fadeOut ? 0 : 1,
+          transform: fadeOut ? "scale(1.03)" : "scale(1)",
+          transition: "opacity 0.7s ease, transform 0.7s ease",
         }}
       >
         <div
@@ -543,18 +546,26 @@ function WelcomeScreen() {
 
 export default function WelcomePage() {
   const [showSplash, setShowSplash] = useState(true);
+  const [fadeSplash, setFadeSplash] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowSplash(false);
-    }, 2400);
+  const fadeTimer = setTimeout(() => {
+    setFadeSplash(true);
+  }, 2100);
 
-    return () => clearTimeout(timer);
-  }, []);
+  const removeTimer = setTimeout(() => {
+    setShowSplash(false);
+  }, 2800);
+
+  return () => {
+    clearTimeout(fadeTimer);
+    clearTimeout(removeTimer);
+  };
+}, []);
 
   if (showSplash) {
-    return <SplashScreen />;
-  }
+  return <SplashScreen fadeOut={fadeSplash} />;
+}
 
   return <WelcomeScreen />;
 }
