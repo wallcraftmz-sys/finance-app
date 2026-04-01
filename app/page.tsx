@@ -550,13 +550,14 @@ export default function WelcomePage() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const alreadySeen = sessionStorage.getItem("moniq-splash-seen");
+    const alreadySeen = localStorage.getItem("moniq-splash-seen");
 
     if (alreadySeen === "true") {
       setReady(true);
       return;
     }
 
+    localStorage.setItem("moniq-splash-seen", "true");
     setShowSplash(true);
     setReady(true);
 
@@ -565,7 +566,6 @@ export default function WelcomePage() {
     }, 2100);
 
     const removeTimer = setTimeout(() => {
-      sessionStorage.setItem("moniq-splash-seen", "true");
       setShowSplash(false);
     }, 2800);
 
