@@ -545,27 +545,41 @@ function WelcomeScreen() {
 }
 
 export default function WelcomePage() {
-  const [showSplash, setShowSplash] = useState(true);
+  const [showSplash, setShowSplash] = useState(false);
   const [fadeSplash, setFadeSplash] = useState(false);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-  const fadeTimer = setTimeout(() => {
-    setFadeSplash(true);
-  }, 2100);
+    const alreadySeen = sessionStorage.getItem("moniq-splash-seen");
 
-  const removeTimer = setTimeout(() => {
-    setShowSplash(false);
-  }, 2800);
+    if (alreadySeen === "true") {
+      setReady(true);
+      return;
+    }
 
-  return () => {
-    clearTimeout(fadeTimer);
-    clearTimeout(removeTimer);
-  };
-}, []);
+    setShowSplash(true);
+    setReady(true);
+
+    const fadeTimer = setTimeout(() => {
+      setFadeSplash(true);
+    }, 2100);
+
+    const removeTimer = setTimeout(() => {
+      sessionStorage.setItem("moniq-splash-seen", "true");
+      setShowSplash(false);
+    }, 2800);
+
+    return () => {
+      clearTimeout(fadeTimer);
+      clearTimeout(removeTimer);
+    };
+  }, []);
+
+  if (!ready) return null;
 
   if (showSplash) {
-  return <SplashScreen fadeOut={fadeSplash} />;
-}
+    return <SplashScreen fadeOut={fadeSplash} />;
+  }
 
   return <WelcomeScreen />;
 }
