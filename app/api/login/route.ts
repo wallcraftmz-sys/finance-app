@@ -36,9 +36,11 @@ export async function POST(req: Request) {
     }
 
     const token = crypto.randomUUID() + crypto.randomUUID();
-
-    // 30 дней
     const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30);
+
+    await prisma.session.deleteMany({
+      where: { userId: user.id },
+    });
 
     await prisma.session.create({
       data: {
@@ -47,9 +49,7 @@ export async function POST(req: Request) {
         expiresAt,
       },
     });
-    await prisma.session.deleteMany({
-    where: { userId: user.id },
-  });
+
     const res = NextResponse.json({
       ok: true,
       user: {
