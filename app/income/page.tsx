@@ -49,21 +49,23 @@ export default function IncomePage() {
           <div style={{ fontSize: "32px", fontWeight: 800 }}>{totalIncome}€</div>
         </div>
 
-        <button
-          style={{
-            width: "100%",
-            padding: "14px",
-            background: "linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)",
-            border: "none",
-            borderRadius: "18px",
-            fontWeight: 800,
-            color: "#111",
-            cursor: "pointer",
-            marginBottom: "16px",
-          }}
-        >
-          + Добавить доход
-        </button>
+        <Link href="/income/new" style={{ textDecoration: "none" }}>
+          <button
+            style={{
+              width: "100%",
+              padding: "14px",
+              background: "linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)",
+              border: "none",
+              borderRadius: "18px",
+              fontWeight: 800,
+              color: "#111",
+              cursor: "pointer",
+              marginBottom: "16px",
+            }}
+          >
+            + Добавить доход
+          </button>
+        </Link>
 
         <div
           style={{
