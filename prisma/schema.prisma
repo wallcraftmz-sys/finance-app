@@ -72,3 +72,10 @@ model Expense {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+
+model SupportMessage {
+  id        String   @id @default(cuid())
+  email     String
+  message   String
+  createdAt DateTime @default(now())
+}
