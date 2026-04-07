@@ -1,41 +1,29 @@
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
-import { NextResponse } from "next/server";
 
-export async function POST(req: Request) {
+export async function DELETE(req: Request) {
   try {
-    const user = await getCurrentUser();
+    const currentUser = await getCurrentUser();
+    const adminEmail = String(process.env.ADMIN_EMAIL || "").trim().toLowerCase();
 
-    if (!user || user.email !== process.env.ADMIN_EMAIL) {
-      return NextResponse.json(
-        { error: "Нет доступа" },
-        { status: 403 }
-      );
+    if (!currentUser || currentUser.email.trim().toLowerCase() !== adminEmail) {
+      return Response.json({ error: "Нет доступа" }, { status: 403 });
     }
 
-    const { searchParams } = new URL(req.url);
-    const userId = String(searchParams.get("userId") || "").trim();
+    const body = await req.json();
+    const userId = String(body.userId || "").trim();
 
     if (!userId) {
-      return NextResponse.json(
-        { error: "userId обязателен" },
-        { status: 400 }
-      );
+      return Response.json({ error: "userId обязателен" }, { status: 400 });
     }
 
     await prisma.supportMessage.deleteMany({
-      where: {
-        userId,
-      },
+      where: { userId },
     });
 
-    return NextResponse.redirect(new URL("/admin/support", req.url));
+    return Response.json({ success: true });
   } catch (error) {
     console.error("DELETE_CONVERSATION_ERROR", error);
-
-    return NextResponse.json(
-      { error: "Ошибка сервера" },
-      { status: 500 }
-    );
+    return Response.json({ error: "Ошибка сервера" }, { status: 500 });
   }
 }

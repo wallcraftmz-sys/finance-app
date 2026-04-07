@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import AdminSupportReplyBox from "@/components/AdminSupportReplyBox";
+import DeleteConversationButton from "@/components/DeleteConversationButton";
 import type { Prisma } from "@prisma/client";
 
 type SupportMessageWithUser = Prisma.SupportMessageGetPayload<{
@@ -23,12 +24,13 @@ export default async function AdminSupportPage() {
     },
   });
 
-  const messages: SupportMessageWithUser[] = await prisma.supportMessage.findMany({
-    orderBy: { createdAt: "asc" },
-    include: {
-      user: true,
-    },
-  });
+  const messages: SupportMessageWithUser[] =
+    await prisma.supportMessage.findMany({
+      orderBy: { createdAt: "asc" },
+      include: {
+        user: true,
+      },
+    });
 
   const grouped = new Map<string, SupportMessageWithUser[]>();
 
@@ -129,28 +131,19 @@ export default async function AdminSupportPage() {
                     </div>
                   </div>
 
-                  <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: 10,
+                      alignItems: "center",
+                      flexWrap: "wrap",
+                    }}
+                  >
                     <div style={{ color: "#9ca3af", fontSize: 14 }}>
                       {new Date(conversation.lastCreatedAt).toLocaleString()}
                     </div>
 
-                    <form action={`/api/admin/support/delete-conversation?userId=${conversation.userId}`} method="post">
-                      <button
-                        type="submit"
-                        style={{
-                          border: "none",
-                          borderRadius: 10,
-                          background: "linear-gradient(135deg, #ef4444 0%, #f97316 100%)",
-                          color: "#fff",
-                          fontSize: 14,
-                          fontWeight: 700,
-                          padding: "10px 14px",
-                          cursor: "pointer",
-                        }}
-                      >
-                        Удалить диалог
-                      </button>
-                    </form>
+                    <DeleteConversationButton userId={conversation.userId} />
                   </div>
                 </div>
 
