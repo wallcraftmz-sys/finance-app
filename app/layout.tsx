@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import AssistantButton from "@/components/AssistantButton";
 import UpdateNotice from "@/components/UpdateNotice";
+import FloatingButtonsServer from "@/components/FloatingButtonsServer";
 
 export const metadata: Metadata = {
   title: "Moniq",
@@ -28,7 +28,7 @@ export default function RootLayout({
       <body>
         <UpdateNotice />
         {children}
-        <AssistantButton />
+        <FloatingButtonsServer />
       </body>
     </html>
   );

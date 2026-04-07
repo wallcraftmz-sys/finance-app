@@ -7,16 +7,17 @@ datasource db {
 }
 
 model User {
-  id           String      @id @default(cuid())
-  email        String      @unique
-  passwordHash String
-  createdAt    DateTime    @default(now())
+  id              String           @id @default(cuid())
+  email           String           @unique
+  passwordHash    String
+  createdAt       DateTime         @default(now())
 
-  sessions     Session[]
-  goals        Goal[]
-  incomes      Income[]
-  expenses     Expense[]
-  aiMessages   AiMessage[]
+  sessions        Session[]
+  goals           Goal[]
+  incomes         Income[]
+  expenses        Expense[]
+  aiMessages      AiMessage[]
+  supportMessages SupportMessage[]
 }
 
 model AiMessage {
@@ -75,7 +76,11 @@ model Expense {
 
 model SupportMessage {
   id        String   @id @default(cuid())
-  email     String
+  userId    String
   message   String
+  isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
+  role      String   @default("user")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
