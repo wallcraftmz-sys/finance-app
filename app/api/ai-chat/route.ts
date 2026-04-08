@@ -42,8 +42,8 @@ export async function POST(req: Request) {
       }),
     ]);
 
-    const totalIncome = incomes.reduce((sum: number, item: any) => sum + item.amount, 0);
-    const totalExpense = expenses.reduce((sum: number, item: any) => sum + item.amount, 0);
+    const totalIncome = incomes.reduce((sum, item) => sum + item.amount, 0);
+    const totalExpense = expenses.reduce((sum, item) => sum + item.amount, 0);
     const balance = totalIncome - totalExpense;
 
     const expenseByCategory: Record<string, number> = {};
@@ -70,7 +70,7 @@ export async function POST(req: Request) {
 
     const goalSummary =
       goals.length > 0
-        ? goals.map((g: any) => `${g.title}: цель ${g.targetAmount}€`).join(", ")
+        ? goals.map((g) => `${g.title}: цель ${g.targetAmount}€`).join(", ")
         : "Целей пока нет";
 
     await prisma.aiMessage.create({
@@ -81,61 +81,70 @@ export async function POST(req: Request) {
       },
     });
 
-   const systemPrompt = `
+    const currentDate = new Date().toISOString().split("T")[0];
+
+    const memoryText =
+      previousMessages.length > 0
+        ? previousMessages
+            .map((m) => `${m.role === "assistant" ? "Ассистент" : "Пользователь"}: ${m.content}`)
+            .join("\n")
+        : "Истории сообщений пока нет.";
+
+    const financeContext = `
+Данные пользователя из Moniq:
+- Доходы всего: ${totalIncome}€
+- Расходы всего: ${totalExpense}€
+- Баланс: ${balance}€
+- Самая большая категория расходов: ${biggestCategory}
+- Категории расходов: ${categorySummary}
+- Финансовые цели: ${goalSummary}
+`;
+
+    const response = await openai.responses.create({
+      model: "gpt-4.1-mini",
+      instructions: `
+Сегодня ${currentDate}.
+
 Ты умный и живой AI-помощник внутри приложения Moniq.
 
 Твоя задача:
 - разговаривать естественно и по-человечески
-- отвечать не сухо, а понятно и дружелюбно
+- отвечать понятно, спокойно и полезно
 - помогать по финансам, накоплениям, расходам, целям и планированию
-- отвечать и на обычные вопросы пользователя, если они не противоречат теме приложения
-- если вопрос не про финансы, всё равно отвечай нормально, но кратко и дружелюбно
-
-Стиль:
-- не будь сухим
-- не будь роботом
-- объясняй просто
-- можно использовать естественные фразы, как живой помощник
-- если уместно, давай примеры
-- если пользователь переживает, отвечай спокойно и поддерживающе
-- если пользователь спрашивает лишнее, не ломайся и не отвечай шаблонно
+- если вопрос касается текущих событий, 2026 года, новостей, законов, курсов, компаний, экономики или рынка — обязательно используй веб-поиск
+- не говори, что твои знания ограничены 2024 годом
+- если вопрос не требует интернета, отвечай по контексту приложения и истории переписки
+- не выдумывай факты и цифры
+- если используешь веб-поиск, опирайся на найденные данные
 
 Когда вопрос про финансы:
 1. коротко скажи, что происходит
 2. покажи слабое место
 3. предложи конкретный шаг
 
-Когда вопрос не про финансы:
-- отвечай как обычный дружелюбный AI-ассистент
-- не пиши, что "это вне моей функции", если можешь нормально помочь
+Твой стиль:
+- дружелюбный
+- не сухой
+- без роботских фраз
+- можно кратко, но полезно
+`,
+      input: `
+История переписки:
+${memoryText}
 
-Не выдумывай цифры. Используй реальные данные пользователя, если они есть.
-`;
+${financeContext}
 
-    const memoryMessages = previousMessages.map((m: any) => ({
-      role: m.role === "assistant" ? "assistant" : "user",
-      content: m.content,
-    })) as { role: "user" | "assistant"; content: string }[];
-
-    const response = await openai.chat.completions.create({
-      model: "gpt-4.1-mini",
+Новый вопрос пользователя:
+${message}
+`,
+      tools: [{ type: "web_search" }],
+      include: ["web_search_call.action.sources"],
       temperature: 0.7,
-      messages: [
-        {
-          role: "system",
-          content: systemPrompt,
-        },
-        ...memoryMessages,
-        {
-          role: "user",
-          content: message,
-        },
-      ],
+      max_output_tokens: 900,
     });
 
     const reply =
-      response.choices[0]?.message?.content?.trim() ||
-      "Пока не удалось подготовить ответ.";
+      response.output_text?.trim() || "Пока не удалось подготовить ответ.";
 
     await prisma.aiMessage.create({
       data: {
@@ -145,7 +154,10 @@ export async function POST(req: Request) {
       },
     });
 
-    return NextResponse.json({ reply });
+    return NextResponse.json({
+      reply,
+      sources: response.output ?? null,
+    });
   } catch (error) {
     console.error("AI_CHAT_ERROR", error);
     return NextResponse.json(
