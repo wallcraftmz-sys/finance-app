@@ -17,10 +17,22 @@ export default function SupportPage() {
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
 
+  const markAsRead = async () => {
+    try {
+      await fetch("/api/support/mark-read", {
+        method: "POST",
+      });
+    } catch {}
+  };
+
   const load = async () => {
     try {
       setLoading(true);
-      const res = await fetch("/api/support/get", { cache: "no-store" });
+
+      const res = await fetch("/api/support/get", {
+        cache: "no-store",
+      });
+
       const data = await res.json();
 
       if (Array.isArray(data)) {
@@ -28,6 +40,8 @@ export default function SupportPage() {
       } else {
         setMessages([]);
       }
+
+      await markAsRead();
     } catch {
       setMessages([]);
     } finally {

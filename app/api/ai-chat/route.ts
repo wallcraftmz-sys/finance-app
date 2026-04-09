@@ -7,6 +7,30 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+type ChatHistoryItem = {
+  role: "user" | "assistant";
+  content: string;
+};
+
+function shouldUseWebSearch(message: string) {
+  const m = message.toLowerCase();
+
+  return (
+    m.includes("2026") ||
+    m.includes("сейчас") ||
+    m.includes("новости") ||
+    m.includes("курс") ||
+    m.includes("инфляция") ||
+    m.includes("рынок") ||
+    m.includes("экономика") ||
+    m.includes("крипто") ||
+    m.includes("биткоин") ||
+    m.includes("акции") ||
+    m.includes("доллар") ||
+    m.includes("евро")
+  );
+}
+
 export async function POST(req: Request) {
   try {
     const user = await getCurrentUser();
@@ -42,14 +66,32 @@ export async function POST(req: Request) {
       }),
     ]);
 
-    const totalIncome = incomes.reduce((sum, item) => sum + item.amount, 0);
-    const totalExpense = expenses.reduce((sum, item) => sum + item.amount, 0);
+    const totalIncome = incomes.reduce((sum, item) => sum + (item.amount || 0), 0);
+    const totalExpense = expenses.reduce((sum, item) => sum + (item.amount || 0), 0);
     const balance = totalIncome - totalExpense;
+
+    // 🔥 AI БЮДЖЕТ
+    let dailyBudget = 0;
+    if (balance > 0) {
+      const safeBudget = balance * 0.2;
+      dailyBudget = Math.floor(safeBudget / 30);
+    }
+
+    // 🔥 ТРЕНД (фикс)
+    const last7Expenses = expenses.slice(0, 7).reduce((sum, e) => sum + (e.amount || 0), 0);
+    const prev7Expenses = expenses.slice(7, 14).reduce((sum, e) => sum + (e.amount || 0), 0);
+
+    let trendHint = "";
+    if (last7Expenses > prev7Expenses && prev7Expenses > 0) {
+      trendHint = "Расходы растут";
+    } else if (last7Expenses < prev7Expenses) {
+      trendHint = "Расходы снижаются";
+    }
 
     const expenseByCategory: Record<string, number> = {};
     for (const item of expenses) {
       expenseByCategory[item.category] =
-        (expenseByCategory[item.category] || 0) + item.amount;
+        (expenseByCategory[item.category] || 0) + (item.amount || 0);
     }
 
     const sortedCategories = Object.entries(expenseByCategory).sort(
@@ -83,68 +125,66 @@ export async function POST(req: Request) {
 
     const currentDate = new Date().toISOString().split("T")[0];
 
-    const memoryText =
-      previousMessages.length > 0
-        ? previousMessages
-            .map((m) => `${m.role === "assistant" ? "Ассистент" : "Пользователь"}: ${m.content}`)
+    const memoryMessages: ChatHistoryItem[] = previousMessages
+      .filter((m) => m.role === "user" || m.role === "assistant")
+      .map((m) => ({
+        role: m.role as "user" | "assistant",
+        content: m.content,
+      }));
+
+    const historyText =
+      memoryMessages.length > 0
+        ? memoryMessages
+            .map((m) =>
+              `${m.role === "assistant" ? "Ассистент" : "Пользователь"}: ${m.content}`
+            )
             .join("\n")
         : "Истории сообщений пока нет.";
 
     const financeContext = `
-Данные пользователя из Moniq:
-- Доходы всего: ${totalIncome}€
-- Расходы всего: ${totalExpense}€
+Данные пользователя:
+- Доходы: ${totalIncome}€
+- Расходы: ${totalExpense}€
 - Баланс: ${balance}€
-- Самая большая категория расходов: ${biggestCategory}
-- Категории расходов: ${categorySummary}
-- Финансовые цели: ${goalSummary}
-`;
+- Самая большая категория: ${biggestCategory}
+- Все категории: ${categorySummary}
+- Цели: ${goalSummary}
+- Тренд: ${trendHint || "Нет данных"}
+- Дневной бюджет: ${dailyBudget > 0 ? `${dailyBudget}€` : "Нет расчета"}
+`.trim();
+
+    const useWeb = shouldUseWebSearch(message);
 
     const response = await openai.responses.create({
       model: "gpt-4.1-mini",
       instructions: `
 Сегодня ${currentDate}.
 
-Ты умный и живой AI-помощник внутри приложения Moniq.
+Ты AI Moniq.
 
-Твоя задача:
-- разговаривать естественно и по-человечески
-- отвечать понятно, спокойно и полезно
-- помогать по финансам, накоплениям, расходам, целям и планированию
-- если вопрос касается текущих событий, 2026 года, новостей, законов, курсов, компаний, экономики или рынка — обязательно используй веб-поиск
-- не говори, что твои знания ограничены 2024 годом
-- если вопрос не требует интернета, отвечай по контексту приложения и истории переписки
-- не выдумывай факты и цифры
-- если используешь веб-поиск, опирайся на найденные данные
-
-Когда вопрос про финансы:
-1. коротко скажи, что происходит
-2. покажи слабое место
-3. предложи конкретный шаг
-
-Твой стиль:
-- дружелюбный
-- не сухой
-- без роботских фраз
-- можно кратко, но полезно
-`,
+- анализируй финансы
+- учитывай бюджет и тренд
+- не выдумывай данные
+- используй интернет только если нужно
+      `,
       input: `
-История переписки:
-${memoryText}
+${historyText}
 
 ${financeContext}
 
-Новый вопрос пользователя:
+Вопрос:
 ${message}
-`,
-      tools: [{ type: "web_search" }],
+      `,
+      tools: useWeb ? [{ type: "web_search" }] : [],
       include: ["web_search_call.action.sources"],
       temperature: 0.7,
       max_output_tokens: 900,
     });
 
     const reply =
-      response.output_text?.trim() || "Пока не удалось подготовить ответ.";
+      typeof response.output_text === "string" && response.output_text.trim()
+        ? response.output_text.trim()
+        : "Ошибка ответа";
 
     await prisma.aiMessage.create({
       data: {
@@ -156,7 +196,6 @@ ${message}
 
     return NextResponse.json({
       reply,
-      sources: response.output ?? null,
     });
   } catch (error) {
     console.error("AI_CHAT_ERROR", error);
