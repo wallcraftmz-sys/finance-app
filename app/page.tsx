@@ -448,7 +448,7 @@ function WelcomeScreen() {
               justifyContent: "center",
               fontWeight: 800,
               fontSize: "28px",
-              marginBottom: "18px",
+              marginBottom: "14px",
             }}
           >
             M
@@ -478,7 +478,7 @@ function WelcomeScreen() {
             и получай умные подсказки в одном приложении.
           </p>
 
-          <div style={{ display: "grid", gap: "8px", marginBottom: "18px" }}>
+          <div style={{ display: "grid", gap: "8px", marginBottom: "14px" }}>
             <div
               style={{
                 background: "#15151a",
