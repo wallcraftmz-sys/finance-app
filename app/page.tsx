@@ -409,7 +409,7 @@ function WelcomeScreen() {
   return (
     <main
       style={{
-        minHeight: "100vh",
+        minHeight: "100dvh",
         background: "linear-gradient(180deg, #0b0b0f 0%, #111111 100%)",
         color: "white",
         display: "flex",
@@ -422,8 +422,9 @@ function WelcomeScreen() {
     >
       <div
         style={{
-          width: "390px",
-          padding: "24px",
+          width: "100%",
+          maxWidth: "390px",
+          padding: "12px",
         }}
       >
         <div
@@ -431,14 +432,14 @@ function WelcomeScreen() {
             background: "linear-gradient(135deg, #1c1c22 0%, #111114 100%)",
             border: "1px solid #26262b",
             borderRadius: "28px",
-            padding: "28px 22px",
+            padding: "20px 16px",
             boxShadow: "0 20px 40px rgba(0,0,0,0.35)",
           }}
         >
           <div
             style={{
-              width: "64px",
-              height: "64px",
+              width: "52px",
+              height: "52px",
               borderRadius: "20px",
               background: "linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)",
               color: "#111",
@@ -447,7 +448,7 @@ function WelcomeScreen() {
               justifyContent: "center",
               fontWeight: 800,
               fontSize: "28px",
-              marginBottom: "22px",
+              marginBottom: "18px",
             }}
           >
             M
@@ -455,7 +456,7 @@ function WelcomeScreen() {
 
           <h1
             style={{
-              fontSize: "34px",
+              fontSize: "28px",
               lineHeight: 1.1,
               margin: "0 0 14px 0",
               fontWeight: 800,
@@ -477,13 +478,13 @@ function WelcomeScreen() {
             и получай умные подсказки в одном приложении.
           </p>
 
-          <div style={{ display: "grid", gap: "12px", marginBottom: "22px" }}>
+          <div style={{ display: "grid", gap: "8px", marginBottom: "18px" }}>
             <div
               style={{
                 background: "#15151a",
                 border: "1px solid #24242a",
                 borderRadius: "18px",
-                padding: "14px",
+                padding: "10px",
               }}
             >
               <div style={{ fontWeight: 700, marginBottom: "4px" }}>Доходы и расходы</div>
