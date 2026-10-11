@@ -12,6 +12,7 @@ model User {
   passwordHash    String
   createdAt       DateTime         @default(now())
 
+  passwordResetTokens PasswordResetToken[]
   sessions        Session[]
   goals           Goal[]
   incomes         Income[]
@@ -83,4 +84,16 @@ model SupportMessage {
   role      String   @default("user")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
