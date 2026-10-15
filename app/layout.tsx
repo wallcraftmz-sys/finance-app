@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import UpdateNotice from "@/components/UpdateNotice";
 import FloatingButtonsServer from "@/components/FloatingButtonsServer";
 
@@ -26,9 +27,11 @@ export default function RootLayout({
   return (
     <html lang="ru">
       <body>
-        <UpdateNotice />
-        {children}
-        <FloatingButtonsServer />
+        <ThemeProvider>
+          <UpdateNotice />
+          {children}
+          <FloatingButtonsServer />
+        </ThemeProvider>
       </body>
     </html>
   );

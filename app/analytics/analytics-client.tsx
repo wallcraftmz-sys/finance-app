@@ -1,12 +1,17 @@
+
 "use client";
 
+import BottomNav from "@/components/BottomNav";
+
 import Link from "next/link";
+import type { ExchangeRates } from "@/lib/exchange-rates";
 import { useMemo } from "react";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 
 type Expense = {
   id: string;
   amount: number;
+  currency: string;
   category: string;
   date: string;
   note: string;
@@ -15,6 +20,7 @@ type Expense = {
 type Income = {
   id: string;
   amount: number;
+  currency: string;
   source: string;
   date: string;
   note: string;
@@ -23,45 +29,81 @@ type Income = {
 type Props = {
   expenses: Expense[];
   incomes: Income[];
+  primaryCurrency: string;
+  exchangeRates: ExchangeRates | null;
 };
 
-const COLORS = ["#fbbf24", "#f59e0b", "#fcd34d", "#facc15", "#fde68a", "#ca8a04"];
+const COLORS = ["var(--moniq-accent)", "#f59e0b", "#fcd34d", "#facc15", "#fde68a", "#ca8a04"];
 
-export default function AnalyticsClient({ expenses, incomes }: Props) {
-  const totalExpense = useMemo(() => {
-    return expenses.reduce((sum, item) => sum + item.amount, 0);
-  }, [expenses]);
+export default function AnalyticsClient({
+  expenses,
+  incomes,
+  primaryCurrency,
+  exchangeRates,
+}: Props) {
+  const analytics = useMemo(() => {
+    const rates = exchangeRates?.rates;
+    const to = primaryCurrency as keyof NonNullable<typeof rates>;
 
-  const totalIncome = useMemo(() => {
-    return incomes.reduce((sum, item) => sum + item.amount, 0);
-  }, [incomes]);
+    if (!rates || !rates[to]) return null;
 
-  const balance = totalIncome - totalExpense;
+    const convert = (amount: number, currency: string) => {
+      const from = (currency || "EUR") as keyof typeof rates;
 
-  const categoryTotals = useMemo(() => {
-    const map: Record<string, number> = {};
+      if (!Number.isFinite(amount) || !rates[from]) return null;
 
-    for (const item of expenses) {
-      if (!map[item.category]) {
-        map[item.category] = 0;
-      }
-      map[item.category] += item.amount;
+      const result = (amount / rates[from]) * rates[to];
+      return Number.isFinite(result) ? result : null;
+    };
+
+    let totalIncome = 0;
+    let totalExpense = 0;
+    const categories: Record<string, number> = {};
+
+    for (const item of incomes) {
+      const amount = convert(item.amount, item.currency);
+      if (amount === null) return null;
+      totalIncome += amount;
     }
 
-    return Object.entries(map)
-      .map(([category, amount]) => ({
-        category,
-        amount,
-      }))
+    for (const item of expenses) {
+      const amount = convert(item.amount, item.currency);
+      if (amount === null) return null;
+
+      totalExpense += amount;
+      categories[item.category] =
+        (categories[item.category] || 0) + amount;
+    }
+
+    const categoryTotals = Object.entries(categories)
+      .map(([category, amount]) => ({ category, amount }))
       .sort((a, b) => b.amount - a.amount);
-  }, [expenses]);
+
+    return {
+      totalIncome,
+      totalExpense,
+      balance: totalIncome - totalExpense,
+      categoryTotals,
+    };
+  }, [expenses, incomes, exchangeRates, primaryCurrency]);
+
+  const totalIncome = analytics?.totalIncome ?? null;
+  const totalExpense = analytics?.totalExpense ?? null;
+  const balance = analytics?.balance ?? null;
+  const categoryTotals = analytics?.categoryTotals ?? [];
+
+  const formatMoney = (amount: number) =>
+    new Intl.NumberFormat("ru-RU", {
+      style: "currency",
+      currency: primaryCurrency,
+    }).format(amount);
 
   return (
     <main
       style={{
         minHeight: "100vh",
-        background: "linear-gradient(180deg, #0b0b0f 0%, #111111 100%)",
-        color: "white",
+        background: "var(--moniq-bg)",
+        color: "var(--moniq-text)",
         display: "flex",
         justifyContent: "center",
         fontFamily: "Inter, sans-serif",
@@ -75,11 +117,20 @@ export default function AnalyticsClient({ expenses, incomes }: Props) {
           borderRadius: "24px",
         }}
       >
-        <h1 style={{ fontSize: "28px", marginBottom: "18px" }}>Аналитика</h1>
+        <h1 style={{ fontSize: "28px", marginBottom: "8px" }}>Аналитика</h1>
+        <div style={{
+          color: "var(--moniq-muted)",
+          fontSize: "12px",
+          marginBottom: "18px",
+        }}>
+          {exchangeRates
+            ? `Конвертация по курсу ECB от ${exchangeRates.date}`
+            : "Курсы ECB недоступны"}
+        </div>
 
         <section
           style={{
-            background: "#17171c",
+            background: "var(--moniq-card)",
             border: "1px solid #26262b",
             borderRadius: "22px",
             padding: "18px",
@@ -89,45 +140,45 @@ export default function AnalyticsClient({ expenses, incomes }: Props) {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px" }}>
             <div
               style={{
-                background: "#111114",
+                background: "var(--moniq-input)",
                 border: "1px solid #24242a",
                 borderRadius: "16px",
                 padding: "12px",
               }}
             >
-              <div style={{ color: "#8f8f95", fontSize: "12px", marginBottom: "6px" }}>
+              <div style={{ color: "var(--moniq-muted)", fontSize: "12px", marginBottom: "6px" }}>
                 Доход
               </div>
-              <div style={{ fontWeight: 700, fontSize: "18px" }}>{totalIncome}€</div>
+              <div style={{ fontWeight: 700, fontSize: "18px" }}>{totalIncome !== null ? formatMoney(totalIncome) : "—"}</div>
             </div>
 
             <div
               style={{
-                background: "#111114",
+                background: "var(--moniq-input)",
                 border: "1px solid #24242a",
                 borderRadius: "16px",
                 padding: "12px",
               }}
             >
-              <div style={{ color: "#8f8f95", fontSize: "12px", marginBottom: "6px" }}>
+              <div style={{ color: "var(--moniq-muted)", fontSize: "12px", marginBottom: "6px" }}>
                 Расход
               </div>
-              <div style={{ fontWeight: 700, fontSize: "18px" }}>{totalExpense}€</div>
+              <div style={{ fontWeight: 700, fontSize: "18px" }}>{totalExpense !== null ? formatMoney(totalExpense) : "—"}</div>
             </div>
 
             <div
               style={{
-                background: "#111114",
+                background: "var(--moniq-input)",
                 border: "1px solid #24242a",
                 borderRadius: "16px",
                 padding: "12px",
               }}
             >
-              <div style={{ color: "#8f8f95", fontSize: "12px", marginBottom: "6px" }}>
+              <div style={{ color: "var(--moniq-muted)", fontSize: "12px", marginBottom: "6px" }}>
                 Баланс
               </div>
-              <div style={{ fontWeight: 700, fontSize: "18px", color: "#fbbf24" }}>
-                {balance}€
+              <div style={{ fontWeight: 700, fontSize: "18px", color: "var(--moniq-accent)" }}>
+                {balance !== null ? formatMoney(balance) : "—"}
               </div>
             </div>
           </div>
@@ -135,7 +186,7 @@ export default function AnalyticsClient({ expenses, incomes }: Props) {
 
         <section
           style={{
-            background: "#17171c",
+            background: "var(--moniq-card)",
             border: "1px solid #26262b",
             borderRadius: "22px",
             padding: "18px",
@@ -146,8 +197,12 @@ export default function AnalyticsClient({ expenses, incomes }: Props) {
             Расходы по категориям
           </div>
 
-          {categoryTotals.length === 0 ? (
-            <div style={{ color: "#8f8f95", fontSize: "14px" }}>
+          {analytics === null ? (
+            <div style={{ color: "var(--moniq-accent)", fontSize: '14px' }}>
+              Не удалось рассчитать аналитику: курсы валют недоступны.
+            </div>
+          ) : categoryTotals.length === 0 ? (
+            <div style={{ color: "var(--moniq-muted)", fontSize: "14px" }}>
               Пока нет расходов для аналитики
             </div>
           ) : (
@@ -167,7 +222,7 @@ export default function AnalyticsClient({ expenses, incomes }: Props) {
                         <Cell key={index} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip />
+                    <Tooltip formatter={(value) => formatMoney(Number(value))} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
@@ -177,7 +232,7 @@ export default function AnalyticsClient({ expenses, incomes }: Props) {
                   <div
                     key={item.category}
                     style={{
-                      background: "#111114",
+                      background: "var(--moniq-input)",
                       border: "1px solid #24242a",
                       borderRadius: "16px",
                       padding: "12px",
@@ -199,7 +254,7 @@ export default function AnalyticsClient({ expenses, incomes }: Props) {
                       <div style={{ fontWeight: 600 }}>{item.category}</div>
                     </div>
 
-                    <div style={{ color: "#fbbf24", fontWeight: 700 }}>{item.amount}€</div>
+                    <div style={{ color: "var(--moniq-accent)", fontWeight: 700 }}>{formatMoney(item.amount)}</div>
                   </div>
                 ))}
               </div>
@@ -207,84 +262,7 @@ export default function AnalyticsClient({ expenses, incomes }: Props) {
           )}
         </section>
 
-        <div
-          style={{
-            position: "fixed",
-            bottom: "16px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            width: "390px",
-            background: "rgba(20,20,24,0.95)",
-            border: "1px solid #2a2a30",
-            borderRadius: "22px",
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr 1fr 1fr 1fr",
-            overflow: "hidden",
-            backdropFilter: "blur(12px)",
-          }}
-        >
-          <Link
-            href="/dashboard"
-            style={{
-              padding: "14px 10px",
-              textAlign: "center",
-              color: "white",
-              textDecoration: "none",
-            }}
-          >
-            Главная
-          </Link>
-
-          <Link
-            href="/analytics"
-            style={{
-              padding: "14px 10px",
-              textAlign: "center",
-              color: "#fbbf24",
-              textDecoration: "none",
-              fontWeight: 700,
-              background: "#1a1a20",
-            }}
-          >
-            Аналитика
-          </Link>
-
-          <Link
-            href="/goals"
-            style={{
-              padding: "14px 10px",
-              textAlign: "center",
-              color: "white",
-              textDecoration: "none",
-            }}
-          >
-            Цель
-          </Link>
-
-          <Link
-            href="/income"
-            style={{
-              padding: "14px 10px",
-              textAlign: "center",
-              color: "white",
-              textDecoration: "none",
-            }}
-          >
-            Доход
-          </Link>
-
-          <Link
-            href="/expenses"
-            style={{
-              padding: "14px 10px",
-              textAlign: "center",
-              color: "white",
-              textDecoration: "none",
-            }}
-          >
-            Расход
-          </Link>
-        </div>
+        <BottomNav />
       </div>
     </main>
   );

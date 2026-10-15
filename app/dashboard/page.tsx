@@ -1,3 +1,4 @@
+import { getExchangeRates } from "@/lib/exchange-rates";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
@@ -45,11 +46,21 @@ export default async function DashboardPage() {
     }),
   ]);
 
+  let exchangeRates = null;
+
+  try {
+    exchangeRates = await getExchangeRates();
+  } catch (error) {
+    console.error("EXCHANGE_RATES_ERROR", error);
+  }
+
   return (
     <DashboardClient
       goals={goals}
       incomes={incomes}
       expenses={expenses}
+      primaryCurrency={session.user.currency}
+      exchangeRates={exchangeRates}
     />
   );
 }

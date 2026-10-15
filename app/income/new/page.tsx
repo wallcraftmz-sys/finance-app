@@ -53,8 +53,8 @@ export default function NewIncomePage() {
     <main
       style={{
         minHeight: "100vh",
-        background: "#0a0a0a",
-        color: "white",
+        background: "var(--moniq-bg)",
+        color: "var(--moniq-text)",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
@@ -65,10 +65,27 @@ export default function NewIncomePage() {
         style={{
           width: "380px",
           padding: "30px",
-          background: "#111",
+          background: "var(--moniq-card)",
           borderRadius: "16px",
         }}
       >
+        <button
+          type="button"
+          onClick={() => router.push("/income")}
+          style={{
+            background: "transparent",
+            border: "none",
+            color: "var(--moniq-accent)",
+            cursor: "pointer",
+            padding: "0",
+            marginBottom: "20px",
+            fontSize: "15px",
+            fontWeight: 600,
+          }}
+        >
+          ← Назад к доходам
+        </button>
+
         <h1 style={{ fontSize: "28px", marginBottom: "20px" }}>
           Добавить доход
         </h1>
@@ -83,8 +100,8 @@ export default function NewIncomePage() {
               padding: "12px",
               borderRadius: "10px",
               border: "1px solid #333",
-              background: "#1a1a1a",
-              color: "white",
+              background: "var(--moniq-input)",
+              color: "var(--moniq-text)",
             }}
           />
 
@@ -95,8 +112,8 @@ export default function NewIncomePage() {
               padding: "12px",
               borderRadius: "10px",
               border: "1px solid #333",
-              background: "#1a1a1a",
-              color: "white",
+              background: "var(--moniq-input)",
+              color: "var(--moniq-text)",
             }}
           >
             <option>Зарплата</option>
@@ -115,8 +132,8 @@ export default function NewIncomePage() {
               padding: "12px",
               borderRadius: "10px",
               border: "1px solid #333",
-              background: "#1a1a1a",
-              color: "white",
+              background: "var(--moniq-input)",
+              color: "var(--moniq-text)",
             }}
           />
 
@@ -129,8 +146,8 @@ export default function NewIncomePage() {
               padding: "12px",
               borderRadius: "10px",
               border: "1px solid #333",
-              background: "#1a1a1a",
-              color: "white",
+              background: "var(--moniq-input)",
+              color: "var(--moniq-text)",
               resize: "none",
             }}
           />
@@ -141,7 +158,7 @@ export default function NewIncomePage() {
             style={{
               width: "100%",
               padding: "12px",
-              background: "#f59e0b",
+              background: "var(--moniq-accent)",
               border: "none",
               borderRadius: "10px",
               fontWeight: "bold",

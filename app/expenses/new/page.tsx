@@ -18,8 +18,53 @@ export default function NewExpensePage() {
       return;
     }
 
+    const expenseAmount = Number(amount);
+
+    if (
+      !Number.isFinite(expenseAmount) ||
+      expenseAmount <= 0 ||
+      Math.abs(expenseAmount * 100 - Math.round(expenseAmount * 100)) > 1e-7
+    ) {
+      alert("Введите положительную сумму с точностью до двух знаков");
+      return;
+    }
+
     try {
       setLoading(true);
+
+      const checkRes = await fetch("/api/expenses/check", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ amount: expenseAmount }),
+      });
+
+      const checkData = await checkRes.json();
+
+      if (!checkRes.ok) {
+        alert(checkData.error || "Не удалось проверить баланс");
+        return;
+      }
+
+      if (checkData.warning) {
+        const formatMoney = (value: number) =>
+          new Intl.NumberFormat("ru-RU", {
+            style: "currency",
+            currency: checkData.currency,
+          }).format(value);
+
+        const confirmed = window.confirm(
+          "Внимание! Расход превышает доступный остаток.\n\n" +
+          "Доступно: " + formatMoney(checkData.available) + "\n" +
+          "Расход: " + formatMoney(expenseAmount) + "\n" +
+          "После расхода: " + formatMoney(checkData.afterExpense) +
+          "\n\nНакопления останутся без изменений." +
+          "\n\nВсё равно сохранить расход?"
+        );
+
+        if (!confirmed) return;
+      }
 
       const res = await fetch("/api/expenses", {
         method: "POST",
@@ -53,8 +98,8 @@ export default function NewExpensePage() {
     <main
       style={{
         minHeight: "100vh",
-        background: "#0a0a0a",
-        color: "white",
+        background: "var(--moniq-bg)",
+        color: "var(--moniq-text)",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
@@ -65,10 +110,27 @@ export default function NewExpensePage() {
         style={{
           width: "380px",
           padding: "30px",
-          background: "#111",
+          background: "var(--moniq-card)",
           borderRadius: "16px",
         }}
       >
+        <button
+          type="button"
+          onClick={() => router.push("/expenses")}
+          style={{
+            background: "transparent",
+            border: "none",
+            color: "var(--moniq-accent)",
+            cursor: "pointer",
+            padding: "0",
+            marginBottom: "20px",
+            fontSize: "15px",
+            fontWeight: 600,
+          }}
+        >
+          ← Назад к расходам
+        </button>
+
         <h1 style={{ fontSize: "28px", marginBottom: "20px" }}>
           Добавить расход
         </h1>
@@ -83,8 +145,8 @@ export default function NewExpensePage() {
               padding: "12px",
               borderRadius: "10px",
               border: "1px solid #333",
-              background: "#1a1a1a",
-              color: "white",
+              background: "var(--moniq-input)",
+              color: "var(--moniq-text)",
             }}
           />
 
@@ -95,8 +157,8 @@ export default function NewExpensePage() {
               padding: "12px",
               borderRadius: "10px",
               border: "1px solid #333",
-              background: "#1a1a1a",
-              color: "white",
+              background: "var(--moniq-input)",
+              color: "var(--moniq-text)",
             }}
           >
             <option>Еда</option>
@@ -116,8 +178,8 @@ export default function NewExpensePage() {
               padding: "12px",
               borderRadius: "10px",
               border: "1px solid #333",
-              background: "#1a1a1a",
-              color: "white",
+              background: "var(--moniq-input)",
+              color: "var(--moniq-text)",
             }}
           />
 
@@ -130,8 +192,8 @@ export default function NewExpensePage() {
               padding: "12px",
               borderRadius: "10px",
               border: "1px solid #333",
-              background: "#1a1a1a",
-              color: "white",
+              background: "var(--moniq-input)",
+              color: "var(--moniq-text)",
               resize: "none",
             }}
           />
@@ -142,7 +204,7 @@ export default function NewExpensePage() {
             style={{
               width: "100%",
               padding: "12px",
-              background: "#f59e0b",
+              background: "var(--moniq-accent)",
               border: "none",
               borderRadius: "10px",
               fontWeight: "bold",

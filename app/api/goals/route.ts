@@ -45,6 +45,7 @@ export async function POST(req: Request) {
       data: {
         title,
         targetAmount,
+        currency: user.currency,
         userId: user.id,
       },
     });

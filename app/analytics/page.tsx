@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import AnalyticsClient from "./analytics-client";
+import { getExchangeRates } from "@/lib/exchange-rates";
 
 export default async function AnalyticsPage() {
   const cookieStore = await cookies();
@@ -37,5 +38,20 @@ export default async function AnalyticsPage() {
     }),
   ]);
 
-  return <AnalyticsClient expenses={expenses} incomes={incomes} />;
+  let exchangeRates = null;
+
+  try {
+    exchangeRates = await getExchangeRates();
+  } catch (error) {
+    console.error("Analytics ECB error:", error);
+  }
+
+  return (
+    <AnalyticsClient
+      expenses={expenses}
+      incomes={incomes}
+      primaryCurrency={session.user.currency}
+      exchangeRates={exchangeRates}
+    />
+  );
 }

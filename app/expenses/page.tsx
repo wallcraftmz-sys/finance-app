@@ -1,4 +1,7 @@
+
 "use client";
+
+import BottomNav from "@/components/BottomNav";
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -6,6 +9,7 @@ import { useEffect, useMemo, useState } from "react";
 type Expense = {
   id: string;
   amount: number;
+  currency: string;
   category: string;
   date: string;
   note: string;
@@ -33,7 +37,21 @@ export default function ExpensesPage() {
   }, []);
 
   const totalExpense = useMemo(() => {
-    return expenses.reduce((sum, item) => sum + item.amount, 0);
+    const totals: Record<string, number> = {};
+
+    for (const item of expenses) {
+      const currency = item.currency || "EUR";
+      totals[currency] = (totals[currency] || 0) + item.amount;
+    }
+
+    return Object.entries(totals)
+      .map(([currency, amount]) =>
+        new Intl.NumberFormat("ru-RU", {
+          style: "currency",
+          currency,
+        }).format(amount)
+      )
+      .join(" · ") || "0 €";
   }, [expenses]);
 
   const sortedExpenses = [...expenses];
@@ -52,8 +70,8 @@ export default function ExpensesPage() {
     <main
       style={{
         minHeight: "100vh",
-        background: "#0a0a0a",
-        color: "white",
+        background: "var(--moniq-bg)",
+        color: "var(--moniq-text)",
         display: "flex",
         justifyContent: "center",
         fontFamily: "Inter, sans-serif",
@@ -71,17 +89,17 @@ export default function ExpensesPage() {
 
         <div
           style={{
-            background: "#17171c",
+            background: "var(--moniq-card)",
             border: "1px solid #26262b",
             borderRadius: "22px",
             padding: "18px",
             marginBottom: "16px",
           }}
         >
-          <div style={{ fontSize: "14px", color: "#8f8f95", marginBottom: "8px" }}>
+          <div style={{ fontSize: "14px", color: "var(--moniq-muted)", marginBottom: "8px" }}>
             Общая сумма расходов
           </div>
-          <div style={{ fontSize: "32px", fontWeight: 800 }}>{totalExpense}€</div>
+          <div style={{ fontSize: "32px", fontWeight: 800 }}>{totalExpense}</div>
         </div>
 
         <Link href="/expenses/new" style={{ textDecoration: "none" }}>
@@ -89,11 +107,11 @@ export default function ExpensesPage() {
             style={{
               width: "100%",
               padding: "14px",
-              background: "linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)",
+              background: "var(--moniq-accent)",
               border: "none",
               borderRadius: "18px",
               fontWeight: 800,
-              color: "#111",
+              color: "var(--moniq-card)",
               cursor: "pointer",
               marginBottom: "16px",
             }}
@@ -104,7 +122,7 @@ export default function ExpensesPage() {
 
         <div
           style={{
-            background: "#17171c",
+            background: "var(--moniq-card)",
             border: "1px solid #26262b",
             borderRadius: "22px",
             padding: "18px",
@@ -113,16 +131,16 @@ export default function ExpensesPage() {
           <h3 style={{ marginTop: 0, marginBottom: "14px" }}>Список расходов</h3>
 
           {loading ? (
-            <p style={{ color: "#8f8f95", margin: 0 }}>Загрузка...</p>
+            <p style={{ color: "var(--moniq-muted)", margin: 0 }}>Загрузка...</p>
           ) : sortedExpenses.length === 0 ? (
-            <p style={{ color: "#8f8f95", margin: 0 }}>Пока расходов нет</p>
+            <p style={{ color: "var(--moniq-muted)", margin: 0 }}>Пока расходов нет</p>
           ) : (
             <div style={{ display: "grid", gap: "10px" }}>
               {sortedExpenses.map((item) => (
                 <div
                   key={item.id}
                   style={{
-                    background: "#111114",
+                    background: "var(--moniq-input)",
                     border: "1px solid #24242a",
                     borderRadius: "18px",
                     padding: "14px",
@@ -138,17 +156,20 @@ export default function ExpensesPage() {
                     }}
                   >
                     <div style={{ fontWeight: 700 }}>{item.category}</div>
-                    <div style={{ fontWeight: 700, color: "#fbbf24" }}>
-                      {item.amount}€
+                    <div style={{ fontWeight: 700, color: "var(--moniq-accent)" }}>
+                      {new Intl.NumberFormat("ru-RU", {
+                        style: "currency",
+                        currency: item.currency || "EUR",
+                      }).format(item.amount)}
                     </div>
                   </div>
 
-                  <div style={{ color: "#8f8f95", fontSize: "12px", marginBottom: "6px" }}>
+                  <div style={{ color: "var(--moniq-muted)", fontSize: "12px", marginBottom: "6px" }}>
                     {item.date}
                   </div>
 
                   {item.note ? (
-                    <div style={{ color: "#c8c8ce", fontSize: "13px", marginBottom: "10px" }}>
+                    <div style={{ color: "var(--moniq-muted)", fontSize: "13px", marginBottom: "10px" }}>
                       {item.note}
                     </div>
                   ) : null}
@@ -156,9 +177,9 @@ export default function ExpensesPage() {
                   <button
                     onClick={() => handleDelete(item.id)}
                     style={{
-                      background: "#222228",
+                      background: "var(--moniq-input)",
                       border: "1px solid #2f2f36",
-                      color: "white",
+                      color: "var(--moniq-text)",
                       borderRadius: "12px",
                       padding: "8px 12px",
                       cursor: "pointer",
@@ -172,84 +193,7 @@ export default function ExpensesPage() {
           )}
         </div>
 
-        <div
-          style={{
-            position: "fixed",
-            bottom: "16px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            width: "390px",
-            background: "rgba(20,20,24,0.95)",
-            border: "1px solid #2a2a30",
-            borderRadius: "22px",
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr 1fr 1fr 1fr",
-            overflow: "hidden",
-            backdropFilter: "blur(12px)",
-          }}
-        >
-          <Link
-            href="/dashboard"
-            style={{
-              padding: "14px 10px",
-              textAlign: "center",
-              color: "white",
-              textDecoration: "none",
-            }}
-          >
-            Главная
-          </Link>
-
-          <Link
-            href="/analytics"
-            style={{
-              padding: "14px 10px",
-              textAlign: "center",
-              color: "white",
-              textDecoration: "none",
-            }}
-          >
-            Аналитика
-          </Link>
-
-          <Link
-            href="/goals"
-            style={{
-              padding: "14px 10px",
-              textAlign: "center",
-              color: "white",
-              textDecoration: "none",
-            }}
-          >
-            Цель
-          </Link>
-
-          <Link
-            href="/income"
-            style={{
-              padding: "14px 10px",
-              textAlign: "center",
-              color: "white",
-              textDecoration: "none",
-            }}
-          >
-            Доход
-          </Link>
-
-          <Link
-            href="/expenses"
-            style={{
-              padding: "14px 10px",
-              textAlign: "center",
-              color: "#fbbf24",
-              textDecoration: "none",
-              fontWeight: 700,
-              background: "#1a1a20",
-            }}
-          >
-            Расход
-          </Link>
-        </div>
+        <BottomNav />
       </div>
     </main>
   );

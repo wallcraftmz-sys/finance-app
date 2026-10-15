@@ -35,6 +35,12 @@ export async function POST(req: Request) {
 
     const body = await req.json();
 
+    const currency = ["EUR", "USD", "GBP", "PLN", "SEK", "CHF"].includes(
+      user.currency
+    )
+      ? user.currency
+      : "EUR";
+
     const amount = Number(body.amount || 0);
     const category = String(body.category || "").trim();
     const date = String(body.date || "").trim();
@@ -50,6 +56,7 @@ export async function POST(req: Request) {
     const expense = await prisma.expense.create({
       data: {
         amount,
+        currency,
         category,
         date,
         note,

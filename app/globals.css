@@ -24,3 +24,32 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Moniq — глобальная система оформления */
+
+:root,
+:root[data-theme="dark"] {
+  --moniq-bg: #0a0a0a;
+  --moniq-card: #19191f;
+  --moniq-input: #24242b;
+  --moniq-text: #ffffff;
+  --moniq-muted: #a1a1aa;
+  --moniq-border: #303039;
+  --moniq-accent: #f59e0b;
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+  --moniq-bg: #f5f5f7;
+  --moniq-card: #ffffff;
+  --moniq-input: #eeeeef;
+  --moniq-text: #171717;
+  --moniq-muted: #666666;
+  --moniq-border: #dedee3;
+  color-scheme: light;
+}
+
+body {
+  background: var(--moniq-bg);
+  color: var(--moniq-text);
+}

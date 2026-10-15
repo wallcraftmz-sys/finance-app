@@ -7,18 +7,21 @@ datasource db {
 }
 
 model User {
-  id              String           @id @default(cuid())
-  email           String           @unique
-  passwordHash    String
-  createdAt       DateTime         @default(now())
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String?
+  avatarUrl    String?
+  currency     String   @default("EUR")
+  createdAt    DateTime @default(now())
 
   passwordResetTokens PasswordResetToken[]
-  sessions        Session[]
-  goals           Goal[]
-  incomes         Income[]
-  expenses        Expense[]
-  aiMessages      AiMessage[]
-  supportMessages SupportMessage[]
+  sessions            Session[]
+  goals               Goal[]
+  incomes             Income[]
+  expenses            Expense[]
+  aiMessages          AiMessage[]
+  supportMessages     SupportMessage[]
 }
 
 model AiMessage {
@@ -45,6 +48,8 @@ model Goal {
   id           String   @id @default(cuid())
   title        String
   targetAmount Float
+  savedAmount  Float    @default(0)
+  currency     String   @default("EUR")
   createdAt    DateTime @default(now())
   userId       String
 
@@ -54,6 +59,7 @@ model Goal {
 model Income {
   id        String   @id @default(cuid())
   amount    Float
+  currency  String   @default("EUR")
   source    String
   date      String
   note      String
@@ -66,6 +72,7 @@ model Income {
 model Expense {
   id        String   @id @default(cuid())
   amount    Float
+  currency  String   @default("EUR")
   category  String
   date      String
   note      String

@@ -46,8 +46,8 @@ export default function NewGoalPage() {
     <main
       style={{
         minHeight: "100vh",
-        background: "#0a0a0a",
-        color: "white",
+        background: "var(--moniq-bg)",
+        color: "var(--moniq-text)",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
@@ -58,7 +58,7 @@ export default function NewGoalPage() {
       <div
         style={{
           width: "390px",
-          background: "#17171c",
+          background: "var(--moniq-card)",
           border: "1px solid #26262b",
           borderRadius: "22px",
           padding: "22px",
@@ -78,8 +78,8 @@ export default function NewGoalPage() {
               padding: "14px",
               borderRadius: "14px",
               border: "1px solid #333",
-              background: "#111114",
-              color: "white",
+              background: "var(--moniq-input)",
+              color: "var(--moniq-text)",
             }}
           />
 
@@ -92,8 +92,8 @@ export default function NewGoalPage() {
               padding: "14px",
               borderRadius: "14px",
               border: "1px solid #333",
-              background: "#111114",
-              color: "white",
+              background: "var(--moniq-input)",
+              color: "var(--moniq-text)",
             }}
           />
 
@@ -118,7 +118,7 @@ export default function NewGoalPage() {
             style={{
               width: "100%",
               padding: "14px",
-              background: "linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)",
+              background: "var(--moniq-accent)",
               border: "none",
               borderRadius: "16px",
               fontWeight: 800,

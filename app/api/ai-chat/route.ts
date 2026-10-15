@@ -3,9 +3,15 @@ import OpenAI from "openai";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+function getOpenAIClient() {
+  const apiKey = process.env.OPENAI_API_KEY;
+
+  if (!apiKey) {
+    throw new Error("OPENAI_API_KEY не настроен");
+  }
+
+  return new OpenAI({ apiKey });
+}
 
 type ChatHistoryItem = {
   role: "user" | "assistant";
@@ -33,6 +39,7 @@ function shouldUseWebSearch(message: string) {
 
 export async function POST(req: Request) {
   try {
+    const openai = getOpenAIClient();
     const user = await getCurrentUser();
 
     if (!user) {
