@@ -53,3 +53,38 @@ body {
   background: var(--moniq-bg);
   color: var(--moniq-text);
 }
+
+
+/* Moniq — адаптация под мобильные экраны */
+html {
+  width: 100%;
+  max-width: 100%;
+}
+
+body {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+}
+
+.moniq-mobile-stats {
+  min-width: 0;
+}
+
+.moniq-mobile-stats > * {
+  min-width: 0;
+}
+
+.moniq-mobile-stats > * > div {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 480px) {
+  .moniq-mobile-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .moniq-mobile-stats > :last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+}

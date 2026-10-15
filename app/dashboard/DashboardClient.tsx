@@ -444,7 +444,7 @@ export default function DashboardClient({
             </div>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px" }}>
+          <div className="moniq-mobile-stats" style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: "10px" }}>
             <div
               style={{
                 background: "var(--moniq-input)",
