@@ -366,8 +366,8 @@ export default function DashboardClient({
 
         <section
           style={{
-            background: "linear-gradient(145deg, #30243f 0%, #211b2d 55%, #19191f 100%)",
-            border: "1px solid #59416e",
+            background: "linear-gradient(145deg, var(--moniq-accent) -180%, var(--moniq-card) 75%)",
+            border: "1px solid var(--moniq-accent)",
             borderRadius: "24px",
             padding: "22px",
             marginBottom: "16px",
@@ -519,7 +519,7 @@ export default function DashboardClient({
           <Link href="/expenses/new" style={{ textDecoration: "none" }}>
             <div
               style={{
-                background: "linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)",
+                background: "var(--moniq-accent)",
                 borderRadius: "20px",
                 padding: "16px",
                 color: "#111",
