@@ -366,8 +366,8 @@ export default function DashboardClient({
 
         <section
           style={{
-            background: "var(--moniq-card)",
-            border: "1px solid var(--moniq-border)",
+            background: "linear-gradient(145deg, #30243f 0%, #211b2d 55%, #19191f 100%)",
+            border: "1px solid #59416e",
             borderRadius: "24px",
             padding: "22px",
             marginBottom: "16px",
@@ -436,7 +436,7 @@ export default function DashboardClient({
               <div style={{ color: "var(--moniq-muted)", fontSize: "12px", marginBottom: "6px" }}>
                 Доступно
               </div>
-              <div style={{ fontSize: "18px", fontWeight: 700, color: "#fbbf24" }}>
+              <div style={{ fontSize: "18px", fontWeight: 700, color: "#c4a0ff" }}>
                 {convertedAvailable !== null
                   ? formatMoney(convertedAvailable, primaryCurrency)
                   : "—"}
