@@ -104,3 +104,12 @@ model PasswordResetToken {
 
   @@index([userId])
 }
+
+model RateLimit {
+  id          String   @id
+  count       Int      @default(0)
+  windowStart DateTime
+  expiresAt   DateTime
+
+  @@index([expiresAt])
+}

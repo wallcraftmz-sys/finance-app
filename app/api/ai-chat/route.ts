@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import OpenAI from "openai";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 function getOpenAIClient() {
   const apiKey = process.env.OPENAI_API_KEY;
@@ -51,6 +52,31 @@ export async function POST(req: Request) {
 
     if (!message) {
       return NextResponse.json({ error: "Пустое сообщение" }, { status: 400 });
+    }
+
+    if (message.length > 2000) {
+      return NextResponse.json(
+        { error: "Сообщение не должно превышать 2000 символов" },
+        { status: 400 }
+      );
+    }
+
+    const rateLimit = await checkRateLimit(
+      `ai-chat:${user.id}`,
+      20,
+      60 * 60
+    );
+
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: "Лимит AI-сообщений исчерпан. Попробуйте позже." },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(rateLimit.retryAfter),
+          },
+        }
+      );
     }
 
     const [goals, incomes, expenses, previousMessages] = await Promise.all([

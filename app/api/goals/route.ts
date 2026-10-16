@@ -34,7 +34,7 @@ export async function POST(req: Request) {
     const title = String(body.title || "").trim();
     const targetAmount = Number(body.targetAmount || 0);
 
-    if (!title || !targetAmount) {
+    if (!title || !Number.isFinite(targetAmount) || targetAmount <= 0) {
       return NextResponse.json(
         { error: "Название и сумма обязательны" },
         { status: 400 }

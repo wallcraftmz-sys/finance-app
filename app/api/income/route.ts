@@ -46,7 +46,7 @@ export async function POST(req: Request) {
     const date = String(body.date || "").trim();
     const note = String(body.note || "").trim();
 
-    if (!amount || !date || !source) {
+    if (!Number.isFinite(amount) || amount <= 0 || !date || !source) {
       return NextResponse.json(
         { error: "Сумма, источник и дата обязательны" },
         { status: 400 }
