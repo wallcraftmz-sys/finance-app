@@ -3,6 +3,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import UpdateNotice from "@/components/UpdateNotice";
 import FloatingButtonsServer from "@/components/FloatingButtonsServer";
+import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 
 export const metadata: Metadata = {
   title: "Moniq",
@@ -27,6 +28,7 @@ export default function RootLayout({
   return (
     <html lang="ru">
       <body>
+        <ServiceWorkerRegister />
         <ThemeProvider>
           <UpdateNotice />
           {children}
