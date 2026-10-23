@@ -1,3 +1,4 @@
+
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
@@ -36,6 +37,8 @@ export default async function SettingsPage() {
     redirect("/login");
   }
 
+  const isPro = user.plan === "PRO";
+
   return (
     <main
       style={{
@@ -57,20 +60,36 @@ export default async function SettingsPage() {
         >
           <Link
             href="/dashboard"
-            style={{ color: "var(--moniq-text)", textDecoration: "none", fontSize: 24 }}
+            style={{
+              color: "var(--moniq-text)",
+              textDecoration: "none",
+              fontSize: 24,
+            }}
           >
             ←
           </Link>
 
-          <h1 style={{ fontSize: 24, fontWeight: 700, margin: 0 }}>
+          <h1
+            style={{
+              fontSize: 24,
+              fontWeight: 700,
+              margin: 0,
+            }}
+          >
             Настройки
           </h1>
 
-          <span style={{ color: "var(--moniq-accent)", fontWeight: 700 }}>
+          <span
+            style={{
+              color: "var(--moniq-accent)",
+              fontWeight: 700,
+            }}
+          >
             Moniq
           </span>
         </header>
 
+        {/* Настройки аккаунта */}
         <section
           style={{
             background: "var(--moniq-card)",
@@ -96,10 +115,17 @@ export default async function SettingsPage() {
                     : "1px solid var(--moniq-border)",
               }}
             >
-              <span style={{ fontSize: 24 }}>{section.icon}</span>
+              <span style={{ fontSize: 24 }}>
+                {section.icon}
+              </span>
 
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 16, fontWeight: 700 }}>
+                <div
+                  style={{
+                    fontSize: 16,
+                    fontWeight: 700,
+                  }}
+                >
                   {section.title}
                 </div>
 
@@ -114,13 +140,110 @@ export default async function SettingsPage() {
                 </div>
               </div>
 
-              <span style={{ color: "var(--moniq-muted)", fontSize: 22 }}>
+              <span
+                style={{
+                  color: "var(--moniq-muted)",
+                  fontSize: 22,
+                }}
+              >
                 ›
               </span>
             </Link>
           ))}
         </section>
 
+        {/* Тариф Moniq */}
+        <section
+          style={{
+            background: "var(--moniq-card)",
+            borderRadius: 22,
+            padding: 20,
+            marginBottom: 18,
+            border: isPro
+              ? "1px solid var(--moniq-accent)"
+              : "1px solid var(--moniq-border)",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: 12,
+              marginBottom: 12,
+            }}
+          >
+            <span
+              style={{
+                fontSize: 18,
+                fontWeight: 700,
+              }}
+            >
+              ✨ Moniq {isPro ? "PRO" : "LITE"}
+            </span>
+
+            <span
+              style={{
+                padding: "6px 10px",
+                borderRadius: 20,
+                background: "var(--moniq-bg)",
+                color: "var(--moniq-accent)",
+                fontSize: 11,
+                fontWeight: 700,
+              }}
+            >
+              {isPro ? "PRO" : "БЕСПЛАТНО"}
+            </span>
+          </div>
+
+          <p
+            style={{
+              fontSize: 13,
+              lineHeight: 1.6,
+              color: "var(--moniq-muted)",
+              margin: 0,
+            }}
+          >
+            {isPro
+              ? "У вас активен тариф Moniq PRO."
+              : "Вы используете бесплатный тариф Moniq LITE."}
+          </p>
+
+          {!isPro && (
+            <div
+              style={{
+                marginTop: 18,
+                paddingTop: 16,
+                borderTop: "1px solid var(--moniq-border)",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 15,
+                  fontWeight: 700,
+                  marginBottom: 8,
+                }}
+              >
+                🚀 Moniq PRO — скоро
+              </div>
+
+              <p
+                style={{
+                  fontSize: 13,
+                  lineHeight: 1.6,
+                  color: "var(--moniq-muted)",
+                  margin: 0,
+                }}
+              >
+                Мы готовим расширенные возможности
+                управления финансами. Информация
+                о подписке появится позже.
+              </p>
+            </div>
+          )}
+        </section>
+
+        {/* Управление аккаунтом */}
         <section
           style={{
             background: "var(--moniq-card)",
@@ -128,13 +251,11 @@ export default async function SettingsPage() {
             padding: "8px 18px",
           }}
         >
-
           <Link
             href="/settings/delete-account"
             style={{
               display: "block",
               padding: "20px 0",
-              borderTop: "1px solid var(--moniq-border)",
               color: "#ff655c",
               fontSize: 16,
               fontWeight: 700,
