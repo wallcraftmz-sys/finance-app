@@ -48,3 +48,31 @@ export async function PATCH(req: Request) {
     );
   }
 }
+
+export async function GET() {
+  try {
+    const user = await getCurrentUser();
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    return NextResponse.json({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      currency: user.currency,
+      plan: user.plan,
+    });
+  } catch (error) {
+    console.error("PROFILE_GET_ERROR", error);
+
+    return NextResponse.json(
+      { error: "Failed to load profile" },
+      { status: 500 }
+    );
+  }
+}
