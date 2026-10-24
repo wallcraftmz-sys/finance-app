@@ -1,13 +1,21 @@
 [
   {
-    "relation": [
-      "delegate_permission/common.handle_all_urls"
-    ],
+    "relation": ["delegate_permission/common.handle_all_urls"],
     "target": {
       "namespace": "android_app",
       "package_name": "lat.moniq.app",
       "sha256_cert_fingerprints": [
         "8E:46:D0:A1:9D:DD:EE:2C:9D:0C:E4:F8:77:82:3A:9B:17:35:9C:43:91:3D:61:A5:7F:C2:66:5C:82:B5:34:16"
+      ]
+    }
+  },
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "lat.moniq.www.twa",
+      "sha256_cert_fingerprints": [
+        "C1:41:0B:8C:57:43:79:2E:98:AA:DA:6A:F8:4F:FC:27:CB:22:FF:F7:03:4A:1C:40:50:BC:83:33:90:6E:4B:98"
       ]
     }
   }
