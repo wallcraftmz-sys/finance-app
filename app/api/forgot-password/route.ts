@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { Resend } from "resend";
 import { createHash, randomBytes } from "node:crypto";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -19,7 +20,31 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+    const clientIp =
+  req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+  "unknown";
 
+const ipHash = createHash("sha256")
+  .update(clientIp)
+  .digest("hex");
+
+const rateLimit = await checkRateLimit(
+  `forgot-password:${ipHash}`,
+  5,
+  900
+);
+
+if (!rateLimit.allowed) {
+  return NextResponse.json(
+    { error: "Слишком много запросов. Попробуйте позже." },
+    {
+      status: 429,
+      headers: {
+        "Retry-After": String(rateLimit.retryAfter),
+      },
+    }
+  );
+}
     const apiKey = process.env.RESEND_API_KEY;
     const appUrl = process.env.APP_URL;
 

@@ -52,6 +52,7 @@ export default async function AnalyticsPage() {
       incomes={incomes}
       primaryCurrency={session.user.currency}
       exchangeRates={exchangeRates}
+      plan={session.user.plan}
     />
   );
 }

@@ -5,7 +5,13 @@ export async function GET() {
   try {
     const currentUser = await getCurrentUser();
 
-    if (!currentUser || currentUser.email !== process.env.ADMIN_EMAIL) {
+    const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+
+if (
+  !currentUser ||
+  !adminEmail ||
+  currentUser.email.trim().toLowerCase() !== adminEmail
+) {
       return Response.json({ error: "Доступ запрещён" }, { status: 403 });
     }
 

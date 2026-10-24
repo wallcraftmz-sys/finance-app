@@ -1,7 +1,8 @@
+
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
+import BottomNav from "@/components/BottomNav";
 
 type ChatMessage = {
   role: "user" | "ai";
@@ -13,16 +14,33 @@ export default function AssistantPage() {
   const [chat, setChat] = useState<ChatMessage[]>([
     {
       role: "ai",
-      text: "Привет. Я твой финансовый помощник. Можешь спросить меня что тебе интересно по финансам"
+      text: "Привет! Я твой финансовый помощник Moniq. Можешь спросить меня о финансах.",
     },
   ]);
+
   const [loading, setLoading] = useState(false);
+  const [limitReached, setLimitReached] = useState(false);
+  const [limitMessage, setLimitMessage] = useState("");
+
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "end",
+    });
+  }, [chat, loading]);
 
   async function send() {
-    if (!message.trim() || loading) return;
+    if (!message.trim() || loading || limitReached) return;
 
     const userMessage = message.trim();
-    const newChat: ChatMessage[] = [...chat, { role: "user", text: userMessage }];
+
+    const newChat: ChatMessage[] = [
+      ...chat,
+      { role: "user", text: userMessage },
+    ];
+
     setChat(newChat);
     setMessage("");
     setLoading(true);
@@ -40,11 +58,31 @@ export default function AssistantPage() {
 
       const data = await res.json();
 
+      if (!res.ok) {
+        if (data.code === "AI_DAILY_LIMIT") {
+          setLimitReached(true);
+          setLimitMessage(
+            data.error || "Дневной лимит AI-запросов исчерпан."
+          );
+          return;
+        }
+
+        setChat([
+          ...newChat,
+          {
+            role: "ai",
+            text: data.error || "Не удалось получить ответ.",
+          },
+        ]);
+
+        return;
+      }
+
       setChat([
         ...newChat,
         {
           role: "ai",
-          text: data.reply || "Пока не удалось получить ответ.",
+          text: data.reply || "Не удалось получить ответ.",
         },
       ]);
     } catch {
@@ -63,46 +101,69 @@ export default function AssistantPage() {
   return (
     <main
       style={{
-        minHeight: "100vh",
-        background: "linear-gradient(180deg, #0b0b0f 0%, #111111 100%)",
-        color: "white",
+        position: "fixed",
+        inset: 0,
+        height: "100dvh",
+        overflow: "hidden",
+        background: "var(--moniq-bg)",
+        color: "var(--moniq-text)",
         display: "flex",
         justifyContent: "center",
         fontFamily: "Inter, sans-serif",
-        padding: "20px 0 96px",
       }}
     >
       <div
         style={{
-          width: "390px",
-          padding: "18px",
-          borderRadius: "24px",
+          width: "100%",
+          maxWidth: "430px",
+          height: "100%",
+          minHeight: 0,
+          display: "flex",
+          flexDirection: "column",
+          padding: "16px 14px 88px",
+          boxSizing: "border-box",
         }}
       >
-        <div
+        <header
           style={{
-            marginBottom: "18px",
+            flexShrink: 0,
+            paddingBottom: "14px",
           }}
         >
-          <div style={{ fontSize: "13px", color: "#8f8f95", marginBottom: "4px" }}>
+          <div
+            style={{
+              fontSize: "13px",
+              color: "var(--moniq-muted)",
+              marginBottom: "4px",
+            }}
+          >
             moniq
           </div>
-          <h1 style={{ fontSize: "28px", margin: 0, fontWeight: 700 }}>
+
+          <h1
+            style={{
+              fontSize: "26px",
+              margin: 0,
+            }}
+          >
             AI помощник
           </h1>
-        </div>
+        </header>
 
         <section
           style={{
-            background: "#17171c",
-            border: "1px solid #26262b",
+            flex: "1 1 0",
+            minHeight: 0,
+            overflowY: "auto",
+            overscrollBehavior: "contain",
+            background: "var(--moniq-card)",
+            border: "1px solid var(--moniq-border)",
             borderRadius: "22px",
             padding: "16px",
-            marginBottom: "16px",
-            minHeight: "420px",
-            display: "grid",
+            display: "flex",
+            flexDirection: "column",
             gap: "12px",
-            alignContent: "start",
+            scrollbarWidth: "thin",
           }}
         >
           {chat.map((m, i) => (
@@ -110,20 +171,34 @@ export default function AssistantPage() {
               key={i}
               style={{
                 display: "flex",
-                justifyContent: m.role === "user" ? "flex-end" : "flex-start",
+                flexShrink: 0,
+                justifyContent:
+                  m.role === "user"
+                    ? "flex-end"
+                    : "flex-start",
               }}
             >
               <div
                 style={{
                   maxWidth: "85%",
-                  background: m.role === "user" ? "#f59e0b" : "#111114",
-                  color: m.role === "user" ? "#111" : "white",
-                  border: m.role === "user" ? "none" : "1px solid #24242a",
+                  background:
+                    m.role === "user"
+                      ? "var(--moniq-accent)"
+                      : "var(--moniq-input)",
+                  color:
+                    m.role === "user"
+                      ? "#111111"
+                      : "var(--moniq-text)",
+                  border:
+                    m.role === "user"
+                      ? "none"
+                      : "1px solid var(--moniq-border)",
                   borderRadius: "18px",
                   padding: "12px 14px",
                   lineHeight: 1.5,
                   fontSize: "14px",
                   whiteSpace: "pre-wrap",
+                  overflowWrap: "anywhere",
                 }}
               >
                 {m.text}
@@ -131,136 +206,112 @@ export default function AssistantPage() {
             </div>
           ))}
 
-          {loading ? (
-            <div style={{ color: "#8f8f95", fontSize: "14px" }}>
+          {loading && (
+            <div
+              style={{
+                color: "var(--moniq-muted)",
+                fontSize: "14px",
+              }}
+            >
               AI думает...
             </div>
-          ) : null}
+          )}
+
+          <div ref={messagesEndRef} />
         </section>
+
+        {limitReached && (
+          <div
+            style={{
+              flexShrink: 0,
+              marginTop: "10px",
+              padding: "12px",
+              borderRadius: "14px",
+              background: "var(--moniq-input)",
+              border: "1px solid var(--moniq-accent)",
+              color: "var(--moniq-text)",
+              fontSize: "13px",
+              lineHeight: 1.5,
+            }}
+          >
+            <strong>Дневной лимит исчерпан</strong>
+            <div>{limitMessage}</div>
+          </div>
+        )}
 
         <section
           style={{
-            background: "#17171c",
-            border: "1px solid #26262b",
-            borderRadius: "22px",
-            padding: "14px",
-            marginBottom: "16px",
+            flexShrink: 0,
+            background: "var(--moniq-card)",
+            border: "1px solid var(--moniq-border)",
+            borderRadius: "20px",
+            padding: "12px",
+            marginTop: "10px",
           }}
         >
-          <div style={{ display: "grid", gap: "10px" }}>
-            <textarea
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="Например: как мне накопить 500€ за 3 месяца?"
-              rows={4}
-              style={{
-                width: "100%",
-                padding: "12px",
-                borderRadius: "14px",
-                border: "1px solid #333",
-                background: "#111114",
-                color: "white",
-                resize: "none",
-                fontFamily: "Inter, sans-serif",
-              }}
-            />
+          <textarea
+            className="moniq-chat-input"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder={
+              limitReached
+                ? "Лимит на сегодня исчерпан"
+                : "Напиши вопрос о финансах..."
+            }
+            disabled={loading || limitReached}
+            rows={2}
+            style={{
+              width: "100%",
+              boxSizing: "border-box",
+              padding: "12px",
+              borderRadius: "14px",
+              border: "1px solid var(--moniq-border)",
+              background: "var(--moniq-input)",
+              color: "var(--moniq-text)",
+              caretColor: "var(--moniq-text)",
+              resize: "none",
+              fontFamily: "Inter, sans-serif",
+            }}
+          />
 
-            <button
-              onClick={send}
-              disabled={loading}
-              style={{
-                width: "100%",
-                padding: "14px",
-                background: "linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)",
-                border: "none",
-                borderRadius: "16px",
-                fontWeight: 800,
-                color: "#111",
-                cursor: "pointer",
-                opacity: loading ? 0.7 : 1,
-              }}
-            >
-              {loading ? "Отправка..." : "Отправить"}
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={send}
+            disabled={
+              loading ||
+              limitReached ||
+              !message.trim()
+            }
+            style={{
+              width: "100%",
+              padding: "12px",
+              marginTop: "8px",
+              background: "var(--moniq-accent)",
+              border: "none",
+              borderRadius: "14px",
+              fontWeight: 800,
+              color: "#111111",
+              cursor:
+                loading || limitReached
+                  ? "not-allowed"
+                  : "pointer",
+              opacity:
+                loading ||
+                limitReached ||
+                !message.trim()
+                  ? 0.5
+                  : 1,
+            }}
+          >
+            {loading
+              ? "Отправка..."
+              : limitReached
+              ? "Лимит исчерпан"
+              : "Отправить"}
+          </button>
         </section>
 
-        <div
-          style={{
-            position: "fixed",
-            bottom: "16px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            width: "390px",
-            background: "rgba(20,20,24,0.95)",
-            border: "1px solid #2a2a30",
-            borderRadius: "22px",
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr 1fr 1fr 1fr",
-            overflow: "hidden",
-            backdropFilter: "blur(12px)",
-          }}
-        >
-          <Link
-            href="/dashboard"
-            style={{
-              padding: "14px 10px",
-              textAlign: "center",
-              color: "white",
-              textDecoration: "none",
-            }}
-          >
-            Главная
-          </Link>
-
-          <Link
-            href="/analytics"
-            style={{
-              padding: "14px 10px",
-              textAlign: "center",
-              color: "white",
-              textDecoration: "none",
-            }}
-          >
-            Аналитика
-          </Link>
-
-          <Link
-            href="/goals"
-            style={{
-              padding: "14px 10px",
-              textAlign: "center",
-              color: "white",
-              textDecoration: "none",
-            }}
-          >
-            Цель
-          </Link>
-
-          <Link
-            href="/income"
-            style={{
-              padding: "14px 10px",
-              textAlign: "center",
-              color: "white",
-              textDecoration: "none",
-            }}
-          >
-            Доход
-          </Link>
-
-          <Link
-            href="/expenses"
-            style={{
-              padding: "14px 10px",
-              textAlign: "center",
-              color: "white",
-              textDecoration: "none",
-            }}
-          >
-            Расход
-          </Link>
-        </div>
+        <BottomNav />
       </div>
     </main>
   );

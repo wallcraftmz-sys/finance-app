@@ -12,7 +12,7 @@ type Props = {
 export default function FloatingButtonsClient({ isAdmin }: Props) {
   const pathname = usePathname();
 
-  const hideOnRoutes = ["/", "/login", "/register"];
+  const hideOnRoutes = ["/", "/login", "/register", "/admin/support"];
   const shouldHide = hideOnRoutes.includes(pathname);
 
   if (shouldHide) {

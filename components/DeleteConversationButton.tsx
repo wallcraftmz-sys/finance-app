@@ -51,11 +51,13 @@ export default function DeleteConversationButton({ userId }: Props) {
         color: "#fff",
         fontSize: 14,
         fontWeight: 700,
-        padding: "10px 14px",
+        padding: "10px",
+        minWidth: 42,
+        height: 42,
         cursor: loading ? "not-allowed" : "pointer",
       }}
     >
-      {loading ? "Удаление..." : "Удалить переписку"}
+      {loading ? "..." : "🗑️"}
     </button>
   );
 }

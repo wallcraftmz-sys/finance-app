@@ -6,7 +6,10 @@ export async function GET() {
     const user = await getCurrentUser();
 
     if (!user) {
-      return Response.json([], { status: 200 });
+      return Response.json(
+        { error: "Не авторизован" },
+        { status: 401 }
+      );
     }
 
     const messages = await prisma.supportMessage.findMany({
@@ -14,9 +17,17 @@ export async function GET() {
       orderBy: { createdAt: "asc" },
     });
 
-    return Response.json(messages);
+    return Response.json(messages, {
+      headers: {
+        "Cache-Control": "no-store",
+      },
+    });
   } catch (error) {
     console.error("SUPPORT_GET_ERROR", error);
-    return Response.json([], { status: 200 });
+
+    return Response.json(
+      { error: "Ошибка загрузки сообщений" },
+      { status: 500 }
+    );
   }
 }

@@ -1,8 +1,13 @@
+
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { checkRateLimit } from "@/lib/rate-limit";
+import {
+  checkRateLimit,
+  checkDailyAiLimit,
+  refundDailyAiLimit,
+} from "@/lib/rate-limit";
 
 function getOpenAIClient() {
   const apiKey = process.env.OPENAI_API_KEY;
@@ -39,24 +44,33 @@ function shouldUseWebSearch(message: string) {
 }
 
 export async function POST(req: Request) {
+  let reservationId: string | null = null;
+
   try {
-    const openai = getOpenAIClient();
     const user = await getCurrentUser();
 
     if (!user) {
-      return NextResponse.json({ error: "Не авторизован" }, { status: 401 });
+      return NextResponse.json(
+        { error: "Не авторизован" },
+        { status: 401 }
+      );
     }
 
     const body = await req.json();
     const message = String(body.message || "").trim();
 
     if (!message) {
-      return NextResponse.json({ error: "Пустое сообщение" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Пустое сообщение" },
+        { status: 400 }
+      );
     }
 
     if (message.length > 2000) {
       return NextResponse.json(
-        { error: "Сообщение не должно превышать 2000 символов" },
+        {
+          error: "Сообщение не должно превышать 2000 символов",
+        },
         { status: 400 }
       );
     }
@@ -69,7 +83,10 @@ export async function POST(req: Request) {
 
     if (!rateLimit.allowed) {
       return NextResponse.json(
-        { error: "Лимит AI-сообщений исчерпан. Попробуйте позже." },
+        {
+          error:
+            "Лимит AI-сообщений исчерпан. Попробуйте позже.",
+        },
         {
           status: 429,
           headers: {
@@ -79,7 +96,39 @@ export async function POST(req: Request) {
       );
     }
 
-    const [goals, incomes, expenses, previousMessages] = await Promise.all([
+    const dailyLimit = await checkDailyAiLimit(
+      user.id,
+      user.plan
+    );
+
+    if (!dailyLimit.allowed) {
+      return NextResponse.json(
+        {
+          error:
+            user.plan === "PRO"
+              ? "Вы использовали 100 AI-запросов за сегодня. Лимит обновится завтра."
+              : "Вы использовали 5 бесплатных AI-запросов за сегодня. Лимит обновится завтра.",
+          code: "AI_DAILY_LIMIT",
+          remaining: 0,
+        },
+        { status: 429 }
+      );
+    }
+
+    reservationId = dailyLimit.reservationId;
+
+    if (!reservationId) {
+      throw new Error("AI reservation was not created");
+    }
+
+    const openai = getOpenAIClient();
+
+    const [
+      goals,
+      incomes,
+      expenses,
+      previousMessages,
+    ] = await Promise.all([
       prisma.goal.findMany({
         where: { userId: user.id },
         orderBy: { createdAt: "desc" },
@@ -99,42 +148,69 @@ export async function POST(req: Request) {
       }),
     ]);
 
-    const totalIncome = incomes.reduce((sum, item) => sum + (item.amount || 0), 0);
-    const totalExpense = expenses.reduce((sum, item) => sum + (item.amount || 0), 0);
+    const totalIncome = incomes.reduce(
+      (sum, item) => sum + (item.amount || 0),
+      0
+    );
+
+    const totalExpense = expenses.reduce(
+      (sum, item) => sum + (item.amount || 0),
+      0
+    );
+
     const balance = totalIncome - totalExpense;
 
-    // 🔥 AI БЮДЖЕТ
     let dailyBudget = 0;
+
     if (balance > 0) {
       const safeBudget = balance * 0.2;
       dailyBudget = Math.floor(safeBudget / 30);
     }
 
-    // 🔥 ТРЕНД (фикс)
-    const last7Expenses = expenses.slice(0, 7).reduce((sum, e) => sum + (e.amount || 0), 0);
-    const prev7Expenses = expenses.slice(7, 14).reduce((sum, e) => sum + (e.amount || 0), 0);
+    const last7Expenses = expenses
+      .slice(0, 7)
+      .reduce(
+        (sum, e) => sum + (e.amount || 0),
+        0
+      );
+
+    const prev7Expenses = expenses
+      .slice(7, 14)
+      .reduce(
+        (sum, e) => sum + (e.amount || 0),
+        0
+      );
 
     let trendHint = "";
-    if (last7Expenses > prev7Expenses && prev7Expenses > 0) {
+
+    if (
+      last7Expenses > prev7Expenses &&
+      prev7Expenses > 0
+    ) {
       trendHint = "Расходы растут";
     } else if (last7Expenses < prev7Expenses) {
       trendHint = "Расходы снижаются";
     }
 
     const expenseByCategory: Record<string, number> = {};
+
     for (const item of expenses) {
       expenseByCategory[item.category] =
-        (expenseByCategory[item.category] || 0) + (item.amount || 0);
+        (expenseByCategory[item.category] || 0) +
+        (item.amount || 0);
     }
 
-    const sortedCategories = Object.entries(expenseByCategory).sort(
-      (a, b) => b[1] - a[1]
-    );
+    const sortedCategories = Object.entries(
+      expenseByCategory
+    ).sort((a, b) => b[1] - a[1]);
 
     const categorySummary =
       sortedCategories.length > 0
         ? sortedCategories
-            .map(([category, amount]) => `${category}: ${amount}€`)
+            .map(
+              ([category, amount]) =>
+                `${category}: ${amount}€`
+            )
             .join(", ")
         : "Нет расходов";
 
@@ -145,31 +221,40 @@ export async function POST(req: Request) {
 
     const goalSummary =
       goals.length > 0
-        ? goals.map((g) => `${g.title}: цель ${g.targetAmount}€`).join(", ")
+        ? goals
+            .map(
+              (g) =>
+                `${g.title}: цель ${g.targetAmount}€`
+            )
+            .join(", ")
         : "Целей пока нет";
 
-    await prisma.aiMessage.create({
-      data: {
-        userId: user.id,
-        role: "user",
-        content: message,
-      },
-    });
+    const currentDate = new Date()
+      .toISOString()
+      .split("T")[0];
 
-    const currentDate = new Date().toISOString().split("T")[0];
-
-    const memoryMessages: ChatHistoryItem[] = previousMessages
-      .filter((m) => m.role === "user" || m.role === "assistant")
-      .map((m) => ({
-        role: m.role as "user" | "assistant",
-        content: m.content,
-      }));
+    const memoryMessages: ChatHistoryItem[] =
+      previousMessages
+        .filter(
+          (m) =>
+            m.role === "user" ||
+            m.role === "assistant"
+        )
+        .map((m) => ({
+          role: m.role as "user" | "assistant",
+          content: m.content,
+        }));
 
     const historyText =
       memoryMessages.length > 0
         ? memoryMessages
-            .map((m) =>
-              `${m.role === "assistant" ? "Ассистент" : "Пользователь"}: ${m.content}`
+            .map(
+              (m) =>
+                `${
+                  m.role === "assistant"
+                    ? "Ассистент"
+                    : "Пользователь"
+                }: ${m.content}`
             )
             .join("\n")
         : "Истории сообщений пока нет.";
@@ -183,7 +268,11 @@ export async function POST(req: Request) {
 - Все категории: ${categorySummary}
 - Цели: ${goalSummary}
 - Тренд: ${trendHint || "Нет данных"}
-- Дневной бюджет: ${dailyBudget > 0 ? `${dailyBudget}€` : "Нет расчета"}
+- Дневной бюджет: ${
+      dailyBudget > 0
+        ? `${dailyBudget}€`
+        : "Нет расчета"
+    }
 `.trim();
 
     const useWeb = shouldUseWebSearch(message);
@@ -208,30 +297,66 @@ ${financeContext}
 Вопрос:
 ${message}
       `,
-      tools: useWeb ? [{ type: "web_search" }] : [],
-      include: ["web_search_call.action.sources"],
+      tools: useWeb
+        ? [{ type: "web_search" }]
+        : [],
+      include: [
+        "web_search_call.action.sources",
+      ],
       temperature: 0.7,
       max_output_tokens: 900,
     });
 
     const reply =
-      typeof response.output_text === "string" && response.output_text.trim()
+      typeof response.output_text === "string"
         ? response.output_text.trim()
-        : "Ошибка ответа";
+        : "";
 
-    await prisma.aiMessage.create({
-      data: {
-        userId: user.id,
-        role: "assistant",
-        content: reply,
-      },
-    });
+    if (!reply) {
+      throw new Error("OpenAI returned an empty reply");
+    }
+
+    // Сохраняем переписку после получения ответа.
+    await prisma.$transaction([
+      prisma.aiMessage.create({
+        data: {
+          userId: user.id,
+          role: "user",
+          content: message,
+        },
+      }),
+      prisma.aiMessage.create({
+        data: {
+          userId: user.id,
+          role: "assistant",
+          content: reply,
+        },
+      }),
+    ]);
+
+    // Успешный ответ: запрос засчитан.
+    reservationId = null;
 
     return NextResponse.json({
       reply,
+      remaining: dailyLimit.remaining,
     });
   } catch (error) {
     console.error("AI_CHAT_ERROR", error);
+
+    // Если ответ не был успешно обработан,
+    // возвращаем дневной запрос.
+    if (reservationId) {
+      try {
+        await refundDailyAiLimit(reservationId);
+      } catch (refundError) {
+        console.error(
+          "AI_LIMIT_REFUND_ERROR",
+          refundError
+        );
+      }
+    }
+
     return NextResponse.json(
       { error: "Ошибка AI-чата" },
       { status: 500 }

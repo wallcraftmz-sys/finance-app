@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
 import { prisma } from "@/lib/prisma";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { createHash } from "node:crypto";
 
 export async function POST(req: Request) {
   try {
@@ -14,10 +16,34 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+    const clientIp =
+  req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+  "unknown";
 
-    if (password.length < 6) {
+const ipHash = createHash("sha256")
+  .update(clientIp)
+  .digest("hex");
+
+const rateLimit = await checkRateLimit(
+  `register:${ipHash}`,
+  5,
+  900
+);
+
+if (!rateLimit.allowed) {
+  return NextResponse.json(
+    { error: "Слишком много попыток регистрации. Попробуйте позже." },
+    {
+      status: 429,
+      headers: {
+        "Retry-After": String(rateLimit.retryAfter),
+      },
+    }
+  );
+}
+    if (password.length < 8) {
       return NextResponse.json(
-        { error: "Пароль должен быть минимум 6 символов" },
+        { error: "Пароль должен быть минимум 8 символов" },
         { status: 400 }
       );
     }

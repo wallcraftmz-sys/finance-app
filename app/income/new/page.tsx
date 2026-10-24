@@ -124,8 +124,7 @@ export default function NewIncomePage() {
           </select>
 
           <input
-            type="text"
-            placeholder="Дата, например 2026-03-11"
+            type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
             style={{

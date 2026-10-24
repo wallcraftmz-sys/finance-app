@@ -1,12 +1,44 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
 import { prisma } from "@/lib/prisma";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { createHash } from "node:crypto";
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
     const email = String(body.email || "").trim().toLowerCase();
     const password = String(body.password || "");
+    const clientIp = (
+  req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+  "unknown"
+);
+
+const ipHash = createHash("sha256")
+  .update(clientIp)
+  .digest("hex");
+
+const emailHash = createHash("sha256")
+  .update(email)
+  .digest("hex");
+
+const rateLimit = await checkRateLimit(
+  `login:${ipHash}:${emailHash}`,
+  5,
+  900
+);
+
+if (!rateLimit.allowed) {
+  return NextResponse.json(
+    { error: "Слишком много попыток входа. Попробуйте через 15 минут." },
+    {
+      status: 429,
+      headers: {
+        "Retry-After": String(rateLimit.retryAfter),
+      },
+    }
+  );
+}
 
     if (!email || !password) {
       return NextResponse.json(
@@ -21,7 +53,7 @@ export async function POST(req: Request) {
 
     if (!user) {
       return NextResponse.json(
-        { error: "Пользователь не найден" },
+        { error: "Неверный email или пароль" },
         { status: 404 }
       );
     }
@@ -30,7 +62,7 @@ export async function POST(req: Request) {
 
     if (!isValid) {
       return NextResponse.json(
-        { error: "Неверный пароль" },
+        { error: "Неверный email или пароль" },
         { status: 401 }
       );
     }

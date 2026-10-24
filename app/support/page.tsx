@@ -1,7 +1,8 @@
+
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
+import BottomNav from "@/components/BottomNav";
 
 type SupportMessage = {
   id: string;
@@ -11,329 +12,363 @@ type SupportMessage = {
 };
 
 export default function SupportPage() {
-  const router = useRouter();
   const [messages, setMessages] = useState<SupportMessage[]>([]);
   const [text, setText] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [error, setError] = useState("");
 
-  const markAsRead = async () => {
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const firstLoadRef = useRef(true);
+  const lastMessageIdRef = useRef<string | null>(null);
+
+  const load = useCallback(async () => {
     try {
-      await fetch("/api/support/mark-read", {
-        method: "POST",
-      });
-    } catch {}
-  };
-
-  const load = async () => {
-    try {
-      setLoading(true);
-
       const res = await fetch("/api/support/get", {
         cache: "no-store",
       });
 
-      const data = await res.json();
-
-      if (Array.isArray(data)) {
-        setMessages(data);
-      } else {
-        setMessages([]);
+      if (!res.ok) {
+        throw new Error("Не удалось загрузить сообщения");
       }
 
-      await markAsRead();
+      const data: unknown = await res.json();
+
+      if (!Array.isArray(data)) {
+        throw new Error("Неверный формат сообщений");
+      }
+
+      const nextMessages = data as SupportMessage[];
+
+      setMessages(nextMessages);
+      setError("");
+
+      const lastId =
+        nextMessages.length > 0
+          ? nextMessages[nextMessages.length - 1].id
+          : null;
+
+      if (
+        firstLoadRef.current ||
+        lastId !== lastMessageIdRef.current
+      ) {
+        lastMessageIdRef.current = lastId;
+
+        requestAnimationFrame(() => {
+          messagesEndRef.current?.scrollIntoView({
+            behavior: firstLoadRef.current ? "instant" : "smooth",
+            block: "end",
+          });
+
+          firstLoadRef.current = false;
+        });
+      }
+
+      await fetch("/api/support/mark-read", {
+        method: "POST",
+      }).catch(() => {});
     } catch {
-      setMessages([]);
+      setError("Не удалось обновить сообщения.");
     } finally {
       setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    load();
-    const id = setInterval(load, 8000);
-    return () => clearInterval(id);
   }, []);
 
-  const send = async () => {
-    if (!text.trim()) {
-      alert("Напиши сообщение");
-      return;
-    }
+  useEffect(() => {
+    void load();
+
+    const interval = setInterval(() => {
+      void load();
+    }, 8000);
+
+    return () => clearInterval(interval);
+  }, [load]);
+
+  async function send() {
+    const message = text.trim();
+
+    if (!message || sending) return;
+
+    setSending(true);
+    setError("");
 
     try {
-      setSending(true);
-
       const res = await fetch("/api/support", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ message: text }),
+        body: JSON.stringify({ message }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data.error || "Ошибка при отправке");
-        return;
+        throw new Error(
+          data.error || "Не удалось отправить сообщение"
+        );
       }
 
       setText("");
       await load();
-    } catch {
-      alert("Ошибка сети или сервера");
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Ошибка сети или сервера"
+      );
     } finally {
       setSending(false);
     }
-  };
+  }
 
   return (
     <main
       style={{
-        minHeight: "100vh",
-        background: "#0b0f19",
-        color: "#fff",
-        padding: "24px 16px 120px",
+        position: "fixed",
+        inset: 0,
+        height: "100dvh",
+        overflow: "hidden",
+        background: "var(--moniq-bg)",
+        color: "var(--moniq-text)",
+        display: "flex",
+        justifyContent: "center",
+        fontFamily: "Inter, sans-serif",
       }}
     >
-      <div style={{ maxWidth: 760, margin: "0 auto" }}>
-        <div
+      <div
+        style={{
+          width: "100%",
+          maxWidth: "430px",
+          height: "100%",
+          minHeight: 0,
+          display: "flex",
+          flexDirection: "column",
+          padding: "16px 14px 88px",
+          boxSizing: "border-box",
+        }}
+      >
+        <header
           style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: 12,
-            flexWrap: "wrap",
-            marginBottom: 18,
+            flexShrink: 0,
+            paddingBottom: "14px",
           }}
         >
-          <div>
-            <h1
-              style={{
-                margin: 0,
-                fontSize: 32,
-                fontWeight: 700,
-              }}
-            >
-              Поддержка
-            </h1>
-
-            <p
-              style={{
-                margin: "8px 0 0 0",
-                color: "#9ca3af",
-                fontSize: 15,
-                lineHeight: 1.5,
-              }}
-            >
-              Здесь ты можешь написать в поддержку и получить ответ от администратора.
-            </p>
-          </div>
-
-          <button
-            onClick={() => router.push("/dashboard")}
+          <div
             style={{
-              border: "none",
-              borderRadius: 12,
-              background: "#1f2937",
-              color: "#fff",
-              fontSize: 15,
-              fontWeight: 600,
-              padding: "12px 18px",
-              cursor: "pointer",
+              fontSize: "13px",
+              color: "var(--moniq-muted)",
+              marginBottom: "4px",
             }}
           >
-            ← Назад
-          </button>
-        </div>
+            moniq
+          </div>
+
+          <h1
+            style={{
+              fontSize: "26px",
+              margin: 0,
+            }}
+          >
+            Поддержка
+          </h1>
+
+          <p
+            style={{
+              fontSize: "13px",
+              color: "var(--moniq-muted)",
+              margin: "6px 0 0",
+            }}
+          >
+            Напиши нам — ответ появится здесь.
+          </p>
+        </header>
 
         <section
           style={{
-            background: "rgba(17, 24, 39, 0.96)",
-            border: "1px solid rgba(255,255,255,0.08)",
-            borderRadius: 20,
-            boxShadow: "0 18px 45px rgba(0,0,0,0.35)",
-            overflow: "hidden",
+            flex: "1 1 0",
+            minHeight: 0,
+            overflowY: "auto",
+            overscrollBehavior: "contain",
+            background: "var(--moniq-card)",
+            border: "1px solid var(--moniq-border)",
+            borderRadius: "22px",
+            padding: "16px",
+            display: "flex",
+            flexDirection: "column",
+            gap: "12px",
+            scrollbarWidth: "thin",
           }}
         >
-          <div
-            style={{
-              padding: 18,
-              borderBottom: "1px solid rgba(255,255,255,0.06)",
-              background: "rgba(255,255,255,0.02)",
-            }}
-          >
-            <b style={{ fontSize: 16 }}>Чат поддержки</b>
-          </div>
+          {loading && messages.length === 0 ? (
+            <div
+              style={{
+                color: "var(--moniq-muted)",
+                fontSize: "14px",
+              }}
+            >
+              Загрузка сообщений...
+            </div>
+          ) : messages.length === 0 ? (
+            <div
+              style={{
+                color: "var(--moniq-muted)",
+                fontSize: "14px",
+                lineHeight: 1.6,
+              }}
+            >
+              Пока сообщений нет. Напиши свой вопрос ниже.
+            </div>
+          ) : (
+            messages.map((m) => {
+              const isAdmin = m.role === "admin";
 
-          <div
-            style={{
-              minHeight: 360,
-              maxHeight: 520,
-              overflowY: "auto",
-              padding: 18,
-              display: "flex",
-              flexDirection: "column",
-              gap: 12,
-            }}
-          >
-            {loading ? (
-              <div style={{ color: "#9ca3af" }}>Загрузка сообщений...</div>
-            ) : messages.length === 0 ? (
-              <div
-                style={{
-                  color: "#9ca3af",
-                  lineHeight: 1.6,
-                }}
-              >
-                Пока сообщений нет. Напиши свой вопрос ниже.
-              </div>
-            ) : (
-              messages.map((m) => {
-                const isAdmin = m.role === "admin";
-
-                return (
+              return (
+                <div
+                  key={m.id}
+                  style={{
+                    display: "flex",
+                    flexShrink: 0,
+                    justifyContent: isAdmin
+                      ? "flex-start"
+                      : "flex-end",
+                  }}
+                >
                   <div
-                    key={m.id}
                     style={{
-                      display: "flex",
-                      justifyContent: isAdmin ? "flex-start" : "flex-end",
+                      maxWidth: "85%",
+                      background: isAdmin
+                        ? "var(--moniq-input)"
+                        : "var(--moniq-accent)",
+                      color: isAdmin
+                        ? "var(--moniq-text)"
+                        : "#111111",
+                      border: isAdmin
+                        ? "1px solid var(--moniq-border)"
+                        : "none",
+                      borderRadius: "18px",
+                      padding: "12px 14px",
+                      lineHeight: 1.5,
+                      fontSize: "14px",
+                      whiteSpace: "pre-wrap",
+                      overflowWrap: "anywhere",
                     }}
                   >
                     <div
                       style={{
-                        maxWidth: "78%",
-                        padding: "12px 14px",
-                        borderRadius: 16,
-                        background: isAdmin
-                          ? "#1f2937"
-                          : "linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)",
-                        color: isAdmin ? "#fff" : "#111827",
-                        boxShadow: "0 8px 18px rgba(0,0,0,0.18)",
+                        fontSize: "11px",
+                        fontWeight: 700,
+                        marginBottom: "5px",
+                        opacity: 0.8,
                       }}
                     >
-                      <div
-                        style={{
-                          fontSize: 12,
-                          fontWeight: 700,
-                          marginBottom: 6,
-                          opacity: 0.85,
-                        }}
-                      >
-                        {isAdmin ? "Поддержка" : "Ты"}
-                      </div>
+                      {isAdmin ? "Поддержка Moniq" : "Ты"}
+                    </div>
 
-                      <div
-                        style={{
-                          whiteSpace: "pre-wrap",
-                          lineHeight: 1.5,
-                          fontSize: 15,
-                        }}
-                      >
-                        {m.message}
-                      </div>
+                    <div>{m.message}</div>
 
-                      <div
-                        style={{
-                          marginTop: 8,
-                          fontSize: 11,
-                          opacity: 0.75,
-                        }}
-                      >
-                        {new Date(m.createdAt).toLocaleString()}
-                      </div>
+                    <div
+                      style={{
+                        fontSize: "10px",
+                        marginTop: "6px",
+                        opacity: 0.7,
+                      }}
+                    >
+                      {new Date(m.createdAt).toLocaleString(
+                        "ru-RU",
+                        {
+                          day: "2-digit",
+                          month: "2-digit",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        }
+                      )}
                     </div>
                   </div>
-                );
-              })
-            )}
-          </div>
+                </div>
+              );
+            })
+          )}
 
+          <div ref={messagesEndRef} />
+        </section>
+
+        {error && (
           <div
+            role="alert"
             style={{
-              padding: 18,
-              borderTop: "1px solid rgba(255,255,255,0.06)",
-              background: "rgba(255,255,255,0.02)",
+              flexShrink: 0,
+              marginTop: "10px",
+              padding: "10px 12px",
+              borderRadius: "12px",
+              background: "var(--moniq-input)",
+              border: "1px solid var(--moniq-border)",
+              color: "var(--moniq-text)",
+              fontSize: "13px",
             }}
           >
-            <label
-              htmlFor="support-message"
-              style={{
-                display: "block",
-                fontSize: 14,
-                fontWeight: 600,
-                marginBottom: 10,
-                color: "#e5e7eb",
-              }}
-            >
-              Новое сообщение
-            </label>
-
-            <textarea
-              id="support-message"
-              placeholder="Напиши сообщение..."
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              rows={5}
-              style={{
-                width: "100%",
-                resize: "vertical",
-                minHeight: 120,
-                borderRadius: 14,
-                border: "1px solid rgba(255,255,255,0.10)",
-                background: "#0f172a",
-                color: "#fff",
-                padding: "14px 16px",
-                fontSize: 15,
-                lineHeight: 1.5,
-                outline: "none",
-                boxSizing: "border-box",
-              }}
-            />
-
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                gap: 14,
-                marginTop: 14,
-                flexWrap: "wrap",
-              }}
-            >
-              <span
-                style={{
-                  color: "#9ca3af",
-                  fontSize: 13,
-                }}
-              >
-                Ответ администратора появится здесь же в чате.
-              </span>
-
-              <button
-                onClick={send}
-                disabled={sending}
-                style={{
-                  border: "none",
-                  borderRadius: 14,
-                  background: sending
-                    ? "#374151"
-                    : "linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)",
-                  color: "#111827",
-                  fontSize: 15,
-                  fontWeight: 700,
-                  padding: "13px 22px",
-                  cursor: sending ? "not-allowed" : "pointer",
-                  minWidth: 160,
-                  boxShadow: "0 10px 24px rgba(0,0,0,0.25)",
-                }}
-              >
-                {sending ? "Отправка..." : "Отправить"}
-              </button>
-            </div>
+            {error}
           </div>
+        )}
+
+        <section
+          style={{
+            flexShrink: 0,
+            background: "var(--moniq-card)",
+            border: "1px solid var(--moniq-border)",
+            borderRadius: "20px",
+            padding: "12px",
+            marginTop: "10px",
+          }}
+        >
+          <textarea
+            className="moniq-chat-input"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Напиши сообщение..."
+            disabled={sending}
+            rows={2}
+            style={{
+              width: "100%",
+              boxSizing: "border-box",
+              padding: "12px",
+              borderRadius: "14px",
+              border: "1px solid var(--moniq-border)",
+              background: "var(--moniq-input)",
+              color: "var(--moniq-text)",
+              caretColor: "var(--moniq-text)",
+              resize: "none",
+              fontFamily: "Inter, sans-serif",
+              fontSize: "14px",
+            }}
+          />
+
+          <button
+            type="button"
+            onClick={send}
+            disabled={sending || !text.trim()}
+            style={{
+              width: "100%",
+              padding: "12px",
+              marginTop: "8px",
+              background: "var(--moniq-accent)",
+              border: "none",
+              borderRadius: "14px",
+              fontWeight: 800,
+              color: "#111111",
+              cursor:
+                sending || !text.trim()
+                  ? "not-allowed"
+                  : "pointer",
+              opacity:
+                sending || !text.trim() ? 0.5 : 1,
+            }}
+          >
+            {sending ? "Отправка..." : "Отправить"}
+          </button>
         </section>
+
+        <BottomNav />
       </div>
     </main>
   );

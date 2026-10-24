@@ -6,7 +6,19 @@ import BottomNav from "@/components/BottomNav";
 import Link from "next/link";
 import type { ExchangeRates } from "@/lib/exchange-rates";
 import { useMemo } from "react";
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Legend,
+} from "recharts";
 
 type Expense = {
   id: string;
@@ -31,6 +43,7 @@ type Props = {
   incomes: Income[];
   primaryCurrency: string;
   exchangeRates: ExchangeRates | null;
+  plan: string;
 };
 
 const COLORS = ["var(--moniq-accent)", "#f59e0b", "#fcd34d", "#facc15", "#fde68a", "#ca8a04"];
@@ -40,7 +53,9 @@ export default function AnalyticsClient({
   incomes,
   primaryCurrency,
   exchangeRates,
+  plan,
 }: Props) {
+  const isPro = plan === "PRO";
   const analytics = useMemo(() => {
     const rates = exchangeRates?.rates;
     const to = primaryCurrency as keyof NonNullable<typeof rates>;
@@ -87,6 +102,88 @@ export default function AnalyticsClient({
     };
   }, [expenses, incomes, exchangeRates, primaryCurrency]);
 
+    const monthlyAnalytics = useMemo(() => {
+    if (!isPro) return [];
+
+    const rates = exchangeRates?.rates;
+    const to = primaryCurrency as keyof NonNullable<typeof rates>;
+
+    if (!rates || !rates[to]) return [];
+
+    const months: Record<
+      string,
+      { month: string; income: number; expense: number }
+    > = {};
+
+    const getMonth = (date: string) => {
+      const value = date.trim();
+      let year: number;
+      let month: number;
+      let day: number;
+
+      if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+        [year, month, day] = value.split("-").map(Number);
+      } else if (/^\d{2}\.\d{2}\.\d{4}$/.test(value)) {
+        [day, month, year] = value.split(".").map(Number);
+      } else if (/^\d{4}-\d{2}-\d{2}T/.test(value)) {
+        [year, month, day] = value.slice(0, 10).split("-").map(Number);
+      } else {
+        return null;
+      }
+
+      const parsed = new Date(Date.UTC(year, month - 1, day));
+
+      if (
+        parsed.getUTCFullYear() !== year ||
+        parsed.getUTCMonth() !== month - 1 ||
+        parsed.getUTCDate() !== day
+      ) {
+        return null;
+      }
+
+      return `${year}-${String(month).padStart(2, "0")}`;
+    };
+
+    const convert = (amount: number, currency: string) => {
+      const from = (currency || "EUR") as keyof typeof rates;
+
+      if (!Number.isFinite(amount) || !rates[from]) return null;
+
+      const result = (amount / rates[from]) * rates[to];
+
+      return Number.isFinite(result) ? result : null;
+    };
+
+    for (const item of incomes) {
+      const month = getMonth(item.date);
+      const amount = convert(item.amount, item.currency);
+
+      if (!month || amount === null) continue;
+
+      if (!months[month]) {
+        months[month] = { month, income: 0, expense: 0 };
+      }
+
+      months[month].income += amount;
+    }
+
+    for (const item of expenses) {
+      const month = getMonth(item.date);
+      const amount = convert(item.amount, item.currency);
+
+      if (!month || amount === null) continue;
+
+      if (!months[month]) {
+        months[month] = { month, income: 0, expense: 0 };
+      }
+
+      months[month].expense += amount;
+    }
+
+    return Object.values(months).sort((a, b) =>
+      a.month.localeCompare(b.month)
+    );
+  }, [isPro, incomes, expenses, exchangeRates, primaryCurrency]);
   const totalIncome = analytics?.totalIncome ?? null;
   const totalExpense = analytics?.totalExpense ?? null;
   const balance = analytics?.balance ?? null;
@@ -261,7 +358,89 @@ export default function AnalyticsClient({
             </>
           )}
         </section>
+                  {isPro && (
+          <section
+            style={{
+              background: "var(--moniq-card)",
+              border: "1px solid #26262b",
+              borderRadius: "22px",
+              padding: "18px",
+              marginBottom: "16px",
+            }}
+          >
+            <div
+              style={{
+                fontSize: "18px",
+                fontWeight: 700,
+                marginBottom: "6px",
+              }}
+            >
+              Доходы и расходы по месяцам
+            </div>
 
+            <div
+              style={{
+                color: "var(--moniq-muted)",
+                fontSize: "12px",
+                marginBottom: "18px",
+              }}
+            >
+              Расширенная аналитика Moniq PRO
+            </div>
+
+            {monthlyAnalytics.length === 0 ? (
+              <div
+                style={{
+                  color: "var(--moniq-muted)",
+                  fontSize: "14px",
+                }}
+              >
+                Пока нет операций с корректными датами для графика.
+              </div>
+            ) : (
+              <div style={{ width: "100%", height: "300px" }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={monthlyAnalytics}
+                    margin={{ top: 10, right: 5, left: -20, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+
+                    <XAxis
+                      dataKey="month"
+                      tick={{ fill: "var(--moniq-muted)", fontSize: 11 }}
+                    />
+
+                    <YAxis
+                      tick={{ fill: "var(--moniq-muted)", fontSize: 11 }}
+                      width={55}
+                    />
+
+                    <Tooltip
+                      formatter={(value) => formatMoney(Number(value))}
+                    />
+
+                    <Legend />
+
+                    <Bar
+                      dataKey="income"
+                      name="Доходы"
+                      fill="var(--moniq-accent)"
+                      radius={[5, 5, 0, 0]}
+                    />
+
+                    <Bar
+                      dataKey="expense"
+                      name="Расходы"
+                      fill="#f59e0b"
+                      radius={[5, 5, 0, 0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+          </section>
+        )}
         <BottomNav />
       </div>
     </main>

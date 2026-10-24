@@ -70,7 +70,7 @@ export default function AdminSupportReplyBox({ userId }: Props) {
         value={message}
         onChange={(e) => setMessage(e.target.value)}
         placeholder="Напиши ответ..."
-        rows={4}
+        rows={2}
         style={{
           width: "100%",
           borderRadius: 14,
@@ -82,7 +82,10 @@ export default function AdminSupportReplyBox({ userId }: Props) {
           lineHeight: 1.5,
           outline: "none",
           boxSizing: "border-box",
-          resize: "vertical",
+          resize: "none",
+          height: "54px",
+          minHeight: "54px",
+          maxHeight: "54px",
         }}
       />
 
@@ -94,9 +97,8 @@ export default function AdminSupportReplyBox({ userId }: Props) {
           style={{
             border: "none",
             borderRadius: 12,
-            background: sending
-              ? "#374151"
-              : "linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)",
+            background: "var(--moniq-accent)",
+            opacity: sending ? 0.5 : 1,
             color: "#111827",
             fontSize: 15,
             fontWeight: 700,

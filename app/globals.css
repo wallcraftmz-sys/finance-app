@@ -88,3 +88,279 @@ body {
     grid-column: 1 / -1;
   }
 }
+.moniq-chat-input::placeholder {
+  color: var(--moniq-muted);
+  opacity: 1;
+}
+
+/* Moniq — административный мессенджер */
+
+.moniq-admin-messenger {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  height: min(75dvh, 750px);
+  min-height: 420px;
+  overflow: hidden;
+  background: var(--moniq-card);
+  border: 1px solid var(--moniq-border);
+  border-radius: 20px;
+}
+
+.moniq-admin-inbox {
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  border-right: 1px solid var(--moniq-border);
+}
+
+.moniq-admin-inbox-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px;
+  border-bottom: 1px solid var(--moniq-border);
+}
+
+.moniq-admin-inbox-header h2 {
+  margin: 0;
+  font-size: 18px;
+  color: var(--moniq-text);
+}
+
+.moniq-admin-inbox-header span {
+  color: var(--moniq-accent);
+  font-weight: 700;
+}
+
+.moniq-admin-empty {
+  padding: 18px;
+  color: var(--moniq-muted);
+}
+
+.moniq-admin-conversation {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border: 0;
+  border-bottom: 1px solid var(--moniq-border);
+  background: transparent;
+  color: var(--moniq-text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.moniq-admin-conversation:hover,
+.moniq-admin-conversation-active {
+  background: var(--moniq-input);
+}
+
+.moniq-admin-avatar {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--moniq-accent);
+  color: #111;
+  font-weight: 800;
+}
+
+.moniq-admin-conversation-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.moniq-admin-conversation-info strong,
+.moniq-admin-conversation-info span {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.moniq-admin-conversation-info strong {
+  font-size: 13px;
+}
+
+.moniq-admin-conversation-info span {
+  font-size: 12px;
+  color: var(--moniq-muted);
+}
+
+.moniq-admin-chat {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.moniq-admin-chat-empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  color: var(--moniq-muted);
+  text-align: center;
+}
+
+.moniq-admin-chat-header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-bottom: 1px solid var(--moniq-border);
+}
+
+.moniq-admin-back {
+  display: none;
+  border: 0;
+  background: var(--moniq-input);
+  color: var(--moniq-text);
+  border-radius: 10px;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.moniq-admin-chat-user {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.moniq-admin-chat-user strong {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--moniq-text);
+  font-size: 14px;
+}
+
+.moniq-admin-chat-user span {
+  font-size: 12px;
+  color: var(--moniq-muted);
+}
+
+.moniq-admin-chat-messages {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: var(--moniq-bg);
+}
+
+.moniq-admin-message-row {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.moniq-admin-message-right {
+  justify-content: flex-end;
+}
+
+.moniq-admin-message {
+  max-width: 85%;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: var(--moniq-input);
+  color: var(--moniq-text);
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.moniq-admin-message-admin {
+  background: var(--moniq-accent);
+  color: #111;
+}
+
+.moniq-admin-message small {
+  display: block;
+  margin-top: 8px;
+  opacity: 0.75;
+  font-size: 10px;
+}
+
+.moniq-admin-chat-reply {
+  flex-shrink: 0;
+  padding: 0 14px 12px;
+  border-top: 1px solid var(--moniq-border);
+  background: var(--moniq-card);
+}
+
+.moniq-admin-chat-reply textarea {
+  min-height: 55px;
+  max-height: 110px;
+}
+
+@media (max-width: 650px) {
+  .moniq-admin-messenger {
+    display: block;
+    height: calc(100dvh - 175px);
+    min-height: 350px;
+    border-radius: 16px;
+  }
+
+  .moniq-admin-inbox,
+  .moniq-admin-chat {
+    height: 100%;
+  }
+
+  .moniq-admin-mobile-hidden {
+    display: none;
+  }
+
+  .moniq-admin-back {
+    display: inline-flex;
+  }
+
+  .moniq-admin-chat-header {
+    flex-wrap: wrap;
+  }
+
+  .moniq-admin-chat-header > :last-child {
+    margin-left: auto;
+  }
+
+  .moniq-admin-chat-reply {
+    padding: 0 10px 10px;
+  }
+}
+
+/* Moniq — компактный ответ администратора */
+
+.moniq-admin-chat-reply textarea {
+  height: 54px !important;
+  min-height: 54px !important;
+  max-height: 54px !important;
+  resize: none !important;
+}
+
+@media (max-width: 650px) {
+  .moniq-admin-chat-reply {
+    padding: 0 10px 8px;
+  }
+
+  .moniq-admin-chat-reply textarea {
+    height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
+  }
+
+  .moniq-admin-chat-reply button {
+    min-width: 110px !important;
+    padding: 10px 14px !important;
+  }
+}

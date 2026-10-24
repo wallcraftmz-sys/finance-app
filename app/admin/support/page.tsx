@@ -1,223 +1,153 @@
+
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
-import AdminSupportReplyBox from "@/components/AdminSupportReplyBox";
-import DeleteConversationButton from "@/components/DeleteConversationButton";
-import type { Prisma } from "@prisma/client";
-
-type SupportMessageWithUser = Prisma.SupportMessageGetPayload<{
-  include: { user: true };
-}>;
+import AdminSupportMessenger from "@/components/AdminSupportMessenger";
 
 export default async function AdminSupportPage() {
   const currentUser = await getCurrentUser();
 
-  if (!currentUser || currentUser.email !== process.env.ADMIN_EMAIL) {
-    return <div style={{ padding: 20 }}>Доступ запрещён</div>;
+  const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+
+  if (
+    !currentUser ||
+    !adminEmail ||
+    currentUser.email.trim().toLowerCase() !== adminEmail
+  ) {
+    return (
+      <main
+        style={{
+          minHeight: "100vh",
+          background: "var(--moniq-bg)",
+          color: "var(--moniq-text)",
+          padding: "24px",
+        }}
+      >
+        Доступ запрещён
+      </main>
+    );
   }
 
-  await prisma.supportMessage.updateMany({
-    where: {
-      isRead: false,
-    },
-    data: {
-      isRead: true,
+  const messages = await prisma.supportMessage.findMany({
+    orderBy: { createdAt: "asc" },
+    include: {
+      user: {
+        select: {
+          email: true,
+        },
+      },
     },
   });
 
-  const messages: SupportMessageWithUser[] =
-    await prisma.supportMessage.findMany({
-      orderBy: { createdAt: "asc" },
-      include: {
-        user: true,
-      },
-    });
-
-  const grouped = new Map<string, SupportMessageWithUser[]>();
+  const grouped = new Map<
+    string,
+    {
+      userId: string;
+      email: string;
+      items: {
+        id: string;
+        role: string;
+        message: string;
+        createdAt: string;
+      }[];
+      lastCreatedAt: string;
+    }
+  >();
 
   for (const message of messages) {
-    const key = message.userId;
-
-    if (!grouped.has(key)) {
-      grouped.set(key, []);
+    if (!grouped.has(message.userId)) {
+      grouped.set(message.userId, {
+        userId: message.userId,
+        email: message.user.email,
+        items: [],
+        lastCreatedAt: message.createdAt.toISOString(),
+      });
     }
 
-    grouped.get(key)!.push(message);
+    const conversation = grouped.get(message.userId)!;
+
+    conversation.items.push({
+      id: message.id,
+      role: message.role,
+      message: message.message,
+      createdAt: message.createdAt.toISOString(),
+    });
+
+    conversation.lastCreatedAt =
+      message.createdAt.toISOString();
   }
 
-  const conversations = Array.from(grouped.entries()).map(([userId, items]) => {
-    const lastMessage = items[items.length - 1];
-
-    return {
-      userId,
-      email: items[0].user.email,
-      items,
-      lastCreatedAt: lastMessage.createdAt,
-    };
-  });
-
-  conversations.sort(
+  const conversations = Array.from(grouped.values()).sort(
     (a, b) =>
-      new Date(b.lastCreatedAt).getTime() - new Date(a.lastCreatedAt).getTime()
+      new Date(b.lastCreatedAt).getTime() -
+      new Date(a.lastCreatedAt).getTime()
   );
 
   return (
     <main
       style={{
-        minHeight: "100vh",
-        background: "#0b0f19",
-        color: "#fff",
-        padding: "32px 16px 120px",
+        minHeight: "100dvh",
+        background: "var(--moniq-bg)",
+        color: "var(--moniq-text)",
+        padding: "16px 14px 30px",
+        fontFamily: "Inter, sans-serif",
       }}
     >
-      <div style={{ maxWidth: 980, margin: "0 auto" }}>
-        <a
-          href="/dashboard"
+      <div
+        style={{
+          maxWidth: "1100px",
+          margin: "0 auto",
+        }}
+      >
+        <header
           style={{
-            display: "inline-block",
-            marginBottom: 20,
-            padding: "10px 16px",
-            borderRadius: 10,
-            background: "#111827",
-            color: "#fff",
-            textDecoration: "none",
-            fontWeight: 600,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "12px",
+            marginBottom: "16px",
           }}
         >
-          ← Назад
-        </a>
+          <div>
+            <div
+              style={{
+                fontSize: "12px",
+                color: "var(--moniq-muted)",
+                marginBottom: "4px",
+              }}
+            >
+              moniq
+            </div>
 
-        <h1 style={{ fontSize: 32, marginBottom: 20 }}>Поддержка</h1>
+            <h1
+              style={{
+                fontSize: "24px",
+                margin: 0,
+              }}
+            >
+              Поддержка
+            </h1>
+          </div>
 
-        {conversations.length === 0 ? (
-          <div
+          <a
+            href="/dashboard"
             style={{
-              background: "rgba(17, 24, 39, 0.95)",
-              border: "1px solid rgba(255,255,255,0.08)",
-              borderRadius: 20,
-              padding: 20,
+              padding: "10px 12px",
+              borderRadius: "12px",
+              background: "var(--moniq-card)",
+              border: "1px solid var(--moniq-border)",
+              color: "var(--moniq-text)",
+              textDecoration: "none",
+              fontSize: "13px",
+              fontWeight: 600,
             }}
           >
-            Сообщений пока нет
-          </div>
-        ) : (
-          <div style={{ display: "grid", gap: 18 }}>
-            {conversations.map((conversation) => (
-              <section
-                key={conversation.userId}
-                style={{
-                  background: "rgba(17, 24, 39, 0.95)",
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  borderRadius: 20,
-                  padding: 18,
-                  boxShadow: "0 14px 30px rgba(0,0,0,0.25)",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    gap: 12,
-                    flexWrap: "wrap",
-                    marginBottom: 16,
-                    alignItems: "flex-start",
-                  }}
-                >
-                  <div>
-                    <div style={{ fontSize: 20, fontWeight: 700 }}>
-                      {conversation.email}
-                    </div>
-                    <div style={{ color: "#9ca3af", fontSize: 13, marginTop: 4 }}>
-                      userId: {conversation.userId}
-                    </div>
-                  </div>
+            ← Назад
+          </a>
+        </header>
 
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: 10,
-                      alignItems: "center",
-                      flexWrap: "wrap",
-                    }}
-                  >
-                    <div style={{ color: "#9ca3af", fontSize: 14 }}>
-                      {new Date(conversation.lastCreatedAt).toLocaleString()}
-                    </div>
-
-                    <DeleteConversationButton userId={conversation.userId} />
-                  </div>
-                </div>
-
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 10,
-                  }}
-                >
-                  {conversation.items.map((m) => {
-                    const isAdmin = m.role === "admin";
-
-                    return (
-                      <div
-                        key={m.id}
-                        style={{
-                          display: "flex",
-                          justifyContent: isAdmin ? "flex-end" : "flex-start",
-                        }}
-                      >
-                        <div
-                          style={{
-                            maxWidth: "78%",
-                            padding: "12px 14px",
-                            borderRadius: 16,
-                            background: isAdmin
-                              ? "linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)"
-                              : "#1f2937",
-                            color: isAdmin ? "#111827" : "#fff",
-                            boxShadow: "0 8px 18px rgba(0,0,0,0.18)",
-                          }}
-                        >
-                          <div
-                            style={{
-                              fontSize: 12,
-                              fontWeight: 700,
-                              marginBottom: 6,
-                              opacity: 0.85,
-                            }}
-                          >
-                            {isAdmin ? "Ты (админ)" : "Пользователь"}
-                          </div>
-
-                          <div
-                            style={{
-                              whiteSpace: "pre-wrap",
-                              lineHeight: 1.5,
-                              fontSize: 15,
-                            }}
-                          >
-                            {m.message}
-                          </div>
-
-                          <div
-                            style={{
-                              marginTop: 8,
-                              fontSize: 11,
-                              opacity: 0.75,
-                            }}
-                          >
-                            {new Date(m.createdAt).toLocaleString()}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                <AdminSupportReplyBox userId={conversation.userId} />
-              </section>
-            ))}
-          </div>
-        )}
+        <AdminSupportMessenger
+          conversations={conversations}
+        />
       </div>
     </main>
   );
