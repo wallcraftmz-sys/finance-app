@@ -1,10 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { translate, useMoniqLanguage } from "@/lib/moniq-language";
 import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const language = useMoniqLanguage();
+  const t = (ru: string, en: string, lv: string) => translate(language, ru, en, lv);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -34,10 +37,10 @@ export default function RegisterPage() {
         return;
       }
 
-      alert("Регистрация успешна");
+      alert(t("Регистрация успешна", "Registration successful", "Reģistrācija veiksmīga"));
       router.push("/login");
     } catch (err) {
-      setError("Ошибка сети");
+      setError(t("Ошибка сети", "Network error", "Tīkla kļūda"));
     } finally {
       setLoading(false);
     }
@@ -66,7 +69,7 @@ export default function RegisterPage() {
         }}
       >
         <h1 style={{ fontSize: "28px", marginTop: 0, marginBottom: "18px" }}>
-          Регистрация
+          {t("Регистрация", "Registration", "Reģistrācija")}
         </h1>
 
         <div style={{ display: "grid", gap: "12px" }}>
@@ -86,7 +89,7 @@ export default function RegisterPage() {
 
           <input
             type="password"
-            placeholder="Пароль"
+            placeholder={t("Пароль", "Password", "Parole")}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             style={{
@@ -128,7 +131,7 @@ export default function RegisterPage() {
               opacity: loading ? 0.7 : 1,
             }}
           >
-            {loading ? "Создание..." : "Создать аккаунт"}
+            {loading ? t("Создание...", "Creating...", "Izveido...") : t("Создать аккаунт", "Create account", "Izveidot kontu")}
           </button>
           <div style={{ marginTop: "16px", textAlign: "center" }}>
   <a
@@ -139,7 +142,7 @@ export default function RegisterPage() {
       fontSize: "13px",
     }}
   >
-    Политика конфиденциальности
+    {t("Политика конфиденциальности", "Privacy policy", "Privātuma politika")}
   </a>
 </div>
         </div>
