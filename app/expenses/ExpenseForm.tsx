@@ -3,6 +3,7 @@
 import TransactionDateField from "@/components/TransactionDateField";
 import { dateForInput } from "@/lib/transaction-date";
 import { useState } from "react";
+import { translate, useMoniqLanguage } from "@/lib/moniq-language";
 import { useRouter } from "next/navigation";
 
 type Expense = {
@@ -18,6 +19,8 @@ const categories = ["Еда", "Транспорт", "Жилье", "Подпис�
 
 export default function ExpenseForm({ expense }: { expense?: Expense }) {
   const router = useRouter();
+  const language = useMoniqLanguage();
+  const t = (ru: string, en: string, lv: string) => translate(language, ru, en, lv);
 
   const [amount, setAmount] = useState(expense ? String(expense.amount) : "");
   const [category, setCategory] = useState(expense?.category ?? categories[0]);
@@ -144,17 +147,17 @@ export default function ExpenseForm({ expense }: { expense?: Expense }) {
             fontWeight: 600,
           }}
         >
-          ← Назад к расходам
+          ← {t("Назад к расходам", "Back to expenses", "Atpakaļ pie izdevumiem")}
         </button>
 
         <h1 style={{ fontSize: "28px", marginBottom: "20px" }}>
-          {expense ? "Изменить расход" : "Добавить расход"}
+          {expense ? t("Изменить расход", "Edit expense", "Rediģēt izdevumu") : t("Добавить расход", "Add expense", "Pievienot izdevumu")}
         </h1>
 
         <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr)", gap: "12px" }}>
           <input
             type="number"
-            placeholder="Сумма"
+            placeholder={t("Сумма", "Amount", "Summa")}
             aria-label={expense ? `Сумма (${expense.currency || "EUR"})` : "Сумма"}
             step="0.01"
             min="0.01"
@@ -170,7 +173,7 @@ export default function ExpenseForm({ expense }: { expense?: Expense }) {
           />
 
           <select
-            aria-label="Категория"
+            aria-label={t("Категория", "Category", "Kategorija")}
             value={category}
             onChange={(e) => setCategory(e.target.value)}
             style={{
@@ -190,7 +193,7 @@ export default function ExpenseForm({ expense }: { expense?: Expense }) {
           <TransactionDateField value={date} onChange={setDate} />
 
           <textarea
-            placeholder="Комментарий"
+            placeholder={t("Комментарий", "Comment", "Komentārs")}
             rows={4}
             value={note}
             onChange={(e) => setNote(e.target.value)}
@@ -218,7 +221,7 @@ export default function ExpenseForm({ expense }: { expense?: Expense }) {
               opacity: loading ? 0.7 : 1,
             }}
           >
-            {loading ? "Сохранение..." : "Сохранить расход"}
+            {loading ? t("Сохранение...", "Saving...", "Saglabā...") : t("Сохранить расход", "Save expense", "Saglabāt izdevumu")}
           </button>
         </div>
       </div>
