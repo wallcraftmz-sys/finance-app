@@ -1,3 +1,5 @@
+import { cookies } from "next/headers";
+import LanguageSelector from "./LanguageSelector";
 
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -38,6 +40,18 @@ export default async function SettingsPage() {
   }
 
   const isPro = user.plan === "PRO";
+  const selected = (await cookies()).get("moniq_language")?.value;
+  const lang = selected === "en" || selected === "lv" ? selected : "ru";
+  const tr = {
+    ru: { settings: "Настройки", language: "Язык приложения", profile: "Мой профиль", profileDesc: "Фото, имя, электронная почта", currency: "Основная валюта", appearance: "Внешний вид", appearanceDesc: "Темы, фон, карточки, кнопки", security: "Безопасность", securityDesc: "Пароль и активные сеансы", delete: "Удалить аккаунт", free: "БЕСПЛАТНО", proActive: "У вас активен тариф Moniq PRO.", liteActive: "Вы используете бесплатный тариф Moniq LITE.", soon: "Moniq PRO — скоро", soonDesc: "Мы готовим расширенные возможности управления финансами. Информация о подписке появится позже." },
+    en: { settings: "Settings", language: "App language", profile: "My profile", profileDesc: "Photo, name, email", currency: "Primary currency", appearance: "Appearance", appearanceDesc: "Themes, background, cards, buttons", security: "Security", securityDesc: "Password and active sessions", delete: "Delete account", free: "FREE", proActive: "Your Moniq PRO subscription is active.", liteActive: "You are using the free Moniq LITE plan.", soon: "Moniq PRO — coming soon", soonDesc: "We are preparing advanced financial management features. Subscription details will be available later." },
+    lv: { settings: "Iestatījumi", language: "Lietotnes valoda", profile: "Mans profils", profileDesc: "Foto, vārds, e-pasts", currency: "Pamatvalūta", appearance: "Izskats", appearanceDesc: "Motīvi, fons, kartītes, pogas", security: "Drošība", securityDesc: "Parole un aktīvās sesijas", delete: "Dzēst kontu", free: "BEZMAKSAS", proActive: "Jūsu Moniq PRO abonements ir aktīvs.", liteActive: "Jūs izmantojat bezmaksas Moniq LITE plānu.", soon: "Moniq PRO — drīzumā", soonDesc: "Mēs gatavojam papildu finanšu pārvaldības iespējas. Informācija par abonementu būs pieejama vēlāk." },
+  }[lang];
+  const localizedSections = sections.map((section, index) => ({
+    ...section,
+    title: [tr.profile, tr.currency, tr.appearance, tr.security][index],
+    description: [tr.profileDesc, "EUR — Euro (€)", tr.appearanceDesc, tr.securityDesc][index],
+  }));
 
   return (
     <main
@@ -76,7 +90,7 @@ export default async function SettingsPage() {
               margin: 0,
             }}
           >
-            Настройки
+            {tr.settings}
           </h1>
 
           <span
@@ -98,7 +112,7 @@ export default async function SettingsPage() {
             marginBottom: 18,
           }}
         >
-          {sections.map((section, index) => (
+          {localizedSections.map((section, index) => (
             <Link
               key={section.href}
               href={section.href}
@@ -150,6 +164,11 @@ export default async function SettingsPage() {
               </span>
             </Link>
           ))}
+        </section>
+
+        <section style={{ background: "var(--moniq-card)", borderRadius: 22, padding: 18, marginBottom: 18 }}>
+          <label style={{ display: "block", fontSize: 16, fontWeight: 700, marginBottom: 12 }}>{tr.language}</label>
+          <LanguageSelector initialLanguage={lang} />
         </section>
 
         {/* Тариф Moniq */}
@@ -224,7 +243,7 @@ export default async function SettingsPage() {
                   marginBottom: 8,
                 }}
               >
-                🚀 Moniq PRO — скоро
+                🚀 {tr.soon}
               </div>
 
               <p
@@ -235,9 +254,7 @@ export default async function SettingsPage() {
                   margin: 0,
                 }}
               >
-                Мы готовим расширенные возможности
-                управления финансами. Информация
-                о подписке появится позже.
+                {tr.soonDesc}
               </p>
             </div>
           )}
@@ -262,7 +279,7 @@ export default async function SettingsPage() {
               textDecoration: "none",
             }}
           >
-            🗑 Удалить аккаунт
+            🗑 {tr.delete}
           </Link>
         </section>
       </div>
