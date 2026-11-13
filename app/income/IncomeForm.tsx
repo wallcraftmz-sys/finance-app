@@ -104,7 +104,7 @@ export default function IncomeForm({ income }: { income?: Income }) {
           {income ? "Изменить доход" : "Добавить доход"}
         </h1>
 
-        <div style={{ display: "grid", gap: "12px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr)", gap: "12px" }}>
           <input
             type="number"
             placeholder="Сумма"

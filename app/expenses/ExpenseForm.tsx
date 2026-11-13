@@ -151,7 +151,7 @@ export default function ExpenseForm({ expense }: { expense?: Expense }) {
           {expense ? "Изменить расход" : "Добавить расход"}
         </h1>
 
-        <div style={{ display: "grid", gap: "12px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr)", gap: "12px" }}>
           <input
             type="number"
             placeholder="Сумма"

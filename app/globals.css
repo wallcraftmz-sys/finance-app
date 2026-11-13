@@ -419,6 +419,7 @@ body {
 
 .transaction-date {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 6px;
   min-width: 0;
   color: var(--moniq-muted);
@@ -427,6 +428,8 @@ body {
 
 .transaction-date-control {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
   position: relative;
 }
 
@@ -442,8 +445,10 @@ body {
 }
 
 .transaction-date input {
+  box-sizing: border-box;
   min-width: 0;
   width: 100%;
+  max-width: 100%;
   min-height: 46px;
   padding: 10px 12px 10px 40px;
   font-size: 16px;
