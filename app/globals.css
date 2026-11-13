@@ -457,3 +457,31 @@ body {
   border: 1px solid var(--moniq-border);
   border-radius: 10px;
 }
+
+/* Keep native iOS date controls within the same grid column as other form fields. */
+.transaction-date,
+.transaction-date-control {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.transaction-date-control {
+  overflow: hidden;
+}
+
+.transaction-date-control input[type="date"] {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.transaction-date-control input[type="date"]::-webkit-date-and-time-value {
+  min-width: 0;
+  text-align: left;
+}
