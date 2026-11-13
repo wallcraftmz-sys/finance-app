@@ -450,13 +450,13 @@ export default function DashboardClient({
                 background: "var(--moniq-input)",
                 border: "1px solid var(--moniq-border)",
                 borderRadius: "18px",
-                padding: "12px",
+                padding: "10px 8px",
               }}
             >
               <div style={{ color: "var(--moniq-muted)", fontSize: "12px", marginBottom: "6px" }}>
                 Доход
               </div>
-              <div style={{ fontWeight: 700, fontSize: "18px" }}>{convertedIncome !== null ? formatMoney(convertedIncome, primaryCurrency) : "—"}</div>
+              <div style={{ fontWeight: 700, fontSize: "16px" }}>{convertedIncome !== null ? formatMoney(convertedIncome, primaryCurrency) : "—"}</div>
             </div>
 
             <div
@@ -464,13 +464,13 @@ export default function DashboardClient({
                 background: "var(--moniq-input)",
                 border: "1px solid var(--moniq-border)",
                 borderRadius: "18px",
-                padding: "12px",
+                padding: "10px 8px",
               }}
             >
               <div style={{ color: "var(--moniq-muted)", fontSize: "12px", marginBottom: "6px" }}>
                 Расход
               </div>
-              <div style={{ fontWeight: 700, fontSize: "18px" }}>{convertedExpense !== null ? formatMoney(convertedExpense, primaryCurrency) : "—"}</div>
+              <div style={{ fontWeight: 700, fontSize: "16px" }}>{convertedExpense !== null ? formatMoney(convertedExpense, primaryCurrency) : "—"}</div>
             </div>
 
             <div
@@ -478,13 +478,13 @@ export default function DashboardClient({
                 background: "var(--moniq-input)",
                 border: "1px solid var(--moniq-border)",
                 borderRadius: "18px",
-                padding: "12px",
+                padding: "10px 8px",
               }}
             >
               <div style={{ color: "var(--moniq-muted)", fontSize: "12px", marginBottom: "6px" }}>
                 Баланс
               </div>
-              <div style={{ fontWeight: 700, fontSize: "18px", color: "#fbbf24" }}>
+              <div style={{ fontWeight: 700, fontSize: "16px", color: "#fbbf24" }}>
                 {convertedBalance !== null ? formatMoney(convertedBalance, primaryCurrency) : "Курс валют недоступен"}
               </div>
             </div>

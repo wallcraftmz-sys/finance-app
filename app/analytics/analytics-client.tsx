@@ -304,25 +304,44 @@ export default function AnalyticsClient({
             </div>
           ) : (
             <>
-              <div style={{ width: "100%", height: "260px", marginBottom: "14px" }}>
-                <ResponsiveContainer>
-                  <PieChart>
-                    <Pie
-                      data={categoryTotals}
-                      dataKey="amount"
-                      nameKey="category"
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={85}
-                    >
-                      {categoryTotals.map((_, index) => (
-                        <Cell key={index} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value) => formatMoney(Number(value))} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
+              {categoryTotals.length === 1 ? (
+                <div
+                  role="img"
+                  aria-label={`${categoryTotals[0].category}: 100% расходов`}
+                  style={{
+                    display: "grid",
+                    placeItems: "center",
+                    margin: "14px auto",
+                    width: "min(170px, 100%)",
+                    aspectRatio: "1",
+                    border: "12px solid var(--moniq-accent)",
+                    borderRadius: "50%",
+                    fontWeight: 700,
+                  }}
+                >
+                  100%
+                </div>
+              ) : (
+                <div style={{ width: "100%", height: "260px", marginBottom: "14px" }}>
+                  <ResponsiveContainer>
+                    <PieChart>
+                      <Pie
+                        data={categoryTotals}
+                        dataKey="amount"
+                        nameKey="category"
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={85}
+                      >
+                        {categoryTotals.map((_, index) => (
+                          <Cell key={index} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip formatter={(value) => formatMoney(Number(value))} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
 
               <div style={{ display: "grid", gap: "10px" }}>
                 {categoryTotals.map((item, index) => (

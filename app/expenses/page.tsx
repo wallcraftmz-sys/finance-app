@@ -174,6 +174,20 @@ export default function ExpensesPage() {
                     </div>
                   ) : null}
 
+                  <Link
+                    href={`/expenses/${item.id}/edit`}
+                    style={{
+                      display: "inline-block",
+                      padding: "8px 12px",
+                      marginRight: "8px",
+                      color: "var(--moniq-text)",
+                      border: "1px solid var(--moniq-border)",
+                      borderRadius: "10px",
+                      textDecoration: "none",
+                    }}
+                  >
+                    Изменить
+                  </Link>
                   <button
                     onClick={() => handleDelete(item.id)}
                     style={{

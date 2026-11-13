@@ -25,6 +25,7 @@ export async function POST(req: Request) {
 
     const body = await req.json().catch(() => null);
     const amount = body?.amount;
+    const expenseId = typeof body?.expenseId === "string" ? body.expenseId : undefined;
 
     if (
       typeof amount !== "number" ||
@@ -39,11 +40,28 @@ export async function POST(req: Request) {
       );
     }
 
-    const currency = isCurrency(user.currency)
+    const primaryCurrency = isCurrency(user.currency)
       ? user.currency
       : "EUR";
 
+    const existingExpense = expenseId
+      ? await prisma.expense.findFirst({
+          where: { id: expenseId, userId: user.id },
+          select: { currency: true },
+        })
+      : null;
+
+    if (expenseId && !existingExpense) {
+      return NextResponse.json({ error: "Расход не найден" }, { status: 404 });
+    }
+
+    const expenseCurrency = existingExpense ? existingExpense.currency || "EUR" : primaryCurrency;
+    if (!isCurrency(expenseCurrency)) {
+      return NextResponse.json({ error: "Валюта расхода не поддерживается" }, { status: 400 });
+    }
+
     const rates = await getExchangeRates();
+    const convertedAmount = convertCurrency(amount, expenseCurrency, primaryCurrency, rates.rates);
 
     const [incomes, expenses, goals] = await Promise.all([
       prisma.income.findMany({
@@ -51,7 +69,7 @@ export async function POST(req: Request) {
         select: { amount: true, currency: true },
       }),
       prisma.expense.findMany({
-        where: { userId: user.id },
+        where: { userId: user.id, ...(expenseId ? { id: { not: expenseId } } : {}) },
         select: { amount: true, currency: true },
       }),
       prisma.goal.findMany({
@@ -75,7 +93,7 @@ export async function POST(req: Request) {
         sum += convertCurrency(
           item.amount,
           from,
-          currency,
+          primaryCurrency,
           rates.rates
         );
       }
@@ -96,11 +114,11 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       ok: true,
-      currency,
+      currency: primaryCurrency,
       available,
-      amount,
-      afterExpense: available - amount,
-      warning: amount > available + 0.000001,
+      amount: convertedAmount,
+      afterExpense: available - convertedAmount,
+      warning: convertedAmount > available + 0.000001,
     });
   } catch (error) {
     console.error("EXPENSE_CHECK_ERROR", error);
