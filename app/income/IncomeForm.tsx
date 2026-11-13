@@ -3,6 +3,7 @@
 import TransactionDateField from "@/components/TransactionDateField";
 import { dateForInput } from "@/lib/transaction-date";
 import { useState } from "react";
+import { translate, useMoniqLanguage } from "@/lib/moniq-language";
 import { useRouter } from "next/navigation";
 
 type Income = {
@@ -16,6 +17,8 @@ type Income = {
 
 export default function IncomeForm({ income }: { income?: Income }) {
   const router = useRouter();
+  const language = useMoniqLanguage();
+  const t = (ru: string, en: string, lv: string) => translate(language, ru, en, lv);
 
   const [amount, setAmount] = useState(income ? String(income.amount) : "");
   const [source, setSource] = useState(income?.source ?? "Зарплата");
@@ -97,17 +100,17 @@ export default function IncomeForm({ income }: { income?: Income }) {
             fontWeight: 600,
           }}
         >
-          ← Назад к доходам
+          ← {t("Назад к доходам", "Back to income", "Atpakaļ pie ienākumiem")}
         </button>
 
         <h1 style={{ fontSize: "28px", marginBottom: "20px" }}>
-          {income ? "Изменить доход" : "Добавить доход"}
+          {income ? t("Изменить доход", "Edit income", "Rediģēt ienākumus") : t("Добавить доход", "Add income", "Pievienot ienākumus")}
         </h1>
 
         <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr)", gap: "12px" }}>
           <input
             type="number"
-            placeholder="Сумма"
+            placeholder={t("Сумма", "Amount", "Summa")}
             aria-label={income ? `Сумма (${income.currency || "EUR"})` : "Сумма"}
             inputMode="decimal"
             step="0.01"
@@ -123,7 +126,7 @@ export default function IncomeForm({ income }: { income?: Income }) {
           />
 
           <select
-            aria-label="Источник"
+            aria-label={t("Источник", "Source", "Avots")}
             value={source}
             onChange={(e) => setSource(e.target.value)}
             style={{
@@ -147,7 +150,7 @@ export default function IncomeForm({ income }: { income?: Income }) {
           <TransactionDateField value={date} onChange={setDate} />
 
           <textarea
-            placeholder="Комментарий"
+            placeholder={t("Комментарий", "Comment", "Komentārs")}
             rows={4}
             value={note}
             onChange={(e) => setNote(e.target.value)}
@@ -175,7 +178,7 @@ export default function IncomeForm({ income }: { income?: Income }) {
               opacity: loading ? 0.7 : 1,
             }}
           >
-            {loading ? "Сохранение..." : "Сохранить доход"}
+            {loading ? t("Сохранение...", "Saving...", "Saglabā...") : t("Сохранить доход", "Save income", "Saglabāt ienākumus")}
           </button>
         </div>
       </div>
