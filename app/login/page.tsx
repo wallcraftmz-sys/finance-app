@@ -1,10 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { translate, useMoniqLanguage } from "@/lib/moniq-language";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const router = useRouter();
+  const language = useMoniqLanguage();
+  const t = (ru: string, en: string, lv: string) => translate(language, ru, en, lv);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -30,14 +33,14 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Ошибка входа");
+        setError(data.error || t("Ошибка входа", "Sign-in failed", "Pieteikšanās kļūda"));
         return;
       }
 
       router.push("/dashboard");
       router.refresh();
     } catch {
-      setError("Ошибка сети");
+      setError(t("Ошибка сети", "Network error", "Tīkla kļūda"));
     } finally {
       setLoading(false);
     }
@@ -66,7 +69,7 @@ export default function LoginPage() {
         }}
       >
         <h1 style={{ fontSize: "28px", marginTop: 0, marginBottom: "18px" }}>
-          Вход
+          {t("Вход", "Sign in", "Pieteikšanās")}
         </h1>
 
         <div style={{ display: "grid", gap: "12px" }}>
@@ -86,7 +89,7 @@ export default function LoginPage() {
 
           <input
             type="password"
-            placeholder="Пароль"
+            placeholder={t("Пароль", "Password", "Parole")}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             style={{
@@ -128,7 +131,7 @@ export default function LoginPage() {
               opacity: loading ? 0.7 : 1,
             }}
           >
-            {loading ? "Вход..." : "Войти"}
+            {loading ? t("Вход...", "Signing in...", "Notiek pieteikšanās...") : t("Войти", "Sign in", "Pieteikties")}
           </button>
 
           <div style={{ textAlign: "right", marginTop: "4px" }}>
@@ -140,7 +143,7 @@ export default function LoginPage() {
                 textDecoration: "none",
               }}
             >
-              Забыли пароль?
+              {t("Забыли пароль?", "Forgot password?", "Aizmirsāt paroli?")}
             </a>
           </div>
 
@@ -152,7 +155,7 @@ export default function LoginPage() {
               fontSize: "14px",
             }}
           >
-            Если нет аккаунта, можете{" "}
+            {t("Если нет аккаунта, можете", "Don’t have an account?", "Nav konta?")}{" "}
             <a
               href="/register"
               style={{
@@ -161,7 +164,7 @@ export default function LoginPage() {
                 fontWeight: 700,
               }}
             >
-              зарегистрироваться
+              {t("зарегистрироваться", "Register", "Reģistrēties")}
             </a>
           </div>
 
@@ -174,7 +177,7 @@ export default function LoginPage() {
                 fontSize: "13px",
               }}
             >
-              Политика конфиденциальности
+              {t("Политика конфиденциальности", "Privacy policy", "Privātuma politika")}
             </a>
           </div>
         </div>
