@@ -394,3 +394,25 @@ body {
   grid-column: 1 / -1;
   cursor: pointer;
 }
+
+.transaction-month {
+  position: relative;
+  display: grid;
+  min-width: 0;
+}
+
+.transaction-month svg {
+  position: absolute;
+  top: 50%;
+  left: 9px;
+  width: 19px;
+  height: 19px;
+  transform: translateY(-50%);
+  color: var(--moniq-text);
+  pointer-events: none;
+}
+
+.transaction-month select {
+  width: 100%;
+  padding-left: 34px;
+}

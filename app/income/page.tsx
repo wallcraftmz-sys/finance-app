@@ -24,6 +24,9 @@ export default function IncomePage() {
   const [month, setMonth] = useState("");
   const [group, setGroup] = useState("");
   const filtersActive = Boolean(month || group);
+  const months = [...new Set(incomes.map((item) => dateForInput(item.date).slice(0, 7)))]
+    .filter((value) => /^\d{4}-(0[1-9]|1[0-2])$/.test(value))
+    .sort((a, b) => b.localeCompare(a));
   const groups = [...new Set(incomes.map((item) => item.source))].sort();
   const filtered = useMemo(
     () => incomes.filter((item) =>
@@ -144,6 +147,7 @@ export default function IncomePage() {
 
           <TransactionFilters
             month={month}
+            months={months}
             setMonth={setMonth}
             group={group}
             setGroup={setGroup}
