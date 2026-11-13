@@ -1,5 +1,6 @@
 "use client";
 
+import TransactionDateField from "@/components/TransactionDateField";
 import { dateForInput } from "@/lib/transaction-date";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -186,19 +187,7 @@ export default function ExpenseForm({ expense }: { expense?: Expense }) {
             {categories.map((option) => <option key={option}>{option}</option>)}
           </select>
 
-          <input
-            type="date"
-            aria-label="Дата"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            style={{
-              padding: "12px",
-              borderRadius: "10px",
-              border: "1px solid #333",
-              background: "var(--moniq-input)",
-              color: "var(--moniq-text)",
-            }}
-          />
+          <TransactionDateField value={date} onChange={setDate} />
 
           <textarea
             placeholder="Комментарий"

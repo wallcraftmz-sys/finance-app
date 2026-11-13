@@ -13,7 +13,8 @@ export default function FloatingButtonsClient({ isAdmin }: Props) {
   const pathname = usePathname();
 
   const hideOnRoutes = ["/", "/login", "/register", "/admin/support"];
-  const shouldHide = hideOnRoutes.includes(pathname);
+  const isTransactionForm = /^\/(income|expenses)\/(new|[^/]+\/edit)$/.test(pathname);
+  const shouldHide = hideOnRoutes.includes(pathname) || isTransactionForm;
 
   if (shouldHide) {
     return null;

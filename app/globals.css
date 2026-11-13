@@ -416,3 +416,39 @@ body {
   width: 100%;
   padding-left: 34px;
 }
+
+.transaction-date {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  color: var(--moniq-muted);
+  font-size: 14px;
+}
+
+.transaction-date-control {
+  display: grid;
+  position: relative;
+}
+
+.transaction-date-control svg {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  width: 20px;
+  height: 20px;
+  transform: translateY(-50%);
+  color: var(--moniq-text);
+  pointer-events: none;
+}
+
+.transaction-date input {
+  min-width: 0;
+  width: 100%;
+  min-height: 46px;
+  padding: 10px 12px 10px 40px;
+  font-size: 16px;
+  color: var(--moniq-text);
+  background: var(--moniq-input);
+  border: 1px solid var(--moniq-border);
+  border-radius: 10px;
+}
