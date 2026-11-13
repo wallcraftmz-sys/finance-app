@@ -1,5 +1,6 @@
 "use client";
 
+import { dateForInput } from "@/lib/transaction-date";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -13,11 +14,6 @@ type Expense = {
 };
 
 const categories = ["Еда", "Транспорт", "Жилье", "Подписки", "Развлечения", "Другое"];
-
-function dateForInput(date: string) {
-  const legacyDate = /^(\d{2})\.(\d{2})\.(\d{4})$/.exec(date);
-  return legacyDate ? `${legacyDate[3]}-${legacyDate[2]}-${legacyDate[1]}` : date.slice(0, 10);
-}
 
 export default function ExpenseForm({ expense }: { expense?: Expense }) {
   const router = useRouter();

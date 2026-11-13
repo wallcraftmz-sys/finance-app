@@ -1,6 +1,8 @@
 
 "use client";
 
+import TransactionFilters from "@/components/TransactionFilters";
+import { dateForInput } from "@/lib/transaction-date";
 import BottomNav from "@/components/BottomNav";
 
 import Link from "next/link";
@@ -18,6 +20,18 @@ type Expense = {
 export default function ExpensesPage() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const [month, setMonth] = useState("");
+  const [group, setGroup] = useState("");
+  const filtersActive = Boolean(month || group);
+  const groups = [...new Set(expenses.map((item) => item.category))].sort();
+  const filtered = useMemo(
+    () => expenses.filter((item) =>
+      (!month || dateForInput(item.date).slice(0, 7) === month) &&
+      (!group || item.category === group)
+    ),
+    [expenses, month, group]
+  );
 
   async function loadExpenses() {
     try {
@@ -39,7 +53,7 @@ export default function ExpensesPage() {
   const totalExpense = useMemo(() => {
     const totals: Record<string, number> = {};
 
-    for (const item of expenses) {
+    for (const item of filtered) {
       const currency = item.currency || "EUR";
       totals[currency] = (totals[currency] || 0) + item.amount;
     }
@@ -52,9 +66,7 @@ export default function ExpensesPage() {
         }).format(amount)
       )
       .join(" · ") || "0 €";
-  }, [expenses]);
-
-  const sortedExpenses = [...expenses];
+  }, [filtered]);
 
   async function handleDelete(id: string) {
     const res = await fetch(`/api/expenses/${id}`, {
@@ -97,7 +109,7 @@ export default function ExpensesPage() {
           }}
         >
           <div style={{ fontSize: "14px", color: "var(--moniq-muted)", marginBottom: "8px" }}>
-            Общая сумма расходов
+            {filtersActive ? "Сумма расходов по фильтрам" : "Общая сумма расходов"}
           </div>
           <div style={{ fontSize: "32px", fontWeight: 800 }}>{totalExpense}</div>
         </div>
@@ -130,13 +142,22 @@ export default function ExpensesPage() {
         >
           <h3 style={{ marginTop: 0, marginBottom: "14px" }}>Список расходов</h3>
 
+          <TransactionFilters
+            month={month}
+            setMonth={setMonth}
+            group={group}
+            setGroup={setGroup}
+            groups={groups}
+            groupLabel="Категория"
+          />
+
           {loading ? (
             <p style={{ color: "var(--moniq-muted)", margin: 0 }}>Загрузка...</p>
-          ) : sortedExpenses.length === 0 ? (
-            <p style={{ color: "var(--moniq-muted)", margin: 0 }}>Пока расходов нет</p>
+          ) : filtered.length === 0 ? (
+            <p style={{ color: "var(--moniq-muted)", margin: 0 }}>{filtersActive ? "Нет операций по выбранным фильтрам" : "Пока расходов нет"}</p>
           ) : (
             <div style={{ display: "grid", gap: "10px" }}>
-              {sortedExpenses.map((item) => (
+              {filtered.map((item) => (
                 <div
                   key={item.id}
                   style={{

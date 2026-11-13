@@ -1,6 +1,8 @@
 
 "use client";
 
+import TransactionFilters from "@/components/TransactionFilters";
+import { dateForInput } from "@/lib/transaction-date";
 import BottomNav from "@/components/BottomNav";
 
 import Link from "next/link";
@@ -18,6 +20,18 @@ type Income = {
 export default function IncomePage() {
   const [incomes, setIncomes] = useState<Income[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const [month, setMonth] = useState("");
+  const [group, setGroup] = useState("");
+  const filtersActive = Boolean(month || group);
+  const groups = [...new Set(incomes.map((item) => item.source))].sort();
+  const filtered = useMemo(
+    () => incomes.filter((item) =>
+      (!month || dateForInput(item.date).slice(0, 7) === month) &&
+      (!group || item.source === group)
+    ),
+    [incomes, month, group]
+  );
 
   async function loadIncomes() {
     try {
@@ -39,7 +53,7 @@ export default function IncomePage() {
   const totalIncome = useMemo(() => {
     const totals: Record<string, number> = {};
 
-    for (const item of incomes) {
+    for (const item of filtered) {
       const currency = item.currency || "EUR";
       totals[currency] = (totals[currency] || 0) + item.amount;
     }
@@ -52,9 +66,7 @@ export default function IncomePage() {
         }).format(amount)
       )
       .join(" · ") || "0 €";
-  }, [incomes]);
-
-  const sortedIncomes = [...incomes];
+  }, [filtered]);
 
   async function handleDelete(id: string) {
     const res = await fetch(`/api/income/${id}`, {
@@ -97,7 +109,7 @@ export default function IncomePage() {
           }}
         >
           <div style={{ fontSize: "14px", color: "var(--moniq-muted)", marginBottom: "8px" }}>
-            Общая сумма доходов
+            {filtersActive ? "Сумма доходов по фильтрам" : "Общая сумма доходов"}
           </div>
           <div style={{ fontSize: "32px", fontWeight: 800 }}>{totalIncome}</div>
         </div>
@@ -130,13 +142,22 @@ export default function IncomePage() {
         >
           <h3 style={{ marginTop: 0, marginBottom: "14px" }}>Список доходов</h3>
 
+          <TransactionFilters
+            month={month}
+            setMonth={setMonth}
+            group={group}
+            setGroup={setGroup}
+            groups={groups}
+            groupLabel="Источник"
+          />
+
           {loading ? (
             <p style={{ color: "var(--moniq-muted)", margin: 0 }}>Загрузка...</p>
-          ) : sortedIncomes.length === 0 ? (
-            <p style={{ color: "var(--moniq-muted)", margin: 0 }}>Пока доходов нет</p>
+          ) : filtered.length === 0 ? (
+            <p style={{ color: "var(--moniq-muted)", margin: 0 }}>{filtersActive ? "Нет операций по выбранным фильтрам" : "Пока доходов нет"}</p>
           ) : (
             <div style={{ display: "grid", gap: "10px" }}>
-              {sortedIncomes.map((item) => (
+              {filtered.map((item) => (
                 <div
                   key={item.id}
                   style={{
@@ -174,6 +195,20 @@ export default function IncomePage() {
                     </div>
                   ) : null}
 
+                  <Link
+                    href={`/income/${item.id}/edit`}
+                    style={{
+                      display: "inline-block",
+                      padding: "8px 12px",
+                      marginRight: "8px",
+                      color: "var(--moniq-text)",
+                      border: "1px solid var(--moniq-border)",
+                      borderRadius: "10px",
+                      textDecoration: "none",
+                    }}
+                  >
+                    Изменить
+                  </Link>
                   <button
                     onClick={() => handleDelete(item.id)}
                     style={{
