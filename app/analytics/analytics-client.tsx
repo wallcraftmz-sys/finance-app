@@ -46,7 +46,7 @@ type Props = {
   plan: string;
 };
 
-const COLORS = ["var(--moniq-accent)", "#f59e0b", "#fcd34d", "#facc15", "#fde68a", "#ca8a04"];
+const COLORS = ["var(--moniq-accent)", "#38bdf8", "#a78bfa", "#34d399", "#fb7185", "#fcd34d"];
 
 export default function AnalyticsClient({
   expenses,
@@ -322,7 +322,7 @@ export default function AnalyticsClient({
                   100%
                 </div>
               ) : (
-                <div style={{ width: "100%", height: "260px", marginBottom: "14px" }}>
+                <div style={{ position: "relative", width: "100%", height: "170px", margin: "14px auto" }}>
                   <ResponsiveContainer>
                     <PieChart>
                       <Pie
@@ -331,15 +331,32 @@ export default function AnalyticsClient({
                         nameKey="category"
                         cx="50%"
                         cy="50%"
+                        innerRadius={73}
                         outerRadius={85}
+                        paddingAngle={2}
                       >
-                        {categoryTotals.map((_, index) => (
-                          <Cell key={index} fill={COLORS[index % COLORS.length]} />
+                        {categoryTotals.map((item, index) => (
+                          <Cell key={item.category} fill={COLORS[index % COLORS.length]} />
                         ))}
                       </Pie>
                       <Tooltip formatter={(value) => formatMoney(Number(value))} />
                     </PieChart>
                   </ResponsiveContainer>
+                  <div
+                    aria-hidden="true"
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      display: "grid",
+                      placeItems: "center",
+                      pointerEvents: "none",
+                      fontWeight: 700,
+                    }}
+                  >
+                    <span style={{ maxWidth: "130px", overflowWrap: "anywhere", textAlign: "center" }}>
+                      {formatMoney(analytics.totalExpense)}
+                    </span>
+                  </div>
                 </div>
               )}
 
