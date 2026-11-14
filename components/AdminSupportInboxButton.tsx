@@ -1,9 +1,12 @@
 "use client";
 
+import { useMoniqI18n } from "@/lib/moniq-language";
+
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function AdminSupportInboxButton() {
+  const { msg } = useMoniqI18n();
   const router = useRouter();
   const [count, setCount] = useState(0);
 
@@ -38,8 +41,8 @@ export default function AdminSupportInboxButton() {
   return (
     <button
       onClick={() => router.push("/admin/support")}
-      title="Вопросы поддержки"
-      aria-label="Открыть вопросы поддержки"
+      title={msg("Вопросы поддержки")}
+      aria-label={msg("Открыть вопросы поддержки")}
       style={{
         position: "fixed",
         right: 20,

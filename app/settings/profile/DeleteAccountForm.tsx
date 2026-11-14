@@ -1,9 +1,13 @@
 "use client";
 
+import { useMoniqI18n } from "@/lib/moniq-language";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function DeleteAccountForm() {
+  const { errorMessage, msg } = useMoniqI18n();
+  const confirmationWord = msg("УДАЛИТЬ");
   const router = useRouter();
 
   const [opened, setOpened] = useState(false);
@@ -15,7 +19,7 @@ export default function DeleteAccountForm() {
   async function handleDelete(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
-    if (loading || confirmation !== "УДАЛИТЬ") return;
+    if (loading || confirmation !== confirmationWord) return;
 
     setLoading(true);
     setError("");
@@ -28,21 +32,21 @@ export default function DeleteAccountForm() {
         },
         body: JSON.stringify({
           password,
-          confirmation,
+          confirmation: "УДАЛИТЬ",
         }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Не удалось удалить аккаунт");
+        throw new Error(errorMessage(data.error, msg("Не удалось удалить аккаунт")));
       }
 
       router.replace("/login");
       router.refresh();
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Ошибка сервера"
+        err instanceof Error ? err.message : msg("Ошибка сервера")
       );
       setLoading(false);
     }
@@ -59,7 +63,7 @@ export default function DeleteAccountForm() {
       }}
     >
       <h2 style={{ fontSize: 19, margin: "0 0 12px" }}>
-        Удаление аккаунта
+        {msg("Удаление аккаунта")}
       </h2>
 
       <p
@@ -69,9 +73,7 @@ export default function DeleteAccountForm() {
           lineHeight: 1.6,
         }}
       >
-        При удалении аккаунта будут удалены ваши доходы,
-        расходы, финансовые цели и история AI-чата.
-        Это действие нельзя отменить.
+        {msg("При удалении аккаунта будут удалены ваши доходы, расходы, финансовые цели и история AI-чата. Это действие нельзя отменить.")}
       </p>
 
       {!opened ? (
@@ -89,19 +91,19 @@ export default function DeleteAccountForm() {
             cursor: "pointer",
           }}
         >
-          Удалить аккаунт
+          {msg("Удалить аккаунт")}
         </button>
       ) : (
         <form onSubmit={handleDelete}>
           <p style={{ color: "#ff818b", fontSize: 14 }}>
-            Для подтверждения введите пароль и слово УДАЛИТЬ.
+            {msg("Для подтверждения введите пароль и слово {word}.", { word: confirmationWord })}
           </p>
 
           <label
             htmlFor="delete-password"
             style={{ fontSize: 13, color: "#aaaab4" }}
           >
-            Текущий пароль
+            {msg("Текущий пароль")}
           </label>
 
           <input
@@ -128,7 +130,7 @@ export default function DeleteAccountForm() {
             htmlFor="delete-confirmation"
             style={{ fontSize: 13, color: "#aaaab4" }}
           >
-            Напишите УДАЛИТЬ
+            {msg("Напишите {word}", { word: confirmationWord })}
           </label>
 
           <input
@@ -162,7 +164,7 @@ export default function DeleteAccountForm() {
             disabled={
               loading ||
               !password ||
-              confirmation !== "УДАЛИТЬ"
+              confirmation !== confirmationWord
             }
             style={{
               width: "100%",
@@ -173,15 +175,15 @@ export default function DeleteAccountForm() {
               color: "#ffffff",
               fontWeight: 700,
               opacity:
-                loading || !password || confirmation !== "УДАЛИТЬ"
+                loading || !password || confirmation !== confirmationWord
                   ? 0.5
                   : 1,
               cursor: "pointer",
             }}
           >
             {loading
-              ? "Удаление..."
-              : "Подтвердить удаление аккаунта"}
+              ? msg("Удаление...")
+              : msg("Подтвердить удаление аккаунта")}
           </button>
 
           <button
@@ -204,7 +206,7 @@ export default function DeleteAccountForm() {
               cursor: "pointer",
             }}
           >
-            Отмена
+            {msg("Отмена")}
           </button>
         </form>
       )}

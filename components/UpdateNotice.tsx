@@ -1,8 +1,11 @@
 "use client";
 
+import { useMoniqI18n } from "@/lib/moniq-language";
+
 import { useEffect, useState } from "react";
 
 export default function UpdateNotice() {
+  const { msg } = useMoniqI18n();
   const [show, setShow] = useState(false);
 
   useEffect(() => {
@@ -53,12 +56,11 @@ export default function UpdateNotice() {
       }}
     >
       <div style={{ fontWeight: 700, marginBottom: "8px", color: "white" }}>
-        Доступно обновление
+        {msg("Доступно обновление")}
       </div>
 
       <div style={{ color: "#cfcfd6", fontSize: "14px", lineHeight: 1.5, marginBottom: "12px" }}>
-        В приложении появилась новая версия. Закрой и открой приложение заново
-        или нажми кнопку ниже.
+        {msg("В приложении появилась новая версия. Закрой и открой приложение заново или нажми кнопку ниже.")}
       </div>
 
       <button
@@ -74,7 +76,7 @@ export default function UpdateNotice() {
           cursor: "pointer",
         }}
       >
-        Обновить приложение
+        {msg("Обновить приложение")}
       </button>
     </div>
   );

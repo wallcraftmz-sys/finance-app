@@ -1,3 +1,4 @@
+import { getMoniqI18n } from "@/lib/moniq-language-server";
 import SessionsManager from "./SessionsManager";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -7,6 +8,7 @@ import { prisma } from "@/lib/prisma";
 import ChangePasswordForm from "./ChangePasswordForm";
 
 export default async function SecurityPage() {
+  const { msg } = await getMoniqI18n();
   const user = await getCurrentUser();
 
   if (!user) {
@@ -61,7 +63,7 @@ export default async function SecurityPage() {
           </Link>
 
           <h1 style={{ fontSize: 24, margin: 0 }}>
-            Безопасность
+            {msg("Безопасность")}
           </h1>
 
           <span style={{ color: "var(--moniq-accent)", fontWeight: 700 }}>
@@ -79,7 +81,7 @@ export default async function SecurityPage() {
           }}
         >
           <h2 style={{ fontSize: 19, marginTop: 0 }}>
-            🔐 Пароль
+            {msg("🔐 Пароль")}
           </h2>
 
           <ChangePasswordForm />

@@ -1,8 +1,11 @@
 "use client";
 
+import { useMoniqI18n } from "@/lib/moniq-language";
+
 import { useState } from "react";
 
 export default function LogoutButton() {
+  const { msg } = useMoniqI18n();
   const [loading, setLoading] = useState(false);
 
   async function handleLogout() {
@@ -14,12 +17,12 @@ export default function LogoutButton() {
       });
 
       if (!response.ok) {
-        throw new Error("Не удалось выйти из аккаунта");
+        throw new Error(msg("Не удалось выйти из аккаунта"));
       }
 
       window.location.href = "/login";
     } catch {
-      alert("Ошибка выхода. Попробуй ещё раз.");
+      alert(msg("Ошибка выхода. Попробуй ещё раз."));
       setLoading(false);
     }
   }
@@ -41,7 +44,7 @@ export default function LogoutButton() {
         cursor: loading ? "wait" : "pointer",
       }}
     >
-      ↪ {loading ? "Выходим..." : "Выйти из аккаунта"}
+      ↪ {loading ? msg("Выходим...") : msg("Выйти из аккаунта")}
     </button>
   );
 }

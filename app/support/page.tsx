@@ -1,6 +1,8 @@
 
 "use client";
 
+import { useMoniqI18n } from "@/lib/moniq-language";
+
 import { useCallback, useEffect, useRef, useState } from "react";
 import BottomNav from "@/components/BottomNav";
 
@@ -12,6 +14,7 @@ type SupportMessage = {
 };
 
 export default function SupportPage() {
+  const { errorMessage, msg, locale } = useMoniqI18n();
   const [messages, setMessages] = useState<SupportMessage[]>([]);
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(true);
@@ -29,13 +32,13 @@ export default function SupportPage() {
       });
 
       if (!res.ok) {
-        throw new Error("Не удалось загрузить сообщения");
+        throw new Error(msg("Не удалось загрузить сообщения"));
       }
 
       const data: unknown = await res.json();
 
       if (!Array.isArray(data)) {
-        throw new Error("Неверный формат сообщений");
+        throw new Error(msg("Неверный формат сообщений"));
       }
 
       const nextMessages = data as SupportMessage[];
@@ -68,7 +71,7 @@ export default function SupportPage() {
         method: "POST",
       }).catch(() => {});
     } catch {
-      setError("Не удалось обновить сообщения.");
+      setError(msg("Не удалось обновить сообщения."));
     } finally {
       setLoading(false);
     }
@@ -105,7 +108,7 @@ export default function SupportPage() {
 
       if (!res.ok) {
         throw new Error(
-          data.error || "Не удалось отправить сообщение"
+          errorMessage(data.error, msg("Не удалось отправить сообщение"))
         );
       }
 
@@ -115,7 +118,7 @@ export default function SupportPage() {
       setError(
         err instanceof Error
           ? err.message
-          : "Ошибка сети или сервера"
+          : msg("Ошибка сети или сервера")
       );
     } finally {
       setSending(false);
@@ -170,7 +173,7 @@ export default function SupportPage() {
               margin: 0,
             }}
           >
-            Поддержка
+            {msg("Поддержка")}
           </h1>
 
           <p
@@ -180,7 +183,7 @@ export default function SupportPage() {
               margin: "6px 0 0",
             }}
           >
-            Напиши нам — ответ появится здесь.
+            {msg("Напиши нам — ответ появится здесь.")}
           </p>
         </header>
 
@@ -207,7 +210,7 @@ export default function SupportPage() {
                 fontSize: "14px",
               }}
             >
-              Загрузка сообщений...
+              {msg("Загрузка сообщений...")}
             </div>
           ) : messages.length === 0 ? (
             <div
@@ -217,7 +220,7 @@ export default function SupportPage() {
                 lineHeight: 1.6,
               }}
             >
-              Пока сообщений нет. Напиши свой вопрос ниже.
+              {msg("Пока сообщений нет. Напиши свой вопрос ниже.")}
             </div>
           ) : (
             messages.map((m) => {
@@ -262,7 +265,7 @@ export default function SupportPage() {
                         opacity: 0.8,
                       }}
                     >
-                      {isAdmin ? "Поддержка Moniq" : "Ты"}
+                      {isAdmin ? msg("Поддержка Moniq") : msg("Ты")}
                     </div>
 
                     <div>{m.message}</div>
@@ -275,7 +278,7 @@ export default function SupportPage() {
                       }}
                     >
                       {new Date(m.createdAt).toLocaleString(
-                        "ru-RU",
+                        locale,
                         {
                           day: "2-digit",
                           month: "2-digit",
@@ -325,7 +328,7 @@ export default function SupportPage() {
             className="moniq-chat-input"
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="Напиши сообщение..."
+            placeholder={msg("Напиши сообщение...")}
             disabled={sending}
             rows={2}
             style={{
@@ -364,7 +367,7 @@ export default function SupportPage() {
                 sending || !text.trim() ? 0.5 : 1,
             }}
           >
-            {sending ? "Отправка..." : "Отправить"}
+            {sending ? msg("Отправка...") : msg("Отправить")}
           </button>
         </section>
 

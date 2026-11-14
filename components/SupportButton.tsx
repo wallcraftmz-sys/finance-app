@@ -1,9 +1,12 @@
 "use client";
 
+import { useMoniqI18n } from "@/lib/moniq-language";
+
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function SupportButton() {
+  const { msg } = useMoniqI18n();
   const router = useRouter();
   const [count, setCount] = useState(0);
 
@@ -53,7 +56,7 @@ export default function SupportButton() {
         boxShadow: "0 10px 25px rgba(0,0,0,0.3)",
         zIndex: 9999,
       }}
-      title="Поддержка"
+      title={msg("Поддержка")}
     >
       💬
 

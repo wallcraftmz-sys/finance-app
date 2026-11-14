@@ -1,5 +1,7 @@
 "use client";
 
+import { useMoniqI18n } from "@/lib/moniq-language";
+
 import TransactionDateField from "@/components/TransactionDateField";
 import { dateForInput } from "@/lib/transaction-date";
 import { useState } from "react";
@@ -18,6 +20,7 @@ type Expense = {
 const categories = ["Еда", "Транспорт", "Жилье", "Подписки", "Развлечения", "Другое"];
 
 export default function ExpenseForm({ expense }: { expense?: Expense }) {
+  const { errorMessage, msg, locale } = useMoniqI18n();
   const router = useRouter();
   const language = useMoniqLanguage();
   const t = (ru: string, en: string, lv: string) => translate(language, ru, en, lv);
@@ -30,7 +33,7 @@ export default function ExpenseForm({ expense }: { expense?: Expense }) {
 
   async function handleSave() {
     if (!amount || !date) {
-      alert("Заполни сумму и дату");
+      alert(msg("Заполни сумму и дату"));
       return;
     }
 
@@ -41,7 +44,7 @@ export default function ExpenseForm({ expense }: { expense?: Expense }) {
       expenseAmount <= 0 ||
       Math.abs(expenseAmount * 100 - Math.round(expenseAmount * 100)) > 1e-7
     ) {
-      alert("Введите положительную сумму с точностью до двух знаков");
+      alert(msg("Введите положительную сумму с точностью до двух знаков"));
       return;
     }
 
@@ -59,24 +62,24 @@ export default function ExpenseForm({ expense }: { expense?: Expense }) {
       const checkData = await checkRes.json();
 
       if (!checkRes.ok) {
-        alert(checkData.error || "Не удалось проверить баланс");
+        alert(errorMessage(checkData.error, msg("Не удалось проверить баланс")));
         return;
       }
 
       if (checkData.warning) {
         const formatMoney = (value: number) =>
-          new Intl.NumberFormat("ru-RU", {
+          new Intl.NumberFormat(locale, {
             style: "currency",
             currency: checkData.currency,
           }).format(value);
 
         const confirmed = window.confirm(
-          "Внимание! Расход превышает доступный остаток.\n\n" +
-          "Доступно: " + formatMoney(checkData.available) + "\n" +
-          "Расход: " + formatMoney(checkData.amount) + "\n" +
-          "После расхода: " + formatMoney(checkData.afterExpense) +
-          "\n\nНакопления останутся без изменений." +
-          "\n\nВсё равно сохранить расход?"
+          msg("Внимание! Расход превышает доступный остаток.\n\n") +
+          msg("Доступно: ") + formatMoney(checkData.available) + "\n" +
+          msg("Расход: ") + formatMoney(checkData.amount) + "\n" +
+          msg("После расхода: ") + formatMoney(checkData.afterExpense) +
+          msg("\n\nНакопления останутся без изменений.") +
+          msg("\n\nВсё равно сохранить расход?")
         );
 
         if (!confirmed) return;
@@ -98,14 +101,14 @@ export default function ExpenseForm({ expense }: { expense?: Expense }) {
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data.error || "Не удалось сохранить расход");
+        alert(errorMessage(data.error, msg("Не удалось сохранить расход")));
         return;
       }
 
       router.push("/expenses");
       router.refresh();
     } catch (error) {
-      alert("Ошибка сети");
+      alert(msg("Ошибка сети"));
     } finally {
       setLoading(false);
     }
@@ -158,7 +161,7 @@ export default function ExpenseForm({ expense }: { expense?: Expense }) {
           <input
             type="number"
             placeholder={t("Сумма", "Amount", "Summa")}
-            aria-label={expense ? `Сумма (${expense.currency || "EUR"})` : "Сумма"}
+            aria-label={expense ? msg("Сумма ({currency})", { currency: expense.currency || "EUR" }) : msg("Сумма")}
             step="0.01"
             min="0.01"
             value={amount}
@@ -185,9 +188,9 @@ export default function ExpenseForm({ expense }: { expense?: Expense }) {
             }}
           >
             {expense && !categories.includes(expense.category) && (
-              <option>{expense.category}</option>
+              <option value={expense.category}>{msg(expense.category)}</option>
             )}
-            {categories.map((option) => <option key={option}>{option}</option>)}
+            {categories.map((option) => <option key={option} value={option}>{msg(option)}</option>)}
           </select>
 
           <TransactionDateField value={date} onChange={setDate} />

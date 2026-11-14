@@ -1,5 +1,7 @@
 "use client";
 
+import { useMoniqI18n } from "@/lib/moniq-language";
+
 import { useState } from "react";
 
 const currencies = [
@@ -16,6 +18,7 @@ export default function CurrencySelector({
 }: {
   initialCurrency: string;
 }) {
+  const { errorMessage, msg } = useMoniqI18n();
   const [selected, setSelected] = useState(initialCurrency);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
@@ -40,15 +43,15 @@ export default function CurrencySelector({
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Ошибка сохранения");
+        throw new Error(errorMessage(data.error, msg("Ошибка сохранения")));
       }
 
       setSelected(data.currency);
-      setMessage("Валюта успешно сохранена");
+      setMessage(msg("Валюта успешно сохранена"));
     } catch (err) {
       setError(true);
       setMessage(
-        err instanceof Error ? err.message : "Ошибка сервера"
+        err instanceof Error ? err.message : msg("Ошибка сервера")
       );
     } finally {
       setSaving(false);
@@ -125,7 +128,7 @@ export default function CurrencySelector({
                   marginTop: 4,
                 }}
               >
-                {currency.name}
+                {msg(currency.name)}
               </span>
             </span>
 
@@ -164,8 +167,7 @@ export default function CurrencySelector({
           marginTop: 18,
         }}
       >
-        Выбранная валюта сохраняется в вашем аккаунте.
-        На главной странице и в аналитике суммы отображаются в выбранной валюте по доступным курсам ECB. Исходная валюта операций сохраняется.
+        {msg("Выбранная валюта сохраняется в вашем аккаунте. На главной странице и в аналитике суммы отображаются в выбранной валюте по доступным курсам ECB. Исходная валюта операций сохраняется.")}
       </p>
     </>
   );

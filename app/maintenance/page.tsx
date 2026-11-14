@@ -1,4 +1,6 @@
-export default function MaintenancePage() {
+import { getMoniqI18n } from "@/lib/moniq-language-server";
+export default async function MaintenancePage() {
+  const { msg } = await getMoniqI18n();
   return (
     <main
       style={{
@@ -40,10 +42,10 @@ export default function MaintenancePage() {
           M
         </div>
 
-        <h1 style={{ margin: "0 0 12px 0", fontSize: "28px" }}>Moniq обновляется</h1>
+        <h1 style={{ margin: "0 0 12px 0", fontSize: "28px" }}>{msg("Moniq обновляется")}</h1>
 
         <p style={{ margin: 0, color: "#c9c9d2", lineHeight: 1.6 }}>
-          Идёт обновление приложения. Попробуй зайти через пару минут.
+          {msg("Идёт обновление приложения. Попробуй зайти через пару минут.")}
         </p>
       </div>
     </main>

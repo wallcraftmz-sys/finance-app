@@ -1,7 +1,10 @@
 
 "use client";
 
+import { useMoniqI18n } from "@/lib/moniq-language";
+
 import BottomNav from "@/components/BottomNav";
+import { formatTransactionDate } from "@/lib/transaction-date";
 
 import Link from "next/link";
 import type { ExchangeRates } from "@/lib/exchange-rates";
@@ -55,6 +58,7 @@ export default function AnalyticsClient({
   exchangeRates,
   plan,
 }: Props) {
+  const { msg, locale } = useMoniqI18n();
   const isPro = plan === "PRO";
   const analytics = useMemo(() => {
     const rates = exchangeRates?.rates;
@@ -190,7 +194,7 @@ export default function AnalyticsClient({
   const categoryTotals = analytics?.categoryTotals ?? [];
 
   const formatMoney = (amount: number) =>
-    new Intl.NumberFormat("ru-RU", {
+    new Intl.NumberFormat(locale, {
       style: "currency",
       currency: primaryCurrency,
     }).format(amount);
@@ -214,15 +218,15 @@ export default function AnalyticsClient({
           borderRadius: "24px",
         }}
       >
-        <h1 style={{ fontSize: "28px", marginBottom: "8px" }}>Аналитика</h1>
+        <h1 style={{ fontSize: "28px", marginBottom: "8px" }}>{msg("Аналитика")}</h1>
         <div style={{
           color: "var(--moniq-muted)",
           fontSize: "12px",
           marginBottom: "18px",
         }}>
           {exchangeRates
-            ? `Конвертация по курсу ECB от ${exchangeRates.date}`
-            : "Курсы ECB недоступны"}
+            ? msg("Конвертация по курсу ECB от {date}", { date: formatTransactionDate(exchangeRates.date, locale) })
+            : msg("Курсы ECB недоступны")}
         </div>
 
         <section
@@ -244,7 +248,7 @@ export default function AnalyticsClient({
               }}
             >
               <div style={{ color: "var(--moniq-muted)", fontSize: "12px", marginBottom: "6px" }}>
-                Доход
+                {msg("Доход")}
               </div>
               <div style={{ fontWeight: 700, fontSize: "18px" }}>{totalIncome !== null ? formatMoney(totalIncome) : "—"}</div>
             </div>
@@ -258,7 +262,7 @@ export default function AnalyticsClient({
               }}
             >
               <div style={{ color: "var(--moniq-muted)", fontSize: "12px", marginBottom: "6px" }}>
-                Расход
+                {msg("Расход")}
               </div>
               <div style={{ fontWeight: 700, fontSize: "18px" }}>{totalExpense !== null ? formatMoney(totalExpense) : "—"}</div>
             </div>
@@ -272,7 +276,7 @@ export default function AnalyticsClient({
               }}
             >
               <div style={{ color: "var(--moniq-muted)", fontSize: "12px", marginBottom: "6px" }}>
-                Баланс
+                {msg("Баланс")}
               </div>
               <div style={{ fontWeight: 700, fontSize: "18px", color: "var(--moniq-accent)" }}>
                 {balance !== null ? formatMoney(balance) : "—"}
@@ -291,23 +295,23 @@ export default function AnalyticsClient({
           }}
         >
           <div style={{ fontSize: "18px", fontWeight: 700, marginBottom: "14px" }}>
-            Расходы по категориям
+            {msg("Расходы по категориям")}
           </div>
 
           {analytics === null ? (
             <div style={{ color: "var(--moniq-accent)", fontSize: '14px' }}>
-              Не удалось рассчитать аналитику: курсы валют недоступны.
+              {msg("Не удалось рассчитать аналитику: курсы валют недоступны.")}
             </div>
           ) : categoryTotals.length === 0 ? (
             <div style={{ color: "var(--moniq-muted)", fontSize: "14px" }}>
-              Пока нет расходов для аналитики
+              {msg("Пока нет расходов для аналитики")}
             </div>
           ) : (
             <>
               {categoryTotals.length === 1 ? (
                 <div
                   role="img"
-                  aria-label={`${categoryTotals[0].category}: 100% расходов`}
+                  aria-label={msg("{category}: 100% расходов", { category: msg(categoryTotals[0].category) })}
                   style={{
                     display: "grid",
                     placeItems: "center",
@@ -326,9 +330,9 @@ export default function AnalyticsClient({
                   <ResponsiveContainer>
                     <PieChart>
                       <Pie
-                        data={categoryTotals}
+                        data={categoryTotals.map((item) => ({ ...item, name: msg(item.category) }))}
                         dataKey="amount"
-                        nameKey="category"
+                        nameKey="name"
                         cx="50%"
                         cy="50%"
                         innerRadius={73}
@@ -384,7 +388,7 @@ export default function AnalyticsClient({
                           background: COLORS[index % COLORS.length],
                         }}
                       />
-                      <div style={{ fontWeight: 600 }}>{item.category}</div>
+                      <div style={{ fontWeight: 600 }}>{msg(item.category)}</div>
                     </div>
 
                     <div style={{ color: "var(--moniq-accent)", fontWeight: 700 }}>{formatMoney(item.amount)}</div>
@@ -411,7 +415,7 @@ export default function AnalyticsClient({
                 marginBottom: "6px",
               }}
             >
-              Доходы и расходы по месяцам
+              {msg("Доходы и расходы по месяцам")}
             </div>
 
             <div
@@ -421,7 +425,7 @@ export default function AnalyticsClient({
                 marginBottom: "18px",
               }}
             >
-              Расширенная аналитика Moniq PRO
+              {msg("Расширенная аналитика Moniq PRO")}
             </div>
 
             {monthlyAnalytics.length === 0 ? (
@@ -431,7 +435,7 @@ export default function AnalyticsClient({
                   fontSize: "14px",
                 }}
               >
-                Пока нет операций с корректными датами для графика.
+                {msg("Пока нет операций с корректными датами для графика.")}
               </div>
             ) : (
               <div style={{ width: "100%", height: "300px" }}>
@@ -460,14 +464,14 @@ export default function AnalyticsClient({
 
                     <Bar
                       dataKey="income"
-                      name="Доходы"
+                      name={msg("Доходы")}
                       fill="var(--moniq-accent)"
                       radius={[5, 5, 0, 0]}
                     />
 
                     <Bar
                       dataKey="expense"
-                      name="Расходы"
+                      name={msg("Расходы")}
                       fill="#f59e0b"
                       radius={[5, 5, 0, 0]}
                     />

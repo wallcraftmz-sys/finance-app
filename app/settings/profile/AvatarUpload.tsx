@@ -1,5 +1,7 @@
 "use client";
 
+import { useMoniqI18n } from "@/lib/moniq-language";
+
 import { useRef, useState } from "react";
 
 export default function AvatarUpload({
@@ -7,6 +9,7 @@ export default function AvatarUpload({
 }: {
   initialAvatarUrl: string | null;
 }) {
+  const { errorMessage, msg } = useMoniqI18n();
   const inputRef = useRef<HTMLInputElement>(null);
   const [avatarUrl, setAvatarUrl] = useState(initialAvatarUrl);
   const [uploading, setUploading] = useState(false);
@@ -18,12 +21,12 @@ export default function AvatarUpload({
     setMessage("");
 
     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-      setMessage("Выбери JPG, PNG или WebP");
+      setMessage(msg("Выбери JPG, PNG или WebP"));
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      setMessage("Фотография должна быть меньше 5 МБ");
+      setMessage(msg("Фотография должна быть меньше 5 МБ"));
       return;
     }
 
@@ -41,14 +44,14 @@ export default function AvatarUpload({
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Ошибка загрузки");
+        throw new Error(errorMessage(data.error, msg("Ошибка загрузки")));
       }
 
       setAvatarUrl(data.avatarUrl);
-      setMessage("Фотография успешно сохранена!");
+      setMessage(msg("Фотография успешно сохранена!"));
     } catch (error) {
       setMessage(
-        error instanceof Error ? error.message : "Ошибка загрузки"
+        error instanceof Error ? error.message : msg("Ошибка загрузки")
       );
     } finally {
       setUploading(false);
@@ -86,7 +89,7 @@ export default function AvatarUpload({
         {avatarUrl ? (
           <img
             src={avatarUrl}
-            alt="Фото профиля"
+            alt={msg("Фото профиля")}
             style={{
               width: "100%",
               height: "100%",
@@ -111,18 +114,18 @@ export default function AvatarUpload({
           cursor: uploading ? "wait" : "pointer",
         }}
       >
-        {uploading ? "Загружаем..." : "Загрузить фотографию"}
+        {uploading ? msg("Загружаем...") : msg("Загрузить фотографию")}
       </button>
 
       <p style={{ color: "var(--moniq-muted)", fontSize: 13, marginTop: 5 }}>
-        JPG, PNG или WebP · до 5 МБ
+        {msg("JPG, PNG или WebP · до 5 МБ")}
       </p>
 
       {message && (
         <p
           role="status"
           style={{
-            color: message.includes("успешно") ? "#45d6a0" : "#ff655c",
+            color: message === msg("Фотография успешно сохранена!") ? "#45d6a0" : "#ff655c",
             fontSize: 13,
             marginTop: 10,
           }}

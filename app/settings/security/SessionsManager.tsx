@@ -1,5 +1,7 @@
 "use client";
 
+import { useMoniqI18n } from "@/lib/moniq-language";
+
 import { useCallback, useEffect, useState } from "react";
 
 type Session = {
@@ -10,6 +12,7 @@ type Session = {
 };
 
 export default function SessionsManager() {
+  const { errorMessage, msg, locale } = useMoniqI18n();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -25,14 +28,14 @@ export default function SessionsManager() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || "Ошибка загрузки");
+        throw new Error(errorMessage(data.error, msg("Ошибка загрузки")));
       }
 
       setSessions(data.sessions);
       setError("");
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Ошибка загрузки"
+        err instanceof Error ? err.message : msg("Ошибка загрузки")
       );
     } finally {
       setLoading(false);
@@ -49,8 +52,8 @@ export default function SessionsManager() {
   ) {
     const confirmed = window.confirm(
       allOthers
-        ? "Завершить все остальные сеансы?"
-        : "Завершить выбранный сеанс?"
+        ? msg("Завершить все остальные сеансы?")
+        : msg("Завершить выбранный сеанс?")
     );
 
     if (!confirmed || busy) return;
@@ -77,18 +80,18 @@ export default function SessionsManager() {
 
       if (!res.ok) {
         throw new Error(
-          data.error || "Не удалось завершить сеанс"
+          errorMessage(data.error, msg("Не удалось завершить сеанс"))
         );
       }
 
       setMessage(
-        `Завершено сеансов: ${data.revoked}`
+        msg("Завершено сеансов: {count}", { count: data.revoked })
       );
 
       await loadSessions();
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Ошибка"
+        err instanceof Error ? err.message : msg("Ошибка")
       );
     } finally {
       setBusy(false);
@@ -110,7 +113,7 @@ export default function SessionsManager() {
       }}
     >
       <h2 style={{ fontSize: 19, marginTop: 0 }}>
-        💻 Активные сеансы
+        {msg("💻 Активные сеансы")}
       </h2>
 
       <p
@@ -119,13 +122,13 @@ export default function SessionsManager() {
           fontSize: 14,
         }}
       >
-        Здесь отображаются все активные входы в Moniq.
+        {msg("Здесь отображаются все активные входы в Moniq.")}
       </p>
 
-      {loading && <p>Загрузка сеансов...</p>}
+      {loading && <p>{msg("Загрузка сеансов...")}</p>}
 
       {!loading && sessions.length === 0 && !error && (
-        <p>Активных сеансов не найдено.</p>
+        <p>{msg("Активных сеансов не найдено.")}</p>
       )}
 
       {sessions.map((session) => (
@@ -141,21 +144,21 @@ export default function SessionsManager() {
         >
           <div style={{ fontWeight: 700 }}>
             {session.current
-              ? "🟢 Это устройство"
-              : "📱 Другое устройство"}
+              ? msg("🟢 Это устройство")
+              : msg("📱 Другое устройство")}
           </div>
 
           <p style={{ fontSize: 13 }}>
-            Вход:{" "}
+            {msg("Вход:")}{" "}
             {new Date(session.createdAt).toLocaleString(
-              "ru-RU"
+              locale
             )}
           </p>
 
           <p style={{ fontSize: 13 }}>
-            Действует до:{" "}
+            {msg("Действует до:")}{" "}
             {new Date(session.expiresAt).toLocaleString(
-              "ru-RU"
+              locale
             )}
           </p>
 
@@ -173,7 +176,7 @@ export default function SessionsManager() {
                 cursor: busy ? "wait" : "pointer",
               }}
             >
-              Завершить сеанс
+              {msg("Завершить сеанс")}
             </button>
           )}
         </div>
@@ -196,7 +199,7 @@ export default function SessionsManager() {
             cursor: busy ? "wait" : "pointer",
           }}
         >
-          Выйти на всех других устройствах
+          {msg("Выйти на всех других устройствах")}
         </button>
       )}
 

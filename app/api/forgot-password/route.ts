@@ -1,3 +1,4 @@
+import { getMoniqI18n } from "@/lib/moniq-language-server";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { Resend } from "resend";
@@ -88,18 +89,14 @@ if (!rateLimit.allowed) {
     const resetUrl = new URL("/reset-password", appUrl);
     resetUrl.searchParams.set("token", token);
 
+    const { msg } = await getMoniqI18n();
     const resend = new Resend(apiKey);
 
     const { error } = await resend.emails.send({
       from: "Moniq <no-reply@moniq.lat>",
       to: email,
-      subject: "Восстановление пароля Moniq",
-      text:
-        "Здравствуйте!\n\n" +
-        "Для установки нового пароля перейдите по ссылке:\n\n" +
-        resetUrl.toString() +
-        "\n\nСсылка действует 30 минут и может использоваться только один раз." +
-        "\n\nЕсли вы не запрашивали восстановление, проигнорируйте письмо.",
+      subject: msg("Восстановление пароля Moniq"),
+      text: msg("Здравствуйте!\n\nДля установки нового пароля перейдите по ссылке:\n\n{url}\n\nСсылка действует 30 минут и может использоваться только один раз.\n\nЕсли вы не запрашивали восстановление, проигнорируйте письмо.", { url: resetUrl.toString() }),
     });
 
     if (error) {

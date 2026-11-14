@@ -1,8 +1,10 @@
 
 "use client";
 
+import { useMoniqI18n } from "@/lib/moniq-language";
+
 import TransactionFilters from "@/components/TransactionFilters";
-import { dateForInput } from "@/lib/transaction-date";
+import { dateForInput, formatTransactionDate } from "@/lib/transaction-date";
 import BottomNav from "@/components/BottomNav";
 
 import Link from "next/link";
@@ -18,6 +20,7 @@ type Expense = {
 };
 
 export default function ExpensesPage() {
+  const { msg, locale } = useMoniqI18n();
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -63,13 +66,13 @@ export default function ExpensesPage() {
 
     return Object.entries(totals)
       .map(([currency, amount]) =>
-        new Intl.NumberFormat("ru-RU", {
+        new Intl.NumberFormat(locale, {
           style: "currency",
           currency,
         }).format(amount)
       )
       .join(" · ") || "0 €";
-  }, [filtered]);
+  }, [filtered, locale]);
 
   async function handleDelete(id: string) {
     const res = await fetch(`/api/expenses/${id}`, {
@@ -100,7 +103,7 @@ export default function ExpensesPage() {
           borderRadius: "24px",
         }}
       >
-        <h1 style={{ fontSize: "28px", marginBottom: "20px" }}>Расходы</h1>
+        <h1 style={{ fontSize: "28px", marginBottom: "20px" }}>{msg("Расходы")}</h1>
 
         <div
           style={{
@@ -112,7 +115,7 @@ export default function ExpensesPage() {
           }}
         >
           <div style={{ fontSize: "14px", color: "var(--moniq-muted)", marginBottom: "8px" }}>
-            {filtersActive ? "Сумма расходов по фильтрам" : "Общая сумма расходов"}
+            {filtersActive ? msg("Сумма расходов по фильтрам") : msg("Общая сумма расходов")}
           </div>
           <div style={{ fontSize: "32px", fontWeight: 800 }}>{totalExpense}</div>
         </div>
@@ -131,7 +134,7 @@ export default function ExpensesPage() {
               marginBottom: "16px",
             }}
           >
-            + Добавить расход
+            {msg("+ Добавить расход")}
           </button>
         </Link>
 
@@ -143,7 +146,7 @@ export default function ExpensesPage() {
             padding: "18px",
           }}
         >
-          <h3 style={{ marginTop: 0, marginBottom: "14px" }}>Список расходов</h3>
+          <h3 style={{ marginTop: 0, marginBottom: "14px" }}>{msg("Список расходов")}</h3>
 
           <TransactionFilters
             month={month}
@@ -152,13 +155,13 @@ export default function ExpensesPage() {
             group={group}
             setGroup={setGroup}
             groups={groups}
-            groupLabel="Категория"
+            groupLabel={msg("Категория")}
           />
 
           {loading ? (
-            <p style={{ color: "var(--moniq-muted)", margin: 0 }}>Загрузка...</p>
+            <p style={{ color: "var(--moniq-muted)", margin: 0 }}>{msg("Загрузка...")}</p>
           ) : filtered.length === 0 ? (
-            <p style={{ color: "var(--moniq-muted)", margin: 0 }}>{filtersActive ? "Нет операций по выбранным фильтрам" : "Пока расходов нет"}</p>
+            <p style={{ color: "var(--moniq-muted)", margin: 0 }}>{filtersActive ? msg("Нет операций по выбранным фильтрам") : msg("Пока расходов нет")}</p>
           ) : (
             <div style={{ display: "grid", gap: "10px" }}>
               {filtered.map((item) => (
@@ -180,9 +183,9 @@ export default function ExpensesPage() {
                       marginBottom: "6px",
                     }}
                   >
-                    <div style={{ fontWeight: 700 }}>{item.category}</div>
+                    <div style={{ fontWeight: 700 }}>{msg(item.category)}</div>
                     <div style={{ fontWeight: 700, color: "var(--moniq-accent)" }}>
-                      {new Intl.NumberFormat("ru-RU", {
+                      {new Intl.NumberFormat(locale, {
                         style: "currency",
                         currency: item.currency || "EUR",
                       }).format(item.amount)}
@@ -190,7 +193,7 @@ export default function ExpensesPage() {
                   </div>
 
                   <div style={{ color: "var(--moniq-muted)", fontSize: "12px", marginBottom: "6px" }}>
-                    {item.date}
+                    {formatTransactionDate(item.date, locale)}
                   </div>
 
                   {item.note ? (
@@ -211,7 +214,7 @@ export default function ExpensesPage() {
                       textDecoration: "none",
                     }}
                   >
-                    Изменить
+                    {msg("Изменить")}
                   </Link>
                   <button
                     onClick={() => handleDelete(item.id)}
@@ -224,7 +227,7 @@ export default function ExpensesPage() {
                       cursor: "pointer",
                     }}
                   >
-                    Удалить
+                    {msg("Удалить")}
                   </button>
                 </div>
               ))}

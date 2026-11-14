@@ -1,8 +1,12 @@
 "use client";
 
+import LanguageSelector from "@/app/settings/LanguageSelector";
+import { useMoniqI18n } from "@/lib/moniq-language";
+
 import { useState, type FormEvent } from "react";
 
 export default function ForgotPasswordPage() {
+  const { errorMessage, msg } = useMoniqI18n();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -24,13 +28,13 @@ export default function ForgotPasswordPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Ошибка отправки");
+        setError(errorMessage(data.error, msg("Ошибка отправки")));
         return;
       }
 
-      setSuccess(data.message);
+      setSuccess(msg(data.message));
     } catch {
-      setError("Ошибка соединения");
+      setError(msg("Ошибка соединения"));
     } finally {
       setLoading(false);
     }
@@ -39,15 +43,15 @@ export default function ForgotPasswordPage() {
   return (
     <main style={styles.main}>
       <form onSubmit={submit} style={styles.card}>
-        <h1>Восстановление пароля</h1>
+        <LanguageSelector />
+        <h1>{msg("Восстановление пароля")}</h1>
         <p style={styles.description}>
-          Введите электронную почту вашего аккаунта Moniq.
-          Мы отправим ссылку для создания нового пароля.
+          {msg("Введите электронную почту вашего аккаунта Moniq. Мы отправим ссылку для создания нового пароля.")}
         </p>
 
         <input
           type="email"
-          placeholder="Электронная почта"
+          placeholder={msg("Электронная почта")}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
@@ -59,10 +63,10 @@ export default function ForgotPasswordPage() {
         {success && <p style={styles.success}>{success}</p>}
 
         <button disabled={loading} style={styles.button}>
-          {loading ? "Отправка..." : "Отправить ссылку"}
+          {loading ? msg("Отправка...") : msg("Отправить ссылку")}
         </button>
 
-        <a href="/login" style={styles.link}>Вернуться ко входу</a>
+        <a href="/login" style={styles.link}>{msg("Вернуться ко входу")}</a>
       </form>
     </main>
   );

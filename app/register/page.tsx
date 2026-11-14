@@ -1,10 +1,14 @@
 "use client";
 
+import LanguageSelector from "@/app/settings/LanguageSelector";
+import { useMoniqI18n } from "@/lib/moniq-language";
+
 import { useState } from "react";
 import { translate, useMoniqLanguage } from "@/lib/moniq-language";
 import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
+  const { errorMessage, msg } = useMoniqI18n();
   const router = useRouter();
   const language = useMoniqLanguage();
   const t = (ru: string, en: string, lv: string) => translate(language, ru, en, lv);
@@ -33,7 +37,7 @@ export default function RegisterPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Ошибка регистрации");
+        setError(errorMessage(data.error, msg("Ошибка регистрации")));
         return;
       }
 
@@ -68,6 +72,7 @@ export default function RegisterPage() {
           padding: "22px",
         }}
       >
+        <LanguageSelector />
         <h1 style={{ fontSize: "28px", marginTop: 0, marginBottom: "18px" }}>
           {t("Регистрация", "Registration", "Reģistrācija")}
         </h1>
@@ -75,7 +80,7 @@ export default function RegisterPage() {
         <div style={{ display: "grid", gap: "12px" }}>
           <input
             type="email"
-            placeholder="Email"
+            placeholder={t("Электронная почта", "Email address", "E-pasta adrese")}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             style={{

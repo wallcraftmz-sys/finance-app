@@ -1,5 +1,7 @@
 "use client";
 
+import { useMoniqI18n } from "@/lib/moniq-language";
+
 import { useState } from "react";
 
 type Props = {
@@ -7,10 +9,11 @@ type Props = {
 };
 
 export default function DeleteConversationButton({ userId }: Props) {
+  const { errorMessage, msg } = useMoniqI18n();
   const [loading, setLoading] = useState(false);
 
   const onDelete = async () => {
-    const ok = window.confirm("Удалить всю переписку с этим пользователем?");
+    const ok = window.confirm(msg("Удалить всю переписку с этим пользователем?"));
     if (!ok) return;
 
     try {
@@ -27,13 +30,13 @@ export default function DeleteConversationButton({ userId }: Props) {
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data.error || "Ошибка при удалении");
+        alert(errorMessage(data.error, msg("Ошибка при удалении")));
         return;
       }
 
       window.location.reload();
     } catch (error) {
-      alert("Ошибка сети или сервера");
+      alert(msg("Ошибка сети или сервера"));
     } finally {
       setLoading(false);
     }

@@ -1,9 +1,12 @@
 "use client";
 
+import { useMoniqI18n } from "@/lib/moniq-language";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function NewGoalPage() {
+  const { errorMessage, msg } = useMoniqI18n();
   const router = useRouter();
 
   const [title, setTitle] = useState("");
@@ -30,13 +33,13 @@ export default function NewGoalPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Ошибка создания цели");
+        setError(errorMessage(data.error, msg("Ошибка создания цели")));
         return;
       }
 
       router.push("/dashboard");
     } catch (error) {
-      setError("Ошибка сети");
+      setError(msg("Ошибка сети"));
     } finally {
       setLoading(false);
     }
@@ -65,13 +68,13 @@ export default function NewGoalPage() {
         }}
       >
         <h1 style={{ fontSize: "28px", marginTop: 0, marginBottom: "18px" }}>
-          Новая цель
+          {msg("Новая цель")}
         </h1>
 
         <div style={{ display: "grid", gap: "12px" }}>
           <input
             type="text"
-            placeholder="Название цели"
+            placeholder={msg("Название цели")}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             style={{
@@ -85,7 +88,7 @@ export default function NewGoalPage() {
 
           <input
             type="number"
-            placeholder="Сумма"
+            placeholder={msg("Сумма")}
             value={targetAmount}
             onChange={(e) => setTargetAmount(e.target.value)}
             style={{
@@ -127,7 +130,7 @@ export default function NewGoalPage() {
               opacity: loading ? 0.7 : 1,
             }}
           >
-            {loading ? "Сохранение..." : "Сохранить цель"}
+            {loading ? msg("Сохранение...") : msg("Сохранить цель")}
           </button>
         </div>
       </div>

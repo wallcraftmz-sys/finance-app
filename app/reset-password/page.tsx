@@ -1,8 +1,12 @@
 "use client";
 
+import LanguageSelector from "@/app/settings/LanguageSelector";
+import { useMoniqI18n } from "@/lib/moniq-language";
+
 import { useState, useEffect, type FormEvent } from "react";
 
 export default function ResetPasswordPage() {
+  const { errorMessage, msg } = useMoniqI18n();
   const [token, setToken] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -26,12 +30,12 @@ export default function ResetPasswordPage() {
     setError("");
 
     if (password !== confirmPassword) {
-      setError("Пароли не совпадают");
+      setError(msg("Пароли не совпадают"));
       return;
     }
 
     if (password.length < 8) {
-      setError("Минимум 8 символов");
+      setError(msg("Минимум 8 символов"));
       return;
     }
 
@@ -47,13 +51,13 @@ export default function ResetPasswordPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Ошибка сброса пароля");
+        setError(errorMessage(data.error, msg("Ошибка сброса пароля")));
         return;
       }
 
       setSuccess(true);
     } catch {
-      setError("Ошибка соединения");
+      setError(msg("Ошибка соединения"));
     } finally {
       setLoading(false);
     }
@@ -80,26 +84,27 @@ export default function ResetPasswordPage() {
         display: "grid",
         gap: 16,
       }}>
-        <h1>Новый пароль</h1>
+        <LanguageSelector />
+        <h1>{msg("Новый пароль")}</h1>
 
         {success ? (
           <>
             <p style={{ color: "#86efac" }}>
-              Пароль успешно изменён. Теперь можно войти.
+              {msg("Пароль успешно изменён. Теперь можно войти.")}
             </p>
             <a href="/login" style={{ color: "#fbbf24" }}>
-              Перейти ко входу
+              {msg("Перейти ко входу")}
             </a>
           </>
         ) : (
           <>
             <p style={{ color: "#a0a0a8" }}>
-              Создайте новый пароль для аккаунта Moniq.
+              {msg("Создайте новый пароль для аккаунта Moniq.")}
             </p>
 
             <input
               type="password"
-              placeholder="Новый пароль"
+              placeholder={msg("Новый пароль")}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               minLength={8}
@@ -110,7 +115,7 @@ export default function ResetPasswordPage() {
 
             <input
               type="password"
-              placeholder="Повторите пароль"
+              placeholder={msg("Повторите пароль")}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               minLength={8}
@@ -123,7 +128,7 @@ export default function ResetPasswordPage() {
 
             {!token && (
               <p style={{ color: "#ff8a8a" }}>
-                Ссылка отсутствует. Запросите новую.
+                {msg("Ссылка отсутствует. Запросите новую.")}
               </p>
             )}
 
@@ -136,11 +141,11 @@ export default function ResetPasswordPage() {
               cursor: "pointer",
               opacity: loading || !token ? 0.5 : 1,
             }}>
-              {loading ? "Сохранение..." : "Сохранить новый пароль"}
+              {loading ? msg("Сохранение...") : msg("Сохранить новый пароль")}
             </button>
 
             <a href="/forgot-password" style={{ color: "#fbbf24" }}>
-              Запросить новую ссылку
+              {msg("Запросить новую ссылку")}
             </a>
           </>
         )}

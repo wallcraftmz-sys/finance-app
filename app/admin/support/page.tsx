@@ -1,9 +1,11 @@
+import { getMoniqI18n } from "@/lib/moniq-language-server";
 
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import AdminSupportMessenger from "@/components/AdminSupportMessenger";
 
 export default async function AdminSupportPage() {
+  const { msg } = await getMoniqI18n();
   const currentUser = await getCurrentUser();
 
   const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
@@ -22,7 +24,7 @@ export default async function AdminSupportPage() {
           padding: "24px",
         }}
       >
-        Доступ запрещён
+        {msg("Доступ запрещён")}
       </main>
     );
   }
@@ -124,7 +126,7 @@ export default async function AdminSupportPage() {
                 margin: 0,
               }}
             >
-              Поддержка
+              {msg("Поддержка")}
             </h1>
           </div>
 
@@ -141,7 +143,7 @@ export default async function AdminSupportPage() {
               fontWeight: 600,
             }}
           >
-            ← Назад
+            {msg("← Назад")}
           </a>
         </header>
 

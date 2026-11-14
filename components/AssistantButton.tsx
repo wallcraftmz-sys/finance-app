@@ -1,15 +1,18 @@
 "use client";
 
+import { useMoniqI18n } from "@/lib/moniq-language";
+
 import { useRouter } from "next/navigation";
 
 export default function AssistantButton() {
+  const { msg } = useMoniqI18n();
   const router = useRouter();
 
   return (
     <button
       onClick={() => router.push("/assistant")}
-      title="AI помощник"
-      aria-label="Открыть AI помощника"
+      title={msg("AI помощник")}
+      aria-label={msg("Открыть AI помощника")}
       style={{
         position: "fixed",
         right: 20,

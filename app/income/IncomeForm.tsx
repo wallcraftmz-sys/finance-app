@@ -1,5 +1,7 @@
 "use client";
 
+import { useMoniqI18n } from "@/lib/moniq-language";
+
 import TransactionDateField from "@/components/TransactionDateField";
 import { dateForInput } from "@/lib/transaction-date";
 import { useState } from "react";
@@ -16,6 +18,7 @@ type Income = {
 };
 
 export default function IncomeForm({ income }: { income?: Income }) {
+  const { errorMessage, msg } = useMoniqI18n();
   const router = useRouter();
   const language = useMoniqLanguage();
   const t = (ru: string, en: string, lv: string) => translate(language, ru, en, lv);
@@ -28,7 +31,7 @@ export default function IncomeForm({ income }: { income?: Income }) {
 
   async function handleSave() {
     if (!amount || !date) {
-      alert("Заполни сумму и дату");
+      alert(msg("Заполни сумму и дату"));
       return;
     }
 
@@ -51,14 +54,14 @@ export default function IncomeForm({ income }: { income?: Income }) {
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data.error || "Не удалось сохранить доход");
+        alert(errorMessage(data.error, msg("Не удалось сохранить доход")));
         return;
       }
 
       router.push("/income");
       router.refresh();
     } catch (error) {
-      alert("Ошибка сети");
+      alert(msg("Ошибка сети"));
     } finally {
       setLoading(false);
     }
@@ -111,7 +114,7 @@ export default function IncomeForm({ income }: { income?: Income }) {
           <input
             type="number"
             placeholder={t("Сумма", "Amount", "Summa")}
-            aria-label={income ? `Сумма (${income.currency || "EUR"})` : "Сумма"}
+            aria-label={income ? msg("Сумма ({currency})", { currency: income.currency || "EUR" }) : msg("Сумма")}
             inputMode="decimal"
             step="0.01"
             value={amount}
@@ -138,13 +141,13 @@ export default function IncomeForm({ income }: { income?: Income }) {
             }}
           >
             {income && !["Зарплата", "Подработка", "Подарок", "Возврат", "Другое"].includes(income.source) && (
-              <option>{income.source}</option>
+              <option value={income.source}>{msg(income.source)}</option>
             )}
-            <option>Зарплата</option>
-            <option>Подработка</option>
-            <option>Подарок</option>
-            <option>Возврат</option>
-            <option>Другое</option>
+            <option value="Зарплата">{msg("Зарплата")}</option>
+            <option value="Подработка">{msg("Подработка")}</option>
+            <option value="Подарок">{msg("Подарок")}</option>
+            <option value="Возврат">{msg("Возврат")}</option>
+            <option value="Другое">{msg("Другое")}</option>
           </select>
 
           <TransactionDateField value={date} onChange={setDate} />

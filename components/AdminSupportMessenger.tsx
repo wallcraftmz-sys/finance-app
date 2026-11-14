@@ -1,6 +1,8 @@
 
 "use client";
 
+import { useMoniqI18n } from "@/lib/moniq-language";
+
 import { useEffect, useRef, useState } from "react";
 import AdminSupportReplyBox from "@/components/AdminSupportReplyBox";
 import DeleteConversationButton from "@/components/DeleteConversationButton";
@@ -26,6 +28,7 @@ type Props = {
 export default function AdminSupportMessenger({
   conversations,
 }: Props) {
+  const { msg, locale } = useMoniqI18n();
   const [liveConversations, setLiveConversations] =
     useState<Conversation[]>(conversations);
 
@@ -55,7 +58,7 @@ export default function AdminSupportMessenger({
         }
       } catch (error) {
         console.error(
-          "Ошибка обновления поддержки:",
+          msg("Ошибка обновления поддержки:"),
           error
         );
       }
@@ -100,13 +103,13 @@ export default function AdminSupportMessenger({
         }`}
       >
         <div className="moniq-admin-inbox-header">
-          <h2>Обращения</h2>
+          <h2>{msg("Обращения")}</h2>
           <span>{liveConversations.length}</span>
         </div>
 
         {liveConversations.length === 0 ? (
           <p className="moniq-admin-empty">
-            Пока обращений нет.
+            {msg("Пока обращений нет.")}
           </p>
         ) : (
           liveConversations.map((conversation) => {
@@ -138,7 +141,7 @@ export default function AdminSupportMessenger({
                   <strong>{conversation.email}</strong>
 
                   <span>
-                    {last?.message || "Нет сообщений"}
+                    {last?.message || msg("Нет сообщений")}
                   </span>
                 </div>
               </button>
@@ -155,8 +158,7 @@ export default function AdminSupportMessenger({
       >
         {!selected ? (
           <div className="moniq-admin-chat-empty">
-            Выбери обращение слева, чтобы открыть
-            переписку.
+            {msg("Выбери обращение слева, чтобы открыть переписку.")}
           </div>
         ) : (
           <>
@@ -165,14 +167,14 @@ export default function AdminSupportMessenger({
                 type="button"
                 className="moniq-admin-back"
                 onClick={() => setSelectedId(null)}
-                aria-label="Вернуться к обращениям"
+                aria-label={msg("Вернуться к обращениям")}
               >
                 ←
               </button>
 
               <div className="moniq-admin-chat-user">
                 <strong>{selected.email}</strong>
-                <span>Чат поддержки</span>
+                <span>{msg("Чат поддержки")}</span>
               </div>
 
               <DeleteConversationButton
@@ -210,7 +212,7 @@ export default function AdminSupportMessenger({
                       <small>
                         {new Date(
                           message.createdAt
-                        ).toLocaleString("ru-RU")}
+                        ).toLocaleString(locale)}
                       </small>
                     </div>
                   </div>

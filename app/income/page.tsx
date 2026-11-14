@@ -1,8 +1,10 @@
 
 "use client";
 
+import { useMoniqI18n } from "@/lib/moniq-language";
+
 import TransactionFilters from "@/components/TransactionFilters";
-import { dateForInput } from "@/lib/transaction-date";
+import { dateForInput, formatTransactionDate } from "@/lib/transaction-date";
 import BottomNav from "@/components/BottomNav";
 
 import Link from "next/link";
@@ -18,6 +20,7 @@ type Income = {
 };
 
 export default function IncomePage() {
+  const { msg, locale } = useMoniqI18n();
   const [incomes, setIncomes] = useState<Income[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -63,13 +66,13 @@ export default function IncomePage() {
 
     return Object.entries(totals)
       .map(([currency, amount]) =>
-        new Intl.NumberFormat("ru-RU", {
+        new Intl.NumberFormat(locale, {
           style: "currency",
           currency,
         }).format(amount)
       )
       .join(" · ") || "0 €";
-  }, [filtered]);
+  }, [filtered, locale]);
 
   async function handleDelete(id: string) {
     const res = await fetch(`/api/income/${id}`, {
@@ -100,7 +103,7 @@ export default function IncomePage() {
           borderRadius: "24px",
         }}
       >
-        <h1 style={{ fontSize: "28px", marginBottom: "20px" }}>Доходы</h1>
+        <h1 style={{ fontSize: "28px", marginBottom: "20px" }}>{msg("Доходы")}</h1>
 
         <div
           style={{
@@ -112,7 +115,7 @@ export default function IncomePage() {
           }}
         >
           <div style={{ fontSize: "14px", color: "var(--moniq-muted)", marginBottom: "8px" }}>
-            {filtersActive ? "Сумма доходов по фильтрам" : "Общая сумма доходов"}
+            {filtersActive ? msg("Сумма доходов по фильтрам") : msg("Общая сумма доходов")}
           </div>
           <div style={{ fontSize: "32px", fontWeight: 800 }}>{totalIncome}</div>
         </div>
@@ -131,7 +134,7 @@ export default function IncomePage() {
               marginBottom: "16px",
             }}
           >
-            + Добавить доход
+            {msg("+ Добавить доход")}
           </button>
         </Link>
 
@@ -143,7 +146,7 @@ export default function IncomePage() {
             padding: "18px",
           }}
         >
-          <h3 style={{ marginTop: 0, marginBottom: "14px" }}>Список доходов</h3>
+          <h3 style={{ marginTop: 0, marginBottom: "14px" }}>{msg("Список доходов")}</h3>
 
           <TransactionFilters
             month={month}
@@ -152,13 +155,13 @@ export default function IncomePage() {
             group={group}
             setGroup={setGroup}
             groups={groups}
-            groupLabel="Источник"
+            groupLabel={msg("Источник")}
           />
 
           {loading ? (
-            <p style={{ color: "var(--moniq-muted)", margin: 0 }}>Загрузка...</p>
+            <p style={{ color: "var(--moniq-muted)", margin: 0 }}>{msg("Загрузка...")}</p>
           ) : filtered.length === 0 ? (
-            <p style={{ color: "var(--moniq-muted)", margin: 0 }}>{filtersActive ? "Нет операций по выбранным фильтрам" : "Пока доходов нет"}</p>
+            <p style={{ color: "var(--moniq-muted)", margin: 0 }}>{filtersActive ? msg("Нет операций по выбранным фильтрам") : msg("Пока доходов нет")}</p>
           ) : (
             <div style={{ display: "grid", gap: "10px" }}>
               {filtered.map((item) => (
@@ -180,9 +183,9 @@ export default function IncomePage() {
                       marginBottom: "6px",
                     }}
                   >
-                    <div style={{ fontWeight: 700 }}>{item.source}</div>
+                    <div style={{ fontWeight: 700 }}>{msg(item.source)}</div>
                     <div style={{ fontWeight: 700, color: "var(--moniq-accent)" }}>
-                      +{new Intl.NumberFormat("ru-RU", {
+                      +{new Intl.NumberFormat(locale, {
                         style: "currency",
                         currency: item.currency || "EUR",
                       }).format(item.amount)}
@@ -190,7 +193,7 @@ export default function IncomePage() {
                   </div>
 
                   <div style={{ color: "var(--moniq-muted)", fontSize: "12px", marginBottom: "6px" }}>
-                    {item.date}
+                    {formatTransactionDate(item.date, locale)}
                   </div>
 
                   {item.note ? (
@@ -211,7 +214,7 @@ export default function IncomePage() {
                       textDecoration: "none",
                     }}
                   >
-                    Изменить
+                    {msg("Изменить")}
                   </Link>
                   <button
                     onClick={() => handleDelete(item.id)}
@@ -224,7 +227,7 @@ export default function IncomePage() {
                       cursor: "pointer",
                     }}
                   >
-                    Удалить
+                    {msg("Удалить")}
                   </button>
                 </div>
               ))}

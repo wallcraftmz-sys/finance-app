@@ -1,5 +1,7 @@
 "use client";
 
+import { useMoniqI18n } from "@/lib/moniq-language";
+
 import { useState } from "react";
 
 export default function ProfileNameForm({
@@ -7,6 +9,7 @@ export default function ProfileNameForm({
 }: {
   initialName: string;
 }) {
+  const { errorMessage, msg } = useMoniqI18n();
   const [name, setName] = useState(initialName);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
@@ -27,14 +30,14 @@ export default function ProfileNameForm({
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Ошибка сохранения");
+        throw new Error(errorMessage(data.error, msg("Ошибка сохранения")));
       }
 
       setName(data.user.name);
-      setMessage("Имя успешно сохранено!");
+      setMessage(msg("Имя успешно сохранено!"));
     } catch (error) {
       setMessage(
-        error instanceof Error ? error.message : "Ошибка сохранения"
+        error instanceof Error ? error.message : msg("Ошибка сохранения")
       );
     } finally {
       setSaving(false);
@@ -47,7 +50,7 @@ export default function ProfileNameForm({
         htmlFor="profile-name"
         style={{ color: "var(--moniq-muted)", fontSize: 13 }}
       >
-        Имя пользователя
+        {msg("Имя пользователя")}
       </label>
 
       <input
@@ -56,7 +59,7 @@ export default function ProfileNameForm({
         value={name}
         onChange={(e) => setName(e.target.value)}
         maxLength={60}
-        placeholder="Введите ваше имя"
+        placeholder={msg("Введите ваше имя")}
         style={{
           display: "block",
           boxSizing: "border-box",
@@ -89,7 +92,7 @@ export default function ProfileNameForm({
           opacity: saving ? 0.6 : 1,
         }}
       >
-        {saving ? "Сохраняем..." : "Сохранить изменения"}
+        {saving ? msg("Сохраняем...") : msg("Сохранить изменения")}
       </button>
 
       {message && (
@@ -97,7 +100,7 @@ export default function ProfileNameForm({
           role="status"
           style={{
             textAlign: "center",
-            color: message.includes("успешно") ? "#45d6a0" : "#ff655c",
+            color: message === msg("Имя успешно сохранено!") ? "#45d6a0" : "#ff655c",
             fontSize: 13,
             marginTop: 12,
           }}

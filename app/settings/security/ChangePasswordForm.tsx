@@ -1,8 +1,11 @@
 "use client";
 
+import { useMoniqI18n } from "@/lib/moniq-language";
+
 import { useState } from "react";
 
 export default function ChangePasswordForm() {
+  const { errorMessage, msg } = useMoniqI18n();
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -35,17 +38,17 @@ export default function ChangePasswordForm() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Ошибка изменения пароля");
+        throw new Error(errorMessage(data.error, msg("Ошибка изменения пароля")));
       }
 
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
       setSuccess(true);
-      setMessage("Пароль успешно изменён!");
+      setMessage(msg("Пароль успешно изменён!"));
     } catch (error) {
       setMessage(
-        error instanceof Error ? error.message : "Ошибка сервера"
+        error instanceof Error ? error.message : msg("Ошибка сервера")
       );
     } finally {
       setSaving(false);
@@ -73,12 +76,12 @@ export default function ChangePasswordForm() {
   return (
     <form onSubmit={handleSubmit} style={{ marginTop: 28 }}>
       <h2 style={{ fontSize: 19, marginBottom: 20 }}>
-        Изменить пароль
+        {msg("Изменить пароль")}
       </h2>
 
       <div style={{ marginBottom: 18 }}>
         <label htmlFor="current-password" style={labelStyle}>
-          Текущий пароль
+          {msg("Текущий пароль")}
         </label>
         <input
           id="current-password"
@@ -93,7 +96,7 @@ export default function ChangePasswordForm() {
 
       <div style={{ marginBottom: 18 }}>
         <label htmlFor="new-password" style={labelStyle}>
-          Новый пароль
+          {msg("Новый пароль")}
         </label>
         <input
           id="new-password"
@@ -110,7 +113,7 @@ export default function ChangePasswordForm() {
 
       <div style={{ marginBottom: 20 }}>
         <label htmlFor="confirm-password" style={labelStyle}>
-          Подтвердите новый пароль
+          {msg("Подтвердите новый пароль")}
         </label>
         <input
           id="confirm-password"
@@ -139,7 +142,7 @@ export default function ChangePasswordForm() {
           opacity: saving ? 0.65 : 1,
         }}
       >
-        {saving ? "Сохранение..." : "Изменить пароль"}
+        {saving ? msg("Сохранение...") : msg("Изменить пароль")}
       </button>
 
       {message && (

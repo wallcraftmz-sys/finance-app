@@ -1,5 +1,7 @@
 "use client";
 
+import { useMoniqI18n } from "@/lib/moniq-language";
+
 import BottomNav from "@/components/BottomNav";
 
 import Link from "next/link";
@@ -14,6 +16,7 @@ type Goal = {
 };
 
 export default function GoalsPage() {
+  const { errorMessage, msg, locale } = useMoniqI18n();
   const [goals, setGoals] = useState<Goal[]>([]);
   const [loading, setLoading] = useState(true);
   const [depositGoalId, setDepositGoalId] = useState<string | null>(null);
@@ -41,16 +44,13 @@ export default function GoalsPage() {
     if (!goal) return;
 
     const currency = goal.currency || "EUR";
-    const saved = new Intl.NumberFormat("ru-RU", {
+    const saved = new Intl.NumberFormat(locale, {
       style: "currency",
       currency,
     }).format(goal.savedAmount ?? 0);
 
     const confirmed = window.confirm(
-      `Удалить цель «${goal.title}»?\n\n` +
-      `Зарезервированные ${saved} снова станут доступными.\n` +
-      `Общий баланс не изменится.\n\n` +
-      `Это действие нельзя отменить.`
+      msg("Удалить цель «{title}»?\n\nЗарезервированные {amount} снова станут доступными.\nОбщий баланс не изменится.\n\nЭто действие нельзя отменить.", { title: goal.title, amount: saved })
     );
 
     if (!confirmed) return;
@@ -64,10 +64,10 @@ export default function GoalsPage() {
         setGoals((prev) => prev.filter((item) => item.id !== id));
       } else {
         const data = await res.json();
-        alert(data.error || "Не удалось удалить цель");
+        alert(errorMessage(data.error, msg("Не удалось удалить цель")));
       }
     } catch {
-      alert("Ошибка соединения. Попробуйте ещё раз.");
+      alert(msg("Ошибка соединения. Попробуйте ещё раз."));
     }
   }
 
@@ -81,7 +81,7 @@ export default function GoalsPage() {
       amount <= 0 ||
       ! /^\d+(\.\d{1,2})?$/.test(normalized)
     ) {
-      setDepositError("Введите положительную сумму с точностью до двух знаков.");
+      setDepositError(msg("Введите положительную сумму с точностью до двух знаков."));
       return;
     }
 
@@ -98,7 +98,7 @@ export default function GoalsPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setDepositError(data.error || "Не удалось выполнить операцию");
+        setDepositError(errorMessage(data.error, msg("Не удалось выполнить операцию")));
         return;
       }
 
@@ -108,7 +108,7 @@ export default function GoalsPage() {
       setDepositGoalId(null);
       setDepositAmount("");
     } catch {
-      setDepositError("Не удалось подключиться к серверу.");
+      setDepositError(msg("Не удалось подключиться к серверу."));
     } finally {
       setDepositLoading(false);
     }
@@ -137,11 +137,11 @@ export default function GoalsPage() {
           borderRadius: "24px",
         }}
       >
-       <h1 style={{ fontSize: "28px", marginBottom: "12px" }}>Цели</h1>
+       <h1 style={{ fontSize: "28px", marginBottom: "12px" }}>{msg("Цели")}</h1>
 
 
         {loading ? (
-          <div>Загрузка...</div>
+          <div>{msg("Загрузка...")}</div>
         ) : goals.length === 0 ? (
           <div
             style={{
@@ -152,7 +152,7 @@ export default function GoalsPage() {
             }}
           >
             <p style={{ color: "var(--moniq-muted)", marginTop: 0 }}>
-              У тебя пока нет цели. Создай свою первую финансовую цель.
+              {msg("У тебя пока нет цели. Создай свою первую финансовую цель.")}
             </p>
 
             <Link href="/goals/new" style={{ textDecoration: "none" }}>
@@ -168,7 +168,7 @@ export default function GoalsPage() {
                   cursor: "pointer",
                 }}
               >
-                + Создать цель
+                {msg("+ Создать цель")}
               </button>
             </Link>
           </div>
@@ -185,7 +185,7 @@ export default function GoalsPage() {
                 }}
               >
                 <div style={{ fontSize: "14px", color: "var(--moniq-muted)", marginBottom: "8px" }}>
-                  Активная цель
+                  {msg("Активная цель")}
                 </div>
 
                 <h2 style={{ margin: "0 0 10px 0", fontSize: "22px" }}>{goal.title}</h2>
@@ -197,9 +197,9 @@ export default function GoalsPage() {
                     marginBottom: "14px",
                   }}
                 >
-                  <span>Цель</span>
+                  <span>{msg("Цель")}</span>
                   <b>
-                    {new Intl.NumberFormat("ru-RU", {
+                    {new Intl.NumberFormat(locale, {
                       style: "currency",
                       currency: goal.currency || "EUR",
                     }).format(goal.targetAmount)}
@@ -213,9 +213,9 @@ export default function GoalsPage() {
                     marginBottom: "8px",
                     gap: "8px",
                   }}>
-                    <span>Накоплено</span>
+                    <span>{msg("Накоплено")}</span>
                     <b>
-                      {new Intl.NumberFormat("ru-RU", {
+                      {new Intl.NumberFormat(locale, {
                         style: "currency",
                         currency: goal.currency || "EUR",
                       }).format(goal.savedAmount ?? 0)}
@@ -245,7 +245,7 @@ export default function GoalsPage() {
                   }}>
                     {goal.targetAmount > 0
                       ? Math.min(Math.round(((goal.savedAmount ?? 0) / goal.targetAmount) * 100), 100)
-                      : 0}% выполнено
+                      : 0}{msg("% выполнено")}
                   </div>
                 </div>
 
@@ -254,7 +254,7 @@ export default function GoalsPage() {
                     <input
                       type="text"
                       inputMode="decimal"
-                      placeholder={`Сумма в ${goal.currency || "EUR"}`}
+                      placeholder={msg("Сумма в {currency}", { currency: goal.currency || "EUR" })}
                       value={depositAmount}
                       onChange={(e) => setDepositAmount(e.target.value)}
                       style={{
@@ -286,7 +286,7 @@ export default function GoalsPage() {
                         cursor: "pointer",
                       }}
                     >
-                      {depositLoading ? "Сохраняем..." : goalAction === "deposit" ? "Сохранить пополнение" : "Подтвердить снятие"}
+                      {depositLoading ? msg("Сохраняем...") : goalAction === "deposit" ? msg("Сохранить пополнение") : msg("Подтвердить снятие")}
                     </button>
 
                     <button
@@ -306,7 +306,7 @@ export default function GoalsPage() {
                         cursor: "pointer",
                       }}
                     >
-                      Отмена
+                      {msg("Отмена")}
                     </button>
                   </div>
                 ) : (
@@ -329,7 +329,7 @@ export default function GoalsPage() {
                       cursor: "pointer",
                     }}
                   >
-                    + Пополнить цель
+                    {msg("+ Пополнить цель")}
                   </button>
                 )}
 
@@ -354,7 +354,7 @@ export default function GoalsPage() {
                       cursor: "pointer",
                     }}
                   >
-                    − Снять с цели
+                    {msg("− Снять с цели")}
                   </button>
                 )}
 
@@ -372,7 +372,7 @@ export default function GoalsPage() {
                       cursor: "pointer",
                     }}
                   >
-                    Удалить цель
+                    {msg("Удалить цель")}
                   </button>
                 </div>
               </div>
@@ -391,7 +391,7 @@ export default function GoalsPage() {
                   cursor: "pointer",
                 }}
               >
-                + Создать ещё цель
+                {msg("+ Создать ещё цель")}
               </button>
             </Link>
           </div>

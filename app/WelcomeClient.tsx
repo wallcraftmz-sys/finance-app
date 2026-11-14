@@ -1,5 +1,8 @@
 "use client";
 
+import LanguageSelector from "@/app/settings/LanguageSelector";
+import { useMoniqI18n } from "@/lib/moniq-language";
+
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -406,6 +409,7 @@ function SplashScreen({ fadeOut = false }: { fadeOut?: boolean }) {
 }
 
 function WelcomeScreen() {
+  const { msg } = useMoniqI18n();
   return (
     <main
       style={{
@@ -473,8 +477,7 @@ function WelcomeScreen() {
               margin: "0 0 22px 0",
             }}
           >
-            Контролируй доходы и расходы, смотри аналитику, ставь финансовые цели
-            и получай умные подсказки в одном приложении.
+            {msg("Контролируй доходы и расходы, смотри аналитику, ставь финансовые цели и получай умные подсказки в одном приложении.")}
           </p>
 
           <div style={{ display: "grid", gap: "12px", marginBottom: "22px" }}>
@@ -486,9 +489,9 @@ function WelcomeScreen() {
                 padding: "14px",
               }}
             >
-              <div style={{ fontWeight: 700, marginBottom: "4px" }}>Доходы и расходы</div>
+              <div style={{ fontWeight: 700, marginBottom: "4px" }}>{msg("Доходы и расходы")}</div>
               <div style={{ color: "#9d9da6", fontSize: "14px" }}>
-                Добавляй операции и держи баланс под контролем.
+                {msg("Добавляй операции и держи баланс под контролем.")}
               </div>
             </div>
 
@@ -500,9 +503,9 @@ function WelcomeScreen() {
                 padding: "14px",
               }}
             >
-              <div style={{ fontWeight: 700, marginBottom: "4px" }}>Аналитика</div>
+              <div style={{ fontWeight: 700, marginBottom: "4px" }}>{msg("Аналитика")}</div>
               <div style={{ color: "#9d9da6", fontSize: "14px" }}>
-                Смотри категории, графики и структуру расходов.
+                {msg("Смотри категории, графики и структуру расходов.")}
               </div>
             </div>
 
@@ -514,13 +517,14 @@ function WelcomeScreen() {
                 padding: "14px",
               }}
             >
-              <div style={{ fontWeight: 700, marginBottom: "4px" }}>Цели и AI</div>
+              <div style={{ fontWeight: 700, marginBottom: "4px" }}>{msg("Цели и AI")}</div>
               <div style={{ color: "#9d9da6", fontSize: "14px" }}>
-                Копи на важное и получай полезные подсказки.
+                {msg("Копи на важное и получай полезные подсказки.")}
               </div>
             </div>
           </div>
 
+          <div style={{ marginBottom: 12 }}><LanguageSelector /></div>
           <Link href="/login" style={{ textDecoration: "none" }}>
             <button
               style={{
@@ -535,7 +539,7 @@ function WelcomeScreen() {
                 cursor: "pointer",
               }}
             >
-              Войти
+              {msg("Войти")}
             </button>
           </Link>
         </div>

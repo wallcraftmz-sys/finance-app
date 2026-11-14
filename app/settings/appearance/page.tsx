@@ -1,5 +1,7 @@
 "use client";
 
+import { useMoniqI18n } from "@/lib/moniq-language";
+
 import Link from "next/link";
 import { useMoniqTheme } from "@/components/theme/ThemeProvider";
 
@@ -12,6 +14,7 @@ const accentColors = [
 ] as const;
 
 export default function AppearancePage() {
+  const { msg } = useMoniqI18n();
   const { theme, accent, setTheme, setAccent } = useMoniqTheme();
 
   const dark = theme === "dark";
@@ -34,15 +37,15 @@ export default function AppearancePage() {
             textDecoration: "none",
           }}
         >
-          ← Назад к настройкам
+          {msg("← Назад к настройкам")}
         </Link>
 
         <h1 style={{ fontSize: 30, marginTop: 30 }}>
-          Внешний вид
+          {msg("Внешний вид")}
         </h1>
 
         <p style={{ color: dark ? "#aaaaaa" : "#666666" }}>
-          Настрой оформление Moniq под себя
+          {msg("Настрой оформление Moniq под себя")}
         </p>
 
         <section
@@ -54,7 +57,7 @@ export default function AppearancePage() {
           }}
         >
           <h2 style={{ fontSize: 20, marginTop: 0 }}>
-            Тема приложения
+            {msg("Тема приложения")}
           </h2>
 
           <div style={{ display: "flex", gap: 12 }}>
@@ -78,7 +81,7 @@ export default function AppearancePage() {
                   fontWeight: 700,
                 }}
               >
-                {value === "dark" ? "🌙 Тёмная" : "☀️ Светлая"}
+                {value === "dark" ? msg("🌙 Тёмная") : msg("☀️ Светлая")}
               </button>
             ))}
           </div>
@@ -93,15 +96,15 @@ export default function AppearancePage() {
           }}
         >
           <h2 style={{ fontSize: 20, marginTop: 0 }}>
-            Основной цвет
+            {msg("Основной цвет")}
           </h2>
 
           <div style={{ display: "flex", flexWrap: "wrap", gap: 14 }}>
             {accentColors.map((item) => (
               <button
                 key={item.id}
-                title={item.name}
-                aria-label={item.name}
+                title={msg(item.name)}
+                aria-label={msg(item.name)}
                 aria-pressed={accent === item.id}
                 onClick={() => setAccent(item.id)}
                 style={{
@@ -131,8 +134,7 @@ export default function AppearancePage() {
             color: dark ? "#999999" : "#666666",
           }}
         >
-          Настройки сохраняются автоматически в этом браузере.
-          Подключение оформления к остальным страницам — следующий этап.
+          {msg("Настройки сохраняются автоматически в этом браузере. Подключение оформления к остальным страницам — следующий этап.")}
         </p>
       </div>
     </main>

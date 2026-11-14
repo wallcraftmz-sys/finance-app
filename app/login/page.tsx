@@ -1,12 +1,13 @@
 "use client";
 
+import LanguageSelector from "@/app/settings/LanguageSelector";
 import { useState } from "react";
-import { translate, useMoniqLanguage } from "@/lib/moniq-language";
+import { translate, useMoniqI18n } from "@/lib/moniq-language";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const router = useRouter();
-  const language = useMoniqLanguage();
+  const { language, errorMessage } = useMoniqI18n();
   const t = (ru: string, en: string, lv: string) => translate(language, ru, en, lv);
 
   const [email, setEmail] = useState("");
@@ -33,7 +34,7 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || t("Ошибка входа", "Sign-in failed", "Pieteikšanās kļūda"));
+        setError(errorMessage(data.error, t("Ошибка входа", "Sign-in failed", "Pieteikšanās kļūda")));
         return;
       }
 
@@ -68,6 +69,7 @@ export default function LoginPage() {
           padding: "22px",
         }}
       >
+        <LanguageSelector />
         <h1 style={{ fontSize: "28px", marginTop: 0, marginBottom: "18px" }}>
           {t("Вход", "Sign in", "Pieteikšanās")}
         </h1>
@@ -75,7 +77,7 @@ export default function LoginPage() {
         <div style={{ display: "grid", gap: "12px" }}>
           <input
             type="email"
-            placeholder="Email"
+            placeholder={t("Электронная почта", "Email address", "E-pasta adrese")}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             style={{

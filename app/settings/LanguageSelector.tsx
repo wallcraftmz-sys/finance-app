@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMoniqI18n } from "@/lib/moniq-language";
 
 const languages = [
   { code: "ru", label: "Русский" },
@@ -9,18 +9,18 @@ const languages = [
   { code: "lv", label: "Latviešu" },
 ] as const;
 
-export default function LanguageSelector({ initialLanguage }: { initialLanguage: string }) {
+export default function LanguageSelector() {
   const router = useRouter();
-  const [language, setLanguage] = useState(initialLanguage);
+  const { language, msg } = useMoniqI18n();
   return (
     <select
-      aria-label="Language / Язык / Valoda"
+      aria-label={msg("Язык приложения")}
       value={language}
       onChange={(event) => {
         const next = event.target.value;
-        setLanguage(next);
         document.cookie = `moniq_language=${next}; Path=/; Max-Age=31536000; SameSite=Lax`;
         document.documentElement.lang = next;
+        window.dispatchEvent(new Event("moniq-language-change"));
         router.refresh();
       }}
       style={{

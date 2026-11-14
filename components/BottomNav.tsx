@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useMoniqI18n } from "@/lib/moniq-language";
 import { usePathname } from "next/navigation";
 
 const links = [
@@ -14,20 +14,11 @@ const links = [
 
 export default function BottomNav() {
   const pathname = usePathname();
-  const [lang, setLang] = useState<"ru" | "en" | "lv">("ru");
-  useEffect(() => {
-    const found = document.cookie.match(/(?:^|; )moniq_language=(ru|en|lv)(?:;|$)/)?.[1];
-    setLang(found === "en" || found === "lv" ? found : "ru");
-  }, []);
-  const labels = {
-    ru: ["Главная", "Аналитика", "Цели", "Доходы", "Расходы"],
-    en: ["Home", "Analytics", "Goals", "Income", "Expenses"],
-    lv: ["Sākums", "Analītika", "Mērķi", "Ienākumi", "Izdevumi"],
-  }[lang];
+  const { msg } = useMoniqI18n();
 
   return (
     <nav
-      aria-label={lang === "en" ? "Main navigation" : lang === "lv" ? "Galvenā navigācija" : "Основная навигация"}
+      aria-label={msg("Основная навигация")}
       style={{
         position: "fixed",
         bottom: "max(12px, env(safe-area-inset-bottom))",
@@ -45,7 +36,7 @@ export default function BottomNav() {
         zIndex: 100,
       }}
     >
-      {links.map((link, index) => {
+      {links.map((link) => {
         const active =
           pathname === link.href ||
           pathname.startsWith(link.href + "/");
@@ -90,7 +81,7 @@ export default function BottomNav() {
                 whiteSpace: "nowrap",
               }}
             >
-              {labels[index]}
+              {msg(link.label)}
             </span>
           </Link>
         );

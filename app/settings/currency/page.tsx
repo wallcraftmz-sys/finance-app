@@ -1,9 +1,11 @@
+import { getMoniqI18n } from "@/lib/moniq-language-server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import CurrencySelector from "./CurrencySelector";
 
 export default async function CurrencyPage() {
+  const { msg } = await getMoniqI18n();
   const user = await getCurrentUser();
 
   if (!user) {
@@ -41,7 +43,7 @@ export default async function CurrencyPage() {
           </Link>
 
           <h1 style={{ fontSize: 22, margin: 0 }}>
-            Основная валюта
+            {msg("Основная валюта")}
           </h1>
 
           <span style={{ color: "var(--moniq-accent)", fontWeight: 700 }}>
@@ -57,7 +59,7 @@ export default async function CurrencyPage() {
             marginBottom: 24,
           }}
         >
-          Выберите основную валюту вашего аккаунта.
+          {msg("Выберите основную валюту вашего аккаунта.")}
         </p>
 
         <CurrencySelector initialCurrency={user.currency} />

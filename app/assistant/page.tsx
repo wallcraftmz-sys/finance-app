@@ -1,6 +1,8 @@
 
 "use client";
 
+import { useMoniqI18n } from "@/lib/moniq-language";
+
 import { useEffect, useRef, useState } from "react";
 import BottomNav from "@/components/BottomNav";
 
@@ -10,6 +12,7 @@ type ChatMessage = {
 };
 
 export default function AssistantPage() {
+  const { errorMessage, msg } = useMoniqI18n();
   const [message, setMessage] = useState("");
   const [chat, setChat] = useState<ChatMessage[]>([
     {
@@ -62,7 +65,7 @@ export default function AssistantPage() {
         if (data.code === "AI_DAILY_LIMIT") {
           setLimitReached(true);
           setLimitMessage(
-            data.error || "Дневной лимит AI-запросов исчерпан."
+            errorMessage(data.error, msg("Дневной лимит AI-запросов исчерпан."))
           );
           return;
         }
@@ -71,7 +74,7 @@ export default function AssistantPage() {
           ...newChat,
           {
             role: "ai",
-            text: data.error || "Не удалось получить ответ.",
+            text: errorMessage(data.error, msg("Не удалось получить ответ.")),
           },
         ]);
 
@@ -82,7 +85,7 @@ export default function AssistantPage() {
         ...newChat,
         {
           role: "ai",
-          text: data.reply || "Не удалось получить ответ.",
+          text: data.reply || msg("Не удалось получить ответ."),
         },
       ]);
     } catch {
@@ -90,7 +93,7 @@ export default function AssistantPage() {
         ...newChat,
         {
           role: "ai",
-          text: "Ошибка сети. Попробуй ещё раз.",
+          text: msg("Ошибка сети. Попробуй ещё раз."),
         },
       ]);
     } finally {
@@ -146,7 +149,7 @@ export default function AssistantPage() {
               margin: 0,
             }}
           >
-            AI помощник
+            {msg("AI помощник")}
           </h1>
         </header>
 
@@ -201,7 +204,7 @@ export default function AssistantPage() {
                   overflowWrap: "anywhere",
                 }}
               >
-                {m.text}
+                {i === 0 ? msg(m.text) : m.text}
               </div>
             </div>
           ))}
@@ -213,7 +216,7 @@ export default function AssistantPage() {
                 fontSize: "14px",
               }}
             >
-              AI думает...
+              {msg("AI думает...")}
             </div>
           )}
 
@@ -234,7 +237,7 @@ export default function AssistantPage() {
               lineHeight: 1.5,
             }}
           >
-            <strong>Дневной лимит исчерпан</strong>
+            <strong>{msg("Дневной лимит исчерпан")}</strong>
             <div>{limitMessage}</div>
           </div>
         )}
@@ -255,8 +258,8 @@ export default function AssistantPage() {
             onChange={(e) => setMessage(e.target.value)}
             placeholder={
               limitReached
-                ? "Лимит на сегодня исчерпан"
-                : "Напиши вопрос о финансах..."
+                ? msg("Лимит на сегодня исчерпан")
+                : msg("Напиши вопрос о финансах...")
             }
             disabled={loading || limitReached}
             rows={2}
@@ -304,10 +307,10 @@ export default function AssistantPage() {
             }}
           >
             {loading
-              ? "Отправка..."
+              ? msg("Отправка...")
               : limitReached
-              ? "Лимит исчерпан"
-              : "Отправить"}
+              ? msg("Лимит исчерпан")
+              : msg("Отправить")}
           </button>
         </section>
 

@@ -1,3 +1,4 @@
+import { getMoniqI18n } from "@/lib/moniq-language-server";
 import AvatarUpload from "./AvatarUpload";
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -5,6 +6,7 @@ import { getCurrentUser } from "@/lib/auth";
 import ProfileNameForm from "./ProfileNameForm";
 
 export default async function ProfilePage() {
+  const { msg } = await getMoniqI18n();
   const user = await getCurrentUser();
 
   if (!user) {
@@ -41,7 +43,7 @@ export default async function ProfilePage() {
             ←
           </Link>
 
-          <h1 style={{ fontSize: 24, margin: 0 }}>Мой профиль</h1>
+          <h1 style={{ fontSize: 24, margin: 0 }}>{msg("Мой профиль")}</h1>
 
           <span style={{ color: "var(--moniq-accent)", fontWeight: 700 }}>
             Moniq
@@ -61,7 +63,7 @@ export default async function ProfilePage() {
 
           <div style={{ marginBottom: 24 }}>
             <label style={{ color: "var(--moniq-muted)", fontSize: 13 }}>
-              Электронная почта
+              {msg("Электронная почта")}
             </label>
 
             <input

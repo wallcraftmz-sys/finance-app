@@ -1,9 +1,11 @@
+import { getMoniqI18n } from "@/lib/moniq-language-server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import DeleteAccountForm from "../profile/DeleteAccountForm";
 
 export default async function DeleteAccountPage() {
+  const { msg } = await getMoniqI18n();
   const user = await getCurrentUser();
 
   if (!user) {
@@ -41,7 +43,7 @@ export default async function DeleteAccountPage() {
           </Link>
 
           <h1 style={{ fontSize: 22, margin: 0 }}>
-            Удаление аккаунта
+            {msg("Удаление аккаунта")}
           </h1>
 
           <span style={{ color: "#ffb51b", fontWeight: 700 }}>

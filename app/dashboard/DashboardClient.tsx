@@ -1,19 +1,14 @@
 
 "use client";
 
+import { useMoniqI18n } from "@/lib/moniq-language";
+
 import BottomNav from "@/components/BottomNav";
+import { formatTransactionDate } from "@/lib/transaction-date";
 
 import Link from "next/link";
 import type { ExchangeRates } from "@/lib/exchange-rates";
 import { useEffect, useMemo, useState } from "react";
-
-
-function formatMoney(amount: number, currency: string = "EUR") {
-  return new Intl.NumberFormat("ru-RU", {
-    style: "currency",
-    currency,
-  }).format(amount);
-}
 
 function totalsByCurrency(
   items: { amount: number; currency: string }[]
@@ -26,12 +21,6 @@ function totalsByCurrency(
   }
 
   return totals;
-}
-
-function formatTotals(totals: Record<string, number>) {
-  return Object.entries(totals)
-    .map(([currency, amount]) => formatMoney(amount, currency))
-    .join(" · ") || formatMoney(0);
 }
 
 type Expense = {
@@ -75,7 +64,10 @@ export default function DashboardClient({
   primaryCurrency,
   exchangeRates,
 }: Props) {
-  const [aiAdvice, setAiAdvice] = useState("Анализирую твои финансы...");
+  const { msg, locale } = useMoniqI18n();
+  const formatMoney = (amount: number, currency = "EUR") =>
+    new Intl.NumberFormat(locale, { style: "currency", currency }).format(amount);
+  const [aiAdvice, setAiAdvice] = useState(msg("Анализирую твои финансы..."));
 
   const expenseTotals = useMemo(
     () => totalsByCurrency(expenses),
@@ -199,8 +191,8 @@ export default function DashboardClient({
 
       if (currencies.size > 1 || (currencies.size === 1 && !currencies.has("EUR"))) {
         setAiAdvice(
-          "AI-анализ нескольких валют пока недоступен. " +
-          "Доходы и расходы отображаются отдельно без конвертации."
+          msg("AI-анализ нескольких валют пока недоступен. ") +
+          msg("Доходы и расходы отображаются отдельно без конвертации.")
         );
         return;
       }
@@ -225,9 +217,9 @@ export default function DashboardClient({
           return;
         }
 
-        setAiAdvice("Пока не удалось построить совет. Добавь ещё немного данных.");
+        setAiAdvice(msg("Пока не удалось построить совет. Добавь ещё немного данных."));
       } catch {
-        setAiAdvice("Пока не удалось подключить финансовый совет. Попробуй позже.");
+        setAiAdvice(msg("Пока не удалось подключить финансовый совет. Попробуй позже."));
       }
     }
 
@@ -247,7 +239,7 @@ export default function DashboardClient({
   const goalCurrency = goal?.currency || "EUR";
 
   const formatGoalMoney = (amount: number) =>
-    new Intl.NumberFormat("ru-RU", {
+    new Intl.NumberFormat(locale, {
       style: "currency",
       currency: goalCurrency,
     }).format(amount);
@@ -289,13 +281,13 @@ export default function DashboardClient({
               Moniq
             </div>
             <h1 style={{ fontSize: "28px", margin: 0, fontWeight: 700 }}>
-              Главная
+              {msg("Главная")}
             </h1>
           </div>
 
           <details style={{ position: "relative" }}>
             <summary
-              aria-label="Открыть меню"
+              aria-label={msg("Открыть меню")}
               style={{
                 listStyle: "none",
                 cursor: "pointer",
@@ -339,7 +331,7 @@ export default function DashboardClient({
                   fontWeight: 600,
                 }}
               >
-                ⚙ Настройки
+                {msg("⚙ Настройки")}
               </Link>
 
               <button
@@ -358,7 +350,7 @@ export default function DashboardClient({
                   cursor: "pointer",
                 }}
               >
-                ↪ Выйти из аккаунта
+                {msg("↪ Выйти из аккаунта")}
               </button>
             </div>
           </details>
@@ -375,7 +367,7 @@ export default function DashboardClient({
           }}
         >
           <div style={{ color: "var(--moniq-muted)", fontSize: "13px", marginBottom: "8px" }}>
-            Текущий остаток
+            {msg("Текущий остаток")}
           </div>
 
           <div
@@ -386,7 +378,7 @@ export default function DashboardClient({
               marginBottom: "16px",
             }}
           >
-            {convertedBalance !== null ? formatMoney(convertedBalance, primaryCurrency) : "Курс валют недоступен"}
+            {convertedBalance !== null ? formatMoney(convertedBalance, primaryCurrency) : msg("Курс валют недоступен")}
           </div>
 
           <div style={{
@@ -395,8 +387,8 @@ export default function DashboardClient({
             marginBottom: "16px",
           }}>
             {exchangeRates
-              ? `Конвертация по курсу ECB от ${exchangeRates.date}`
-              : "Не удалось получить курсы ECB"}
+              ? msg("Конвертация по курсу ECB от {date}", { date: formatTransactionDate(exchangeRates.date, locale) })
+              : msg("Не удалось получить курсы ECB")}
           </div>
 
           <div
@@ -416,7 +408,7 @@ export default function DashboardClient({
               }}
             >
               <div style={{ color: "var(--moniq-muted)", fontSize: "12px", marginBottom: "6px" }}>
-                Зарезервировано
+                {msg("Зарезервировано")}
               </div>
               <div style={{ fontSize: "18px", fontWeight: 700 }}>
                 {convertedReserved !== null
@@ -434,7 +426,7 @@ export default function DashboardClient({
               }}
             >
               <div style={{ color: "var(--moniq-muted)", fontSize: "12px", marginBottom: "6px" }}>
-                Доступно
+                {msg("Доступно")}
               </div>
               <div style={{ fontSize: "18px", fontWeight: 700, color: "#c4a0ff" }}>
                 {convertedAvailable !== null
@@ -454,7 +446,7 @@ export default function DashboardClient({
               }}
             >
               <div style={{ color: "var(--moniq-muted)", fontSize: "12px", marginBottom: "6px" }}>
-                Доход
+                {msg("Доход")}
               </div>
               <div style={{ fontWeight: 700, fontSize: "16px" }}>{convertedIncome !== null ? formatMoney(convertedIncome, primaryCurrency) : "—"}</div>
             </div>
@@ -468,7 +460,7 @@ export default function DashboardClient({
               }}
             >
               <div style={{ color: "var(--moniq-muted)", fontSize: "12px", marginBottom: "6px" }}>
-                Расход
+                {msg("Расход")}
               </div>
               <div style={{ fontWeight: 700, fontSize: "16px" }}>{convertedExpense !== null ? formatMoney(convertedExpense, primaryCurrency) : "—"}</div>
             </div>
@@ -482,10 +474,10 @@ export default function DashboardClient({
               }}
             >
               <div style={{ color: "var(--moniq-muted)", fontSize: "12px", marginBottom: "6px" }}>
-                Баланс
+                {msg("Баланс")}
               </div>
               <div style={{ fontWeight: 700, fontSize: "16px", color: "#fbbf24" }}>
-                {convertedBalance !== null ? formatMoney(convertedBalance, primaryCurrency) : "Курс валют недоступен"}
+                {convertedBalance !== null ? formatMoney(convertedBalance, primaryCurrency) : msg("Курс валют недоступен")}
               </div>
             </div>
           </div>
@@ -510,9 +502,9 @@ export default function DashboardClient({
               }}
             >
               <div style={{ fontSize: "13px", color: "var(--moniq-muted)", marginBottom: "6px" }}>
-                Быстрое действие
+                {msg("Быстрое действие")}
               </div>
-              <div style={{ fontSize: "18px", fontWeight: 700 }}>Доходы</div>
+              <div style={{ fontSize: "18px", fontWeight: 700 }}>{msg("Доходы")}</div>
             </div>
           </Link>
 
@@ -526,9 +518,9 @@ export default function DashboardClient({
               }}
             >
               <div style={{ fontSize: "13px", opacity: 0.8, marginBottom: "6px" }}>
-                Быстрое действие
+                {msg("Быстрое действие")}
               </div>
-              <div style={{ fontSize: "18px", fontWeight: 800 }}>+ Расход</div>
+              <div style={{ fontSize: "18px", fontWeight: 800 }}>{msg("+ Расход")}</div>
             </div>
           </Link>
         </section>
@@ -545,10 +537,10 @@ export default function DashboardClient({
           {!goal ? (
             <>
               <div style={{ fontSize: "16px", fontWeight: 700, marginBottom: "10px" }}>
-                Финансовая цель
+                {msg("Финансовая цель")}
               </div>
               <div style={{ color: "var(--moniq-muted)", fontSize: "14px", marginBottom: "12px" }}>
-                У тебя пока нет цели. Создай её, чтобы видеть прогресс прямо на главной.
+                {msg("У тебя пока нет цели. Создай её, чтобы видеть прогресс прямо на главной.")}
               </div>
 
               <Link href="/goals/new" style={{ textDecoration: "none" }}>
@@ -564,7 +556,7 @@ export default function DashboardClient({
                     cursor: "pointer",
                   }}
                 >
-                  + Создать цель
+                  {msg("+ Создать цель")}
                 </button>
               </Link>
             </>
@@ -604,7 +596,7 @@ export default function DashboardClient({
               </div>
 
               <div style={{ color: "var(--moniq-muted)", fontSize: "12px" }}>
-                Прогресс: {goalPercent}%
+                {msg("Прогресс:")} {goalPercent}%
               </div>
             </>
           )}
@@ -620,11 +612,11 @@ export default function DashboardClient({
           }}
         >
           <div style={{ fontSize: "16px", fontWeight: 700, marginBottom: "12px" }}>
-            Последние расходы
+            {msg("Последние расходы")}
           </div>
 
           {latestExpenses.length === 0 ? (
-            <div style={{ color: "var(--moniq-muted)", fontSize: "14px" }}>Пока расходов нет</div>
+            <div style={{ color: "var(--moniq-muted)", fontSize: "14px" }}>{msg("Пока расходов нет")}</div>
           ) : (
             <div style={{ display: "grid", gap: "10px" }}>
               {latestExpenses.map((item) => (
@@ -646,14 +638,14 @@ export default function DashboardClient({
                       marginBottom: "6px",
                     }}
                   >
-                    <div style={{ fontWeight: 700 }}>{item.category}</div>
+                    <div style={{ fontWeight: 700 }}>{msg(item.category)}</div>
                     <div style={{ fontWeight: 700, color: "#fbbf24" }}>
                       {formatMoney(item.amount, item.currency)}
                     </div>
                   </div>
 
                   <div style={{ color: "var(--moniq-muted)", fontSize: "12px", marginBottom: "6px" }}>
-                    {item.date}
+                    {formatTransactionDate(item.date, locale)}
                   </div>
 
                   {item.note ? (

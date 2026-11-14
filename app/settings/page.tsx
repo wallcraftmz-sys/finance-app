@@ -1,4 +1,4 @@
-import { cookies } from "next/headers";
+import { getMoniqI18n } from "@/lib/moniq-language-server";
 import LanguageSelector from "./LanguageSelector";
 
 import { redirect } from "next/navigation";
@@ -15,7 +15,7 @@ const sections = [
   {
     icon: "💳",
     title: "Основная валюта",
-    description: "EUR — Евро (€)",
+    description: "",
     href: "/settings/currency",
   },
   {
@@ -40,17 +40,15 @@ export default async function SettingsPage() {
   }
 
   const isPro = user.plan === "PRO";
-  const selected = (await cookies()).get("moniq_language")?.value;
-  const lang = selected === "en" || selected === "lv" ? selected : "ru";
-  const tr = {
-    ru: { settings: "Настройки", language: "Язык приложения", profile: "Мой профиль", profileDesc: "Фото, имя, электронная почта", currency: "Основная валюта", appearance: "Внешний вид", appearanceDesc: "Темы, фон, карточки, кнопки", security: "Безопасность", securityDesc: "Пароль и активные сеансы", delete: "Удалить аккаунт", free: "БЕСПЛАТНО", proActive: "У вас активен тариф Moniq PRO.", liteActive: "Вы используете бесплатный тариф Moniq LITE.", soon: "Moniq PRO — скоро", soonDesc: "Мы готовим расширенные возможности управления финансами. Информация о подписке появится позже." },
-    en: { settings: "Settings", language: "App language", profile: "My profile", profileDesc: "Photo, name, email", currency: "Primary currency", appearance: "Appearance", appearanceDesc: "Themes, background, cards, buttons", security: "Security", securityDesc: "Password and active sessions", delete: "Delete account", free: "FREE", proActive: "Your Moniq PRO subscription is active.", liteActive: "You are using the free Moniq LITE plan.", soon: "Moniq PRO — coming soon", soonDesc: "We are preparing advanced financial management features. Subscription details will be available later." },
-    lv: { settings: "Iestatījumi", language: "Lietotnes valoda", profile: "Mans profils", profileDesc: "Foto, vārds, e-pasts", currency: "Pamatvalūta", appearance: "Izskats", appearanceDesc: "Motīvi, fons, kartītes, pogas", security: "Drošība", securityDesc: "Parole un aktīvās sesijas", delete: "Dzēst kontu", free: "BEZMAKSAS", proActive: "Jūsu Moniq PRO abonements ir aktīvs.", liteActive: "Jūs izmantojat bezmaksas Moniq LITE plānu.", soon: "Moniq PRO — drīzumā", soonDesc: "Mēs gatavojam papildu finanšu pārvaldības iespējas. Informācija par abonementu būs pieejama vēlāk." },
-  }[lang];
-  const localizedSections = sections.map((section, index) => ({
+  const { msg, locale } = await getMoniqI18n();
+  const currency = user.currency || "EUR";
+  const currencyName = new Intl.DisplayNames(locale, { type: "currency" }).of(currency);
+  const localizedSections = sections.map((section) => ({
     ...section,
-    title: [tr.profile, tr.currency, tr.appearance, tr.security][index],
-    description: [tr.profileDesc, "EUR — Euro (€)", tr.appearanceDesc, tr.securityDesc][index],
+    title: msg(section.title),
+    description: section.href === "/settings/currency"
+      ? `${currency} — ${currencyName ?? currency}`
+      : msg(section.description),
   }));
 
   return (
@@ -90,7 +88,7 @@ export default async function SettingsPage() {
               margin: 0,
             }}
           >
-            {tr.settings}
+            {msg("Настройки")}
           </h1>
 
           <span
@@ -167,8 +165,8 @@ export default async function SettingsPage() {
         </section>
 
         <section style={{ background: "var(--moniq-card)", borderRadius: 22, padding: 18, marginBottom: 18 }}>
-          <label style={{ display: "block", fontSize: 16, fontWeight: 700, marginBottom: 12 }}>{tr.language}</label>
-          <LanguageSelector initialLanguage={lang} />
+          <label style={{ display: "block", fontSize: 16, fontWeight: 700, marginBottom: 12 }}>{msg("Язык приложения")}</label>
+          <LanguageSelector />
         </section>
 
         {/* Тариф Moniq */}
@@ -211,7 +209,7 @@ export default async function SettingsPage() {
                 fontWeight: 700,
               }}
             >
-              {isPro ? "PRO" : "БЕСПЛАТНО"}
+              {isPro ? "PRO" : msg("БЕСПЛАТНО")}
             </span>
           </div>
 
@@ -224,8 +222,8 @@ export default async function SettingsPage() {
             }}
           >
             {isPro
-              ? "У вас активен тариф Moniq PRO."
-              : "Вы используете бесплатный тариф Moniq LITE."}
+              ? msg("У вас активен тариф Moniq PRO.")
+              : msg("Вы используете бесплатный тариф Moniq LITE.")}
           </p>
 
           {!isPro && (
@@ -243,7 +241,7 @@ export default async function SettingsPage() {
                   marginBottom: 8,
                 }}
               >
-                🚀 {tr.soon}
+                🚀 {msg("Moniq PRO — скоро")}
               </div>
 
               <p
@@ -254,7 +252,7 @@ export default async function SettingsPage() {
                   margin: 0,
                 }}
               >
-                {tr.soonDesc}
+                {msg("Мы готовим расширенные возможности управления финансами. Информация о подписке появится позже.")}
               </p>
             </div>
           )}
@@ -279,7 +277,7 @@ export default async function SettingsPage() {
               textDecoration: "none",
             }}
           >
-            🗑 {tr.delete}
+            🗑 {msg("Удалить аккаунт")}
           </Link>
         </section>
       </div>

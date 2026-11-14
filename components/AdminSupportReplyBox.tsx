@@ -1,5 +1,7 @@
 "use client";
 
+import { useMoniqI18n } from "@/lib/moniq-language";
+
 import { useState } from "react";
 
 type Props = {
@@ -7,12 +9,13 @@ type Props = {
 };
 
 export default function AdminSupportReplyBox({ userId }: Props) {
+  const { errorMessage, msg } = useMoniqI18n();
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
 
   const sendReply = async () => {
     if (!message.trim()) {
-      alert("Напиши ответ");
+      alert(msg("Напиши ответ"));
       return;
     }
 
@@ -33,14 +36,14 @@ export default function AdminSupportReplyBox({ userId }: Props) {
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data.error || "Ошибка при отправке ответа");
+        alert(errorMessage(data.error, msg("Ошибка при отправке ответа")));
         return;
       }
 
       setMessage("");
       window.location.reload();
     } catch (error) {
-      alert("Ошибка сети или сервера");
+      alert(msg("Ошибка сети или сервера"));
     } finally {
       setSending(false);
     }
@@ -63,13 +66,13 @@ export default function AdminSupportReplyBox({ userId }: Props) {
           color: "#e5e7eb",
         }}
       >
-        Ответ пользователю
+        {msg("Ответ пользователю")}
       </label>
 
       <textarea
         value={message}
         onChange={(e) => setMessage(e.target.value)}
-        placeholder="Напиши ответ..."
+        placeholder={msg("Напиши ответ...")}
         rows={2}
         style={{
           width: "100%",
@@ -107,7 +110,7 @@ export default function AdminSupportReplyBox({ userId }: Props) {
             minWidth: 150,
           }}
         >
-          {sending ? "Отправка..." : "Ответить"}
+          {sending ? msg("Отправка...") : msg("Ответить")}
         </button>
       </div>
     </div>

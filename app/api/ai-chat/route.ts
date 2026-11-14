@@ -1,3 +1,4 @@
+import { getMoniqI18n } from "@/lib/moniq-language-server";
 
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
@@ -275,6 +276,8 @@ export async function POST(req: Request) {
     }
 `.trim();
 
+    const { language } = await getMoniqI18n();
+    const replyLanguage = { ru: "Russian", en: "English", lv: "Latvian" }[language];
     const useWeb = shouldUseWebSearch(message);
 
     const response = await openai.responses.create({
@@ -283,6 +286,7 @@ export async function POST(req: Request) {
 Сегодня ${currentDate}.
 
 Ты AI Moniq.
+Reply in ${replyLanguage}, unless the user explicitly asks for another language.
 
 - анализируй финансы
 - учитывай бюджет и тренд
